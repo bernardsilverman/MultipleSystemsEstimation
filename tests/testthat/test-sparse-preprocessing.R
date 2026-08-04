@@ -141,3 +141,16 @@ test_that("jackknife NAs occur only in zero-count capture histories", {
     ))
   }
 })
+
+test_that("removenoninformativelists never removes the count column", {
+  x <- cbind(
+    A = c(1, 0, 1),
+    B = c(0, 1, 1),
+    count = c(1, 0, 1)
+  )
+
+  out <- removenoninformativelists(x)
+
+  expect_equal(colnames(out)[ncol(out)], "count")
+  expect_equal(out[, "count"], x[, "count"])
+})

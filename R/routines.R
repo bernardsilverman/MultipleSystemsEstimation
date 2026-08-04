@@ -1241,20 +1241,34 @@ BICandbootstrapsim <- function(zdat, nsims=1000,nboot=100,pthresh=0.02, iseed=12
 #' Available from \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2019.1708748}.
 #'
 #' @export
-removenoninformativelists<-function(zdat){
-  zdat=as.matrix(zdat)
-  #remove duplicate list
-  zdat=unique(zdat,MARGIN=2)
-  #remove list that contain no or all data
-  m2=dim(zdat)[2]
-  countname = dimnames(zdat)[[2]][m2]
-  ltot = t( zdat[, -m2])%*% zdat[,m2]
-  mtot= sum(zdat[,m2])
-  jkeep = (ltot > 0) & (ltot < mtot)
-  if (sum(jkeep) > 0 ) zdat = zdat[,c(jkeep, TRUE)] else {
-    #  if there are no lists left at all, just return the total count as a matrix
-    zdat = matrix(mtot, nrow=1, ncol=1, dimnames= list(NULL, countname))
+removenoninformativelists <- function(zdat) {
+  zdat <- as.matrix(zdat)
+
+  m2 <- ncol(zdat)
+  countname <- colnames(zdat)[m2]
+  count <- zdat[, m2]
+
+  listdat <- unique(zdat[, -m2, drop = FALSE], MARGIN = 2)
+  zdat <- cbind(listdat, count)
+  colnames(zdat)[ncol(zdat)] <- countname
+
+  m2 <- ncol(zdat)
+
+  ltot <- t(zdat[, -m2, drop = FALSE]) %*% zdat[, m2]
+  mtot <- sum(zdat[, m2])
+  jkeep <- (ltot > 0) & (ltot < mtot)
+
+  if (sum(jkeep) > 0) {
+    zdat <- zdat[, c(jkeep, TRUE), drop = FALSE]
+  } else {
+    zdat <- matrix(
+      mtot,
+      nrow = 1,
+      ncol = 1,
+      dimnames = list(NULL, countname)
+    )
   }
+
   return(zdat)
 }
 #' Decode capture history
