@@ -22,7 +22,7 @@ together with a vector of pointers back to that matrix.
 \examples{
 data(Korea)
 z=assemble_bic(Korea)
-z=bootstrapcal(z)
+z=bootstrapcal(z, nboot=2)
 find_unique_patterns(z$bootreplications)
 
 }

@@ -18,6 +18,6 @@ Given a 0/1 capture history, encode it as number that corresponds to the row num
 \examples{
 encode_capture(c(1,0,0,0,0))
 encode_capture(c(1,1,1,1,0))
-encode_capture(c(T,F,T,F))
+encode_capture(c(TRUE,FALSE,TRUE,FALSE))
 
 }

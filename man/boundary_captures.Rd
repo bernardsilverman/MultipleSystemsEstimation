@@ -21,7 +21,7 @@ will be preserved if a capture in the boundary is added to it. The routine is ca
 \examples{
 modelstr = "[12,23]"
 nlists=4
-zhierroots = convert_from_hierarchy(modelstr, F)
+zhierroots = convert_from_hierarchy(modelstr, FALSE)
 zhier = unique(ancestors(zhierroots, nlists))
 boundary_captures(zhier,nlists)
 

@@ -23,14 +23,14 @@
 #'
 #'@examples
 #'data(Korea)
-#'bootstrap_mse(Korea)
+#'bootstrap_mse(Korea, nboot=2)
 #'
 #'@export
 bootstrap_mse=function(zdat,maxorder=dim(zdat)[2]-2, nboot=10000, iseed=1234,alpha=c(0.025, 0.1, 0.9, 0.975)){
 
   if (maxorder == 6){
-    z= assemble_bic(zdat, maxorder =2 ,checkexist =T)} else {
-      z=assemble_bic(zdat, maxorder=maxorder, checkexist=T)
+    z= assemble_bic(zdat, maxorder =2 ,checkexist =TRUE)} else {
+      z=assemble_bic(zdat, maxorder=maxorder, checkexist=TRUE)
     }
 
   if (maxorder == 4){z= subsetmat(z, ntopmodels = 20, maxorder = maxorder)
@@ -40,8 +40,8 @@ bootstrap_mse=function(zdat,maxorder=dim(zdat)[2]-2, nboot=10000, iseed=1234,alp
     }
 
 
-  z=bootstrapcal(z, nboot=nboot, iseed=iseed, checkexist=T)
-  z=jackknifecal(z,checkexist=T)
+  z=bootstrapcal(z, nboot=nboot, iseed=iseed, checkexist=TRUE)
+  z=jackknifecal(z,checkexist=TRUE)
   ntopBCa(z, alpha=alpha, maxorder=maxorder)
 
 

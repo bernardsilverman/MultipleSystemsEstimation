@@ -15,7 +15,7 @@ checkident.2(x, xcap, zmods)
 }
 \value{
 a matrix with rows corresponding to the models and columns to the columns of x, with elements
-taking the value T if the FR linear program for a vector of 0s and 1s with the same zero pattern as the x data yields a strictly
+taking the value TRUE if the FR linear program for a vector of 0s and 1s with the same zero pattern as the x data yields a strictly
 positive value
 }
 \description{
@@ -26,7 +26,7 @@ and hence economises the task of finding which model/data combinations satisfy t
 \examples{
 data(Korea)
 z=assemble_bic(Korea)
-z=bootstrapcal(z)
+z=bootstrapcal(z, nboot=2)
 n2=dim(z$xdata)[2]
 checkident.2(z$bootreplications, z$xdata[,-n2], dimnames(z$res)[[1]])
 

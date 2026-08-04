@@ -4,12 +4,12 @@
 \alias{downhill_jackknifecal}
 \title{Jackknife downhill}
 \usage{
-downhill_jackknifecal(xdata, checkid = T, maxorder = dim(xdata)[2] - 2)
+downhill_jackknifecal(xdata, checkid = TRUE, maxorder = dim(xdata)[2] - 2)
 }
 \arguments{
 \item{xdata}{original data matrix}
 
-\item{checkid}{If it is T, then \code{checkident.1} is called and it performs the Fienberg-Rinaldo linear program check for the existence of the estimates}
+\item{checkid}{If it is TRUE, then \code{checkident.1} is called and it performs the Fienberg-Rinaldo linear program check for the existence of the estimates}
 
 \item{maxorder}{Maximum order of models to be included}
 }

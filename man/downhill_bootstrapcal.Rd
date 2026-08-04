@@ -8,8 +8,8 @@ downhill_bootstrapcal(
   xdata,
   nboot = 1000,
   iseed = 1234,
-  checkid = T,
-  verbose = F,
+  checkid = TRUE,
+  verbose = FALSE,
   maxorder = dim(xdata)[2] - 2
 )
 }
@@ -20,7 +20,7 @@ downhill_bootstrapcal(
 
 \item{iseed}{random seed}
 
-\item{checkid}{If it is T, then \code{checkident.1} is called and it performs the Fienberg-Rinaldo linear program check for the existence of the estimates}
+\item{checkid}{If it is TRUE, then \code{checkident.1} is called and it performs the Fienberg-Rinaldo linear program check for the existence of the estimates}
 
 \item{verbose}{If TRUE, return the list of extra output from \code{downhill_fit}}
 
@@ -34,7 +34,7 @@ Construct bootstrap replications and use the downhill fit method to obtain point
 }
 \examples{
 data(Korea)
-downhill_bootstrapcal(Korea)
+downhill_bootstrapcal(Korea, nboot = 2)
 }
 \references{
 Silverman, B. W., Chan, L. and  Vincent, K., (2024).

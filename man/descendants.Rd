@@ -11,7 +11,7 @@ descendants(k, nlists, omitk = FALSE)
 
 \item{nlists}{The total number of lists}
 
-\item{omitk}{Determine whether the original capture history is included as a descendant of itself. If \code{omitk=T} it is not.}
+\item{omitk}{Determine whether the original capture history is included as a descendant of itself. If \code{omitk=TRUE} it is not.}
 }
 \value{
 a vector giving the encoded versions of the descendants

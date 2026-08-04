@@ -19,8 +19,8 @@ Returns acceleration factors for each value of ntop for given modelorder
 }
 \examples{
 data(Korea)
-z=assemble_bic(Korea, checkexist=T)
-z=jackknifecal(z, checkexist=T)
+z=assemble_bic(Korea, checkexist=TRUE)
+z=jackknifecal(z, checkexist=TRUE)
 nmods= dim(z$jackabund)[1]
 modscores = (1:nmods)
 modelorder= order(modscores)

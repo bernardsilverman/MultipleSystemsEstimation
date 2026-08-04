@@ -6,13 +6,13 @@
 \usage{
 BICandbootstrapsim(
   zdat,
-  nsims = 100,
+  nsims = 1000,
   nboot = 100,
   pthresh = 0.02,
   iseed = 1234,
   alpha = c(0.025, 0.05, 0.1, 0.16, 0.5, 0.84, 0.9, 0.95, 0.975),
-  noninformativelist = F,
-  verbose = F,
+  noninformativelist = FALSE,
+  verbose = FALSE,
   ...
 )
 }
@@ -68,7 +68,7 @@ This routine carries out the simulation study as detailed in Section 3.4 of Chan
 }
 \examples{
 zdat=UKdat_5
-BICandbootstrapsim(zdat,nsims=1000, nboot=100, pthresh=0.02, iseed=1234, noninformativelist=T)
+BICandbootstrapsim(zdat,nsims=2, nboot=2, pthresh=0.02, iseed=1234, noninformativelist=TRUE)
 }
 \references{
 Chan, L., Silverman, B. W., and Vincent, K. (2021).

@@ -8,7 +8,7 @@ bootstrapcal(
   z,
   nboot = 1000,
   iseed = 1234,
-  checkexist = T,
+  checkexist = TRUE,
   saveinterval = Inf,
   savefile = "bootout.Rdata"
 )
@@ -44,7 +44,7 @@ abundance matrix and BIC matrix. This version makes use of the \code{checkident.
 }
 \examples{
 z=assemble_bic(Korea)
-bootstrapcal(z, checkexist=T, saveinterval=50, savefile="Koreabootresults.Rdata")
+bootstrapcal(z, nboot=2, checkexist=TRUE, saveinterval=50, savefile="Koreabootresults.Rdata")
 
 }
 \references{

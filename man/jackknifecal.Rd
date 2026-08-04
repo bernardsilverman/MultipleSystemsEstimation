@@ -4,7 +4,7 @@
 \alias{jackknifecal}
 \title{Jackknife abundance and Jackknife bic}
 \usage{
-jackknifecal(z, checkexist = T)
+jackknifecal(z, checkexist = TRUE)
 }
 \arguments{
 \item{z}{Results from \code{assemble_bic} or \code{subsetmat}.}
@@ -28,7 +28,7 @@ abundance matrix and jackknife BIC matrix.
 \examples{
 data(Korea)
 z=assemble_bic(Korea)
-jackknifecal(z,checkexist=T)
+jackknifecal(z,checkexist=TRUE)
 
 }
 \references{

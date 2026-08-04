@@ -21,7 +21,7 @@ ktopBCa(
 
 \item{maxorder}{Maximum order of models to be included}
 
-\item{BCaFD}{If T, return also the probabilities of the estimates}
+\item{BCaFD}{If TRUE, return also the probabilities of the estimates}
 }
 \value{
 A list with the following components
@@ -36,7 +36,7 @@ Find BCa confidence intervals using ktop idea.
 \examples{
 data(Korea)
 z=assemble_bic(Korea)
-z=bootstrapcal(z)
+z=bootstrapcal(z, nboot=2)
 z=jackknifecal(z)
 BICmatrix_prop= find_bic_rank_matrix(z)
 BICmatrix_break = BICrank_tiebreak(BICmatrix_prop, 2)

@@ -4,12 +4,12 @@
 \alias{convert_from_hierarchy}
 \title{Find the vector of captures corresponding to a given hierarchical model}
 \usage{
-convert_from_hierarchy(modelstr, findancestors = T)
+convert_from_hierarchy(modelstr, findancestors = TRUE)
 }
 \arguments{
 \item{modelstr}{A given hierarchical model}
 
-\item{findancestors}{If T then find all the captures.  If F then just return the encoded defining histories of the hierarchy}
+\item{findancestors}{If TRUE then find all the captures.  If FALSE then just return the encoded defining histories of the hierarchy}
 }
 \value{
 The encoded capture histories that corresponds to the row number of the capture history data set
@@ -21,7 +21,7 @@ Given a hierarchical model, find the vector of all the corresponding encoded cap
 modelstr = "[12,23]"
 convert_from_hierarchy(modelstr)
 modelstr = "[12,3]"
-convert_from_hierarchy(modelstr, findancestors=F)
+convert_from_hierarchy(modelstr, findancestors=FALSE)
 
 }
 \references{

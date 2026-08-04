@@ -28,10 +28,10 @@
 #' @examples
 #' data(Korea)
 #' xdata=Korea
-#' downhill_funs(xdata)
+#' downhill_funs(xdata, nboot = 2)
 #'
 #' @export
-downhill_funs = function(xdata, maxorder=dim(xdata)[2]-2, checkid=T, verbose=F, nboot=1000, alpha=c(0.025, 0.05, 0.95, 0.975)){
+downhill_funs = function(xdata, maxorder=dim(xdata)[2]-2, checkid=TRUE, verbose=FALSE, nboot=1000, alpha=c(0.025, 0.05, 0.95, 0.975)){
 
   counts = xdata[,dim(xdata)[2]]
   desmat = xdata[,1:(dim(xdata)[2]-1)]

@@ -9,9 +9,9 @@ downhill_fit(
   counts,
   desmat,
   maxorder = dim(desmat)[2] - 1,
-  checkid = T,
+  checkid = TRUE,
   niter = 20,
-  verbose = F
+  verbose = FALSE
 )
 }
 \arguments{
@@ -21,11 +21,11 @@ downhill_fit(
 
 \item{maxorder}{Maximum order of models to be included}
 
-\item{checkid}{If it is T, then \code{checkident.1} is called and it performs the Fienberg-Rinaldo linear program check for the existence of the estimates}
+\item{checkid}{If it is TRUE, then \code{checkident.1} is called and it performs the Fienberg-Rinaldo linear program check for the existence of the estimates}
 
 \item{niter}{Number of iterations}
 
-\item{verbose}{Specifies the output, if F then only returns the best value, if T, returns a more detailed list of objects}
+\item{verbose}{Specifies the output, if FALSE then only returns the best value, if TRUE, returns a more detailed list of objects}
 }
 \value{
 A list with the following components
@@ -45,7 +45,6 @@ xdata=Korea
 counts = xdata[,dim(xdata)[2]]
 desmat = xdata[,1:(dim(xdata)[2]-1)]
 downhill_fit(counts, desmat)
-
 }
 \references{
 Silverman, B. W., Chan, L. and  Vincent, K., (2024).

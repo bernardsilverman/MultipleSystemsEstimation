@@ -37,7 +37,7 @@ A routine for naive user
 }
 \examples{
 data(Korea)
-bootstrap_mse(Korea)
+bootstrap_mse(Korea, nboot=2)
 
 }
 \references{

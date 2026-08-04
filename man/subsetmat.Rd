@@ -49,7 +49,7 @@ subsetmat(z)
 #Example 2
 z=assemble_bic(UKdat_5)
 z=jackknifecal(z)
-z=bootstrapcal(z)
+z=bootstrapcal(z, nboot=2)
 subsetmat(z,ntopmodels=100,maxorder=2)
 
 }

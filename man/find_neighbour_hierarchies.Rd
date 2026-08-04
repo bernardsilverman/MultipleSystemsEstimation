@@ -7,7 +7,7 @@
 find_neighbour_hierarchies(
   modelstr,
   nlists = NA,
-  keepmaineffects = T,
+  keepmaineffects = TRUE,
   maxorder = nlists - 1
 )
 }
@@ -16,7 +16,7 @@ find_neighbour_hierarchies(
 
 \item{nlists}{Number of lists.}
 
-\item{keepmaineffects}{If T, keep the main effects. If F remove.}
+\item{keepmaineffects}{If TRUE, keep the main effects. If FALSE remove.}
 
 \item{maxorder}{Maximum order of models to be included}
 }

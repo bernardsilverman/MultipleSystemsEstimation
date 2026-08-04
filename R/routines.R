@@ -1,3 +1,5 @@
+utils::globalVariables("hiermodels")
+
 #' Build model for multiple systems estimation
 #'
 #' For multiple systems estimation model corresponding to a specified set of two-list effects,
@@ -148,7 +150,7 @@ tidylists <- function(zdat, includezerocounts = FALSE) {
     ij = (1:dim(zm)[1])[bc == bcode[j]]
     zm[ij, m + 1] = zm[ij, m + 1] + zdat[j, m + 1]
   }
-  # remove rows with zero counts if includezerocounts is F
+  # remove rows with zero counts if includezerocounts is FALSE
   if (!includezerocounts)
     zm = zm[zm[, m + 1] > 0, ]
   zdatr = as.data.frame(zm)
@@ -1166,10 +1168,10 @@ bcaconfvalues<-function(bootreps, popest, ahat, alpha=c(0.025, 0.05, 0.1, 0.16, 
 #'
 #'@examples
 #'zdat=UKdat_5
-#'BICandbootstrapsim(zdat,nsims=1000, nboot=100, pthresh=0.02, iseed=1234, noninformativelist=T)
+#'BICandbootstrapsim(zdat,nsims=2, nboot=2, pthresh=0.02, iseed=1234, noninformativelist=TRUE)
 #'@export
 
-BICandbootstrapsim <- function(zdat, nsims=100,nboot=100,pthresh=0.02, iseed=1234, alpha=c(0.025, 0.05, 0.1, 0.16, 0.5, 0.84, 0.9, 0.95, 0.975),noninformativelist=F,verbose=F, ...){
+BICandbootstrapsim <- function(zdat, nsims=1000,nboot=100,pthresh=0.02, iseed=1234, alpha=c(0.025, 0.05, 0.1, 0.16, 0.5, 0.84, 0.9, 0.95, 0.975),noninformativelist=FALSE,verbose=FALSE, ...){
   #  simulate data
   set.seed(iseed)
   nobserved = sum(zdat[, dim(zdat)[2]])
@@ -1193,14 +1195,14 @@ BICandbootstrapsim <- function(zdat, nsims=100,nboot=100,pthresh=0.02, iseed=123
     # find the BIC estimates at the same time
     zdatsim = cbind(modelmat, simreps[,j])
     if (noninformativelist) zdatsim=removenoninformativelists(zdatsim)
-    zallres=Rcapture::closedpMS.t(zdatsim, dfreq=T,maxorder=2)
+    zallres=Rcapture::closedpMS.t(zdatsim, dfreq=TRUE,maxorder=2)
     zr = zallres$results
-    indmin = (1:dim(zr)[1])[zr[,7]==min(zr[,7])]
+    indmin = which.min(zr[, 7])
     BICmods[j] = dimnames(zr)[[1]][indmin]
     BICvals[j,] = zr[indmin, 1:2]
     #  find multinomial 95% and 80% confidence intervals--probably not the most elegant way but it works
-    BICconf[j,c(2,3)] = Rcapture::closedpCI.t(zdatsim, dfreq=T,mX=BICmods[j], alpha=0.2)$CI[2:3]
-    BICconf[j,c(1,4)] = Rcapture::closedpCI.t(zdatsim, dfreq=T,mX=BICmods[j])$CI[2:3]
+    BICconf[j,c(2,3)] = Rcapture::closedpCI.t(zdatsim, dfreq=TRUE,mX=BICmods[j], alpha=0.2)$CI[2:3]
+    BICconf[j,c(1,4)] = Rcapture::closedpCI.t(zdatsim, dfreq=TRUE,mX=BICmods[j])$CI[2:3]
     if (verbose) cat(j)
   }
   #  now do stepwise estimates and bootstrap CIs
@@ -1249,7 +1251,7 @@ removenoninformativelists<-function(zdat){
   ltot = t( zdat[, -m2])%*% zdat[,m2]
   mtot= sum(zdat[,m2])
   jkeep = (ltot > 0) & (ltot < mtot)
-  if (sum(jkeep) > 0 ) zdat = zdat[,c(jkeep, T)] else {
+  if (sum(jkeep) > 0 ) zdat = zdat[,c(jkeep, TRUE)] else {
     #  if there are no lists left at all, just return the total count as a matrix
     zdat = matrix(mtot, nrow=1, ncol=1, dimnames= list(NULL, countname))
   }
@@ -1285,7 +1287,7 @@ decode_capture = function(k, nlists) {
 #'
 #' @param k An encoded capture history
 #' @param nlists The total number of lists
-#' @param omitk Determine whether the original capture history is included as a descendant of itself. If \code{omitk=T} it is not.
+#' @param omitk Determine whether the original capture history is included as a descendant of itself. If \code{omitk=TRUE} it is not.
 #' @return a vector giving the encoded versions of the descendants
 #'
 #'@references
@@ -1472,8 +1474,8 @@ ingest_data = function(xdat)  {
   for (j in (1:length(ncount))) nobs[xcap[j]] = nobs[xcap[j]]+ ncount[j]
   nobs[1]=0
   for (i in (1:ncaps)) nstar[i] = sum(nobs[descendants(i, nlists)])
-  notestimable = rep(F, ncaps)
-  notestimable[descendants((1:ncaps)[nstar==0], nlists, omitk=T)] = T
+  notestimable = rep(FALSE, ncaps)
+  notestimable[descendants((1:ncaps)[nstar==0], nlists, omitk=TRUE)] = TRUE
   masterdesign = make_master_design(nlists)
   return(list(nobs=nobs, nstar=nstar, nlists=nlists, listnames=listnames, data=xdat,
               notestimable = notestimable, masterdesign= masterdesign))
@@ -1483,7 +1485,7 @@ ingest_data = function(xdat)  {
 #' Given a hierarchical model, find the vector of all the corresponding encoded captures
 #'
 #' @param modelstr A given hierarchical model
-#' @param findancestors If T then find all the captures.  If F then just return the encoded defining histories of the hierarchy
+#' @param findancestors If TRUE then find all the captures.  If FALSE then just return the encoded defining histories of the hierarchy
 #'
 #' @return The encoded capture histories that corresponds to the row number of the capture history data set
 #'
@@ -1497,10 +1499,10 @@ ingest_data = function(xdat)  {
 #'modelstr = "[12,23]"
 #'convert_from_hierarchy(modelstr)
 #'modelstr = "[12,3]"
-#'convert_from_hierarchy(modelstr, findancestors=F)
+#'convert_from_hierarchy(modelstr, findancestors=FALSE)
 #'
 #'@export
-convert_from_hierarchy = function(modelstr, findancestors=T) {
+convert_from_hierarchy = function(modelstr, findancestors=TRUE) {
   # first decode to numerical vectors of root capture histories to obtain a list of vectors
   #  each of which gives the captures in the capture history of the particular root
   zz = lapply(strsplit(unlist(strsplit(substring(strsplit(modelstr, split="]"), 2), ",")), split=""),as.numeric)
@@ -1522,7 +1524,7 @@ convert_from_hierarchy = function(modelstr, findancestors=T) {
 #' @examples
 #' encode_capture(c(1,0,0,0,0))
 #' encode_capture(c(1,1,1,1,0))
-#' encode_capture(c(T,F,T,F))
+#' encode_capture(c(TRUE,FALSE,TRUE,FALSE))
 #'
 #' @export
 encode_capture = function(z) {
@@ -1535,7 +1537,7 @@ encode_capture = function(z) {
 #'@param z The output of \code{assemble_bic}, \code{bootstrapcal} and \code{jackknifecal}
 #'@param alpha Levels of confidence intervals to be constructed and assessed
 #'@param maxorder Maximum order of models to be included
-#'@param BCaFD If T, return also the probabilities of the estimates
+#'@param BCaFD If TRUE, return also the probabilities of the estimates
 #'
 #'
 #'
@@ -1556,9 +1558,9 @@ encode_capture = function(z) {
 #'
 #'@examples
 #'data(Korea)
-#'z=assemble_bic(Korea, checkexist=T)
-#'z=bootstrapcal(z, checkexist=T)
-#'z=jackknifecal(z,checkexist=T)
+#'z=assemble_bic(Korea, checkexist=TRUE)
+#'z=bootstrapcal(z,nboot=2, checkexist=TRUE)
+#'z=jackknifecal(z,checkexist=TRUE)
 #'ntopBCa(z)
 #'
 #'@export
@@ -1633,8 +1635,8 @@ ntopBCa = function(z,alpha=c(0.025, 0.05, 0.1, 0.16,0.2, 0.5, 0.8, 0.84, 0.9, 0.
 #'
 #' @examples
 #' data(Korea)
-#' z=assemble_bic(Korea, checkexist=T)
-#' z=jackknifecal(z, checkexist=T)
+#' z=assemble_bic(Korea, checkexist=TRUE)
+#' z=jackknifecal(z, checkexist=TRUE)
 #' nmods= dim(z$jackabund)[1]
 #' modscores = (1:nmods)
 #' modelorder= order(modscores)
@@ -1714,7 +1716,7 @@ bicktopahatcal = function(z, modelorder) {
 #' #Example 2
 #' z=assemble_bic(UKdat_5)
 #' z=jackknifecal(z)
-#' z=bootstrapcal(z)
+#' z=bootstrapcal(z, nboot=2)
 #' subsetmat(z,ntopmodels=100,maxorder=2)
 #'
 #' @export
@@ -1868,8 +1870,8 @@ checkident.1= function(parset, datlist) {
 #'
 #'@param xdata The original data matrix with capture histories and counts.
 #'@param maxorder Maximum order of models to be included
-#'@param checkexist If T then the Fienberg-Rinaldo condition is checked for each model
-#'@param removeFRfail If checkexist is T then models which fail the FR condition are removed from the results
+#'@param checkexist If TRUE then the Fienberg-Rinaldo condition is checked for each model
+#'@param removeFRfail If checkexist is TRUE then models which fail the FR condition are removed from the results
 #' @param ... Parameters to be fed to \code{gethiermodels}.
 #'
 #'@return A list with the following components
@@ -1884,11 +1886,11 @@ checkident.1= function(parset, datlist) {
 #'@examples
 #'data(hiermodels)
 #'data(Korea)
-#'assemble_bic(Korea, checkexist=T)
+#'assemble_bic(Korea, checkexist=TRUE)
 #'
 #'@export
 assemble_bic <-
-  function(xdata,maxorder=dim(xdata)[2]-2, checkexist=T, removeFRfail=T, ...){
+  function(xdata,maxorder=dim(xdata)[2]-2, checkexist=TRUE, removeFRfail=TRUE, ...){
     # number of lists
     nlists=dim(xdata)[2]-1
     hiermodels_cons=gethiermodels(nlists,maxorder=maxorder, modelvec=hiermodels)
@@ -1928,8 +1930,8 @@ assemble_bic <-
 #'
 #' @param xdatin data obtained using \code{ingest_data}
 #' @param hiermod hierarchical model to fit
-#' @param bicRcap  if T then use the Rcapture convention that the BIC sample size is the number of cases observed.  Otherwise use the number of cells in the Poisson log linear model.
-#' @param checkid if T then \code{checkident.1} is called inside the routine
+#' @param bicRcap  if TRUE then use the Rcapture convention that the BIC sample size is the number of cases observed.  Otherwise use the number of cells in the Poisson log linear model.
+#' @param checkid if TRUE then \code{checkident.1} is called inside the routine
 #'
 #'@references
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
@@ -1945,12 +1947,12 @@ assemble_bic <-
 #'
 #' @importFrom stats glm.fit na.omit splinefun
 #' @export
-fit_hier_model= function(xdatin, hiermod, bicRcap=T, checkid=F) {
+fit_hier_model= function(xdatin, hiermod, bicRcap=TRUE, checkid=FALSE) {
 
   # convert hiermod to a vector of encoded parameters
   parvec = convert_from_hierarchy(hiermod)
    #  if appropriate, perform check for identification and existence of model fit
-  if (checkid==T) {if (checkident.1(parvec, xdatin)==0){
+  if (checkid==TRUE) {if (checkident.1(parvec, xdatin)==0){
       zglm = NULL
       zglm$abundance =NA
       zglm$bic =NA
@@ -1990,7 +1992,7 @@ fit_hier_model= function(xdatin, hiermod, bicRcap=T, checkid=F) {
 #'
 #'@param modelstr Model string written in hierarchical form
 #'@param nlists Number of lists.
-#'@param keepmaineffects If T, keep the main effects. If F remove.
+#'@param keepmaineffects If TRUE, keep the main effects. If FALSE remove.
 #'@param maxorder Maximum order of models to be included
 #'
 #'@return neighbour hierarchical models
@@ -2005,10 +2007,15 @@ fit_hier_model= function(xdatin, hiermod, bicRcap=T, checkid=F) {
 #' modelstr = "[12,23]"
 #' find_neighbour_hierarchies(modelstr)
 #'@export
-find_neighbour_hierarchies = function(modelstr, nlists=NA, keepmaineffects=T, maxorder=nlists-1){
+find_neighbour_hierarchies = function(modelstr, nlists=NA, keepmaineffects=TRUE, maxorder=nlists-1){
   # First find models obtained by adding a capture history
-  if (is.na(nlists)) nlists=as.numeric(max(unlist(strsplit(modelstr, split=""))))
-  zhierroots = convert_from_hierarchy(modelstr, F)
+  if (is.na(nlists)) {
+    model_digits <- as.numeric(
+      strsplit(gsub("[^0-9]", "", modelstr), "")[[1]]
+    )
+    nlists <- max(model_digits)
+  }
+  zhierroots = convert_from_hierarchy(modelstr, FALSE)
   zhier = unique(ancestors(zhierroots, nlists))
   znew = boundary_captures(zhier,nlists)
   newmodels = lapply(znew, function(x) union(zhier, x))
@@ -2068,7 +2075,7 @@ convert_to_hierarchy = function(kcap, nlists) {
     rootweight[jr] = length(zr) + sum(0.5^zr)
     rootdecode[jr] = paste0(zr, collapse="")
   }
-  rootdecode = rootdecode[order(rootweight, decreasing=T)]
+  rootdecode = rootdecode[order(rootweight, decreasing=TRUE)]
   # now concatenate to find full hierarchical representation
   zhier = paste0("[", paste(rootdecode, collapse=","), "]", collapse="")
   return(zhier)
@@ -2093,7 +2100,7 @@ convert_to_hierarchy = function(kcap, nlists) {
 #' @examples
 #'modelstr = "[12,23]"
 #'nlists=4
-#'zhierroots = convert_from_hierarchy(modelstr, F)
+#'zhierroots = convert_from_hierarchy(modelstr, FALSE)
 #'zhier = unique(ancestors(zhierroots, nlists))
 #'boundary_captures(zhier,nlists)
 #'
@@ -2136,7 +2143,7 @@ boundary_captures = function(kcap, nlists) {
 #'@examples
 #'data(Korea)
 #'z=assemble_bic(Korea)
-#'z=bootstrapcal(z)
+#'z=bootstrapcal(z, nboot=2)
 #'find_unique_patterns(z$bootreplications)
 #'
 #' @export
@@ -2167,7 +2174,7 @@ find_unique_patterns = function(x) {
 #' @param zmods a vector of models
 #'
 #' @returns a matrix with rows corresponding to the models and columns to the columns of x, with elements
-#' taking the value T if the FR linear program for a vector of 0s and 1s with the same zero pattern as the x data yields a strictly
+#' taking the value TRUE if the FR linear program for a vector of 0s and 1s with the same zero pattern as the x data yields a strictly
 #' positive value
 #'
 #'
@@ -2180,7 +2187,7 @@ find_unique_patterns = function(x) {
 #' @examples
 #' data(Korea)
 #' z=assemble_bic(Korea)
-#' z=bootstrapcal(z)
+#' z=bootstrapcal(z, nboot=2)
 #' n2=dim(z$xdata)[2]
 #' checkident.2(z$bootreplications, z$xdata[,-n2], dimnames(z$res)[[1]])
 #'
@@ -2247,17 +2254,17 @@ checkident.2 = function(x, xcap, zmods) {
 #'
 #'@examples
 #'z=assemble_bic(Korea)
-#'bootstrapcal(z, checkexist=T, saveinterval=50, savefile="Koreabootresults.Rdata")
+#'bootstrapcal(z, nboot=2, checkexist=TRUE, saveinterval=50, savefile="Koreabootresults.Rdata")
 #'
 #' @export
 bootstrapcal <- function(z,
                            nboot = 1000,
                            iseed = 1234,
-                           checkexist=T,
+                           checkexist=TRUE,
                            saveinterval = Inf,
                            savefile = "bootout.Rdata") {
   set.seed(iseed)
-  zdat = tidylists(z$xdata, includezerocounts = T)
+  zdat = tidylists(z$xdata, includezerocounts = TRUE)
   n1 = dim(zdat)[1]
   n2 = dim(zdat)[2]
   countsobserved = zdat[, n2]
@@ -2284,7 +2291,7 @@ bootstrapcal <- function(z,
       if (!checkexist || frmat[imod, j]) {
         zfit = fit_hier_model(xdatin = ing_dat,
                               hiermod = topmodels[imod],
-                              checkid = F)
+                              checkid = FALSE)
         z$bootabund[imod, j] = zfit$abundance
         z$bootbic[imod, j] = zfit$bic
       }
@@ -2323,12 +2330,12 @@ bootstrapcal <- function(z,
 #' @examples
 #' data(Korea)
 #' z=assemble_bic(Korea)
-#' jackknifecal(z,checkexist=T)
+#' jackknifecal(z,checkexist=TRUE)
 #'
 #' @export
-jackknifecal <- function(z, checkexist = T) {
+jackknifecal <- function(z, checkexist = TRUE) {
 
-  zdat = tidylists(z$xdata, includezerocounts = T)
+  zdat = tidylists(z$xdata, includezerocounts = TRUE)
   n1 = dim(zdat)[1]
   n2 = dim(zdat)[2]
   countsobserved = zdat[, n2]

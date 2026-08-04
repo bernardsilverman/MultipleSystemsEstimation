@@ -4,16 +4,16 @@
 \alias{fit_hier_model}
 \title{Fit a hierarchical model taking account of possible sparsity}
 \usage{
-fit_hier_model(xdatin, hiermod, bicRcap = T, checkid = F)
+fit_hier_model(xdatin, hiermod, bicRcap = TRUE, checkid = FALSE)
 }
 \arguments{
 \item{xdatin}{data obtained using \code{ingest_data}}
 
 \item{hiermod}{hierarchical model to fit}
 
-\item{bicRcap}{if T then use the Rcapture convention that the BIC sample size is the number of cases observed.  Otherwise use the number of cells in the Poisson log linear model.}
+\item{bicRcap}{if TRUE then use the Rcapture convention that the BIC sample size is the number of cases observed.  Otherwise use the number of cells in the Poisson log linear model.}
 
-\item{checkid}{if T then \code{checkident.1} is called inside the routine}
+\item{checkid}{if TRUE then \code{checkident.1} is called inside the routine}
 }
 \description{
 Fit a hierarchical model taking account of possible sparsity

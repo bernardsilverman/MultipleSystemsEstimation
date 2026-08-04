@@ -32,7 +32,7 @@ BICrank_tiebreak <- function(BICmatrix_prop, k){
 #'@param z The output of \code{assemble_bic}, \code{bootstrapcal} and \code{jackknifecal}
 #'@param alpha Levels of confidence intervals to be constructed and assessed
 #'@param BICmatrix_break output from \code{BICrank_tiebreak}
-#'@param BCaFD If T, return also the probabilities of the estimates
+#'@param BCaFD If TRUE, return also the probabilities of the estimates
 #'@param maxorder Maximum order of models to be included
 #'
 #'@return A list with the following components
@@ -51,7 +51,7 @@ BICrank_tiebreak <- function(BICmatrix_prop, k){
 #'@examples
 #' data(Korea)
 #' z=assemble_bic(Korea)
-#' z=bootstrapcal(z)
+#' z=bootstrapcal(z, nboot=2)
 #' z=jackknifecal(z)
 #' BICmatrix_prop= find_bic_rank_matrix(z)
 #' BICmatrix_break = BICrank_tiebreak(BICmatrix_prop, 2)
@@ -70,7 +70,7 @@ ktopBCa = function(z,BICmatrix_break,alpha=c(0.025, 0.05, 0.1, 0.16,0.2, 0.5, 0.
   nreps = dim(bootabund)[2]
   #modscores = (1:nmods)
   modscores = BICmatrix_break[,1]
-  #if (ktop*lweight > 0) modscores = rescoremodels(modelslist, ktop, lweight, verbose=F)
+  #if (ktop*lweight > 0) modscores = rescoremodels(modelslist, ktop, lweight, verbose=FALSE)
   #modelorder= order(modscores)
   modelorder = as.vector(modscores)
   # now set up to find all bootstrap estimates
@@ -131,7 +131,7 @@ ktopBCa = function(z,BICmatrix_break,alpha=c(0.025, 0.05, 0.1, 0.16,0.2, 0.5, 0.
 #'
 #' @examples
 #' data(Korea)
-#' zsortbic=assemble_bic(Korea, checkexist=T)
+#' zsortbic=assemble_bic(Korea, checkexist=TRUE)
 #' find_bic_rank_matrix(zsortbic, nbicranks=5)
 #' @export
 find_bic_rank_matrix= function(zsortbic,  nbicranks=5){
@@ -146,7 +146,7 @@ find_bic_rank_matrix= function(zsortbic,  nbicranks=5){
   bic_rank_matrix = matrix(NA, nrow=nranks, ncol=nbicranks, dimnames=list(models,1:nbicranks))
   bic_rank_matrix[,1] = rank(zsortbic$res[,2], ties.method="f")
   neighbour_list = sapply(models, find_neighbour_hierarchies, nlists=nlists, maxorder=maxorder,
-                          simplify=F)
+                          simplify=FALSE)
   #  Now do the recursion to find all the bic ranks.  For debugging purposes
   #  you can call it with nbicranks=1 and the output will be different
   #  Perhaps remove this line in the final version or put it differently.

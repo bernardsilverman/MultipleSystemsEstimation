@@ -18,7 +18,7 @@ ntopBCa(
 
 \item{maxorder}{Maximum order of models to be included}
 
-\item{BCaFD}{If T, return also the probabilities of the estimates}
+\item{BCaFD}{If TRUE, return also the probabilities of the estimates}
 }
 \value{
 A list with the following components
@@ -32,9 +32,9 @@ Find BCa confidence intervals for all possible ntop
 }
 \examples{
 data(Korea)
-z=assemble_bic(Korea, checkexist=T)
-z=bootstrapcal(z, checkexist=T)
-z=jackknifecal(z,checkexist=T)
+z=assemble_bic(Korea, checkexist=TRUE)
+z=bootstrapcal(z,nboot=2, checkexist=TRUE)
+z=jackknifecal(z,checkexist=TRUE)
 ntopBCa(z)
 
 }

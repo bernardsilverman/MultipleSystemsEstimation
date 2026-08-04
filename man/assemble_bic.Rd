@@ -7,8 +7,8 @@
 assemble_bic(
   xdata,
   maxorder = dim(xdata)[2] - 2,
-  checkexist = T,
-  removeFRfail = T,
+  checkexist = TRUE,
+  removeFRfail = TRUE,
   ...
 )
 }
@@ -17,9 +17,9 @@ assemble_bic(
 
 \item{maxorder}{Maximum order of models to be included}
 
-\item{checkexist}{If T then the Fienberg-Rinaldo condition is checked for each model}
+\item{checkexist}{If TRUE then the Fienberg-Rinaldo condition is checked for each model}
 
-\item{removeFRfail}{If checkexist is T then models which fail the FR condition are removed from the results}
+\item{removeFRfail}{If checkexist is TRUE then models which fail the FR condition are removed from the results}
 
 \item{...}{Parameters to be fed to \code{gethiermodels}.}
 }
@@ -40,6 +40,6 @@ considered are returned as well.
 \examples{
 data(hiermodels)
 data(Korea)
-assemble_bic(Korea, checkexist=T)
+assemble_bic(Korea, checkexist=TRUE)
 
 }
