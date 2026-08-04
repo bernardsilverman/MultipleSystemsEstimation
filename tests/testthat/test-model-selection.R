@@ -393,3 +393,24 @@ test_that("downhill_funs returns complete finite output", {
     tolerance = 1e-8
   )
 })
+
+test_that("assemble_bic handles data with no valid models", {
+  x <- cbind(
+    A = c(1, 0, 0),
+    B = c(0, 1, 0),
+    C = c(0, 0, 1),
+    count = c(2, 2, 2)
+  )
+
+  expect_warning(
+    z <- assemble_bic(
+      x,
+      checkexist = TRUE,
+      removeFRfail = TRUE
+    ),
+    NA
+  )
+
+  expect_equal(nrow(z$res), 0)
+  expect_equal(z$maxorder, 0)
+})

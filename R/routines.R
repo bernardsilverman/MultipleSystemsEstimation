@@ -1928,6 +1928,23 @@ assemble_bic <-
 
     }
     if (removeFRfail) res = na.omit(res)
+    if (nrow(res) == 0) {
+      res <- matrix(
+        numeric(0),
+        nrow = 0,
+        ncol = 3,
+        dimnames = list(
+          NULL,
+          c("abundance", "BIC", "modelsorder")
+        )
+      )
+
+      return(list(
+        res = res,
+        xdata = xdata,
+        maxorder = 0
+      ))
+    }
     # arrange rows in order of BIC
     res = res[order(res[, 2]), , drop = FALSE]
     modelnames = rownames(res)
