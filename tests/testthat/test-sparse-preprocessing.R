@@ -118,3 +118,26 @@ test_that("non-identifiable hierarchical fits are not assigned model scores", {
   expect_true(is.na(fit$aic))
 })
 
+test_that("jackknife NAs occur only in zero-count capture histories", {
+  data("Korea", package = "SparseMSE")
+  data("Artificial_3", package = "SparseMSE")
+
+  for (dat in list(Korea, Artificial_3)) {
+    z <- assemble_bic(
+      dat,
+      checkexist = TRUE,
+      removeFRfail = TRUE
+    )
+    z <- jackknifecal(z)
+
+    expect_false(any(
+      colSums(is.na(z$jackabund)) > 0 &
+        z$countsobserved > 0
+    ))
+
+    expect_false(any(
+      colSums(is.na(z$jackbic)) > 0 &
+        z$countsobserved > 0
+    ))
+  }
+})
