@@ -1681,7 +1681,9 @@ bicktopahatcal = function(z, modelorder) {
     }
   }
   # now find the vector of acceleration parameters
-  #  replace NAs by 0s to avoid computational errors (which don't affect the result)
+  # The remaining NAs occur only in columns whose observed count is zero.
+  # These columns have zero weight in the acceleration calculation, so replacing
+  # their NAs by zero does not affect the result.
   zjackest[is.na(zjackest)] = 0
   jackmeans = as.vector(zjackest%*%datobs/ ndat)
   jackd = jackmeans -zjackest
@@ -1987,7 +1989,10 @@ fit_hier_model= function(xdatin, hiermod, bicRcap=TRUE, checkid=FALSE) {
   xdes = xdatin$masterdesign[keepdat, estpars]
   yobs = xdatin$nobs[1+keepdat]
   # carry out glm fit and calculate estimated abundance, BIC and AIC (using the number of cells not the number of cases as the number of data points)
-  # note that the "structural zeroes" have fitted value zero and so their log likelihood is zero.
+  # Parameters on the extended-MLE boundary are fixed at minus infinity.
+  # Their descendant cells therefore have fitted value zero and contribute zero
+  # to the log likelihood.
+  #
   zglm = glm.fit(xdes, yobs, family=poisson())
   if (zglm$rank < ncol(xdes)) {
     zglm$abundance <- NA_real_
@@ -1998,10 +2003,11 @@ fit_hier_model= function(xdatin, hiermod, bicRcap=TRUE, checkid=FALSE) {
     return(zglm)
   }
   zf = zglm$fitted.values
-
   zglm$abundance = sum(yobs) + exp(zglm$coefficients[1])
   loglikhat = sum(yobs*log(zf) - zf - lfactorial(yobs))
   if (bicRcap) nobs = sum(yobs)
+  # Count all parameters in the specified hierarchical model in the AIC and BIC
+  # penalties, including parameters fixed at minus infinity on the boundary.
   zglm$bic = npars*log(nobs) - 2*loglikhat
   zglm$aic = 2*npars - 2*loglikhat
   zglm$neginfpars = sparsepars
