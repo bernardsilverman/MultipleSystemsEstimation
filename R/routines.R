@@ -1692,6 +1692,23 @@ bicktopahatcal = function(z, modelorder) {
   zjackest=zja
   zjbic = z$jackbic[modelorder,]
   datobs = z$countsobserved
+  no_valid_model <- apply(
+    zjbic,
+    2,
+    function(x) !any(is.finite(x))
+  )
+
+  bad_jackknife <- no_valid_model & datobs > 0
+
+  if (any(bad_jackknife)) {
+    stop(
+      sum(bad_jackknife),
+      " positive-count jackknife deletion",
+      if (sum(bad_jackknife) != 1) "s" else "",
+      " had no candidate model with a finite BIC.",
+      call. = FALSE
+    )
+  }
   mdat = length(datobs)
   # take care because a lot of the entries will be NA but only in columns corresponding to zero data count
   #   in the original data.

@@ -470,3 +470,24 @@ test_that("ktopBCa omits bootstrap replicates with no valid model", {
 
   expect_true(all(is.finite(out)))
 })
+
+test_that("BCa acceleration rejects positive-weight jackknife failures", {
+  dat <- cbind(
+    A = c(1, 0, 1, 0, 1, 0, 1),
+    B = c(0, 1, 1, 0, 0, 1, 1),
+    C = c(0, 0, 0, 1, 1, 1, 1),
+    count = c(2, 1, 1, 0, 0, 0, 0)
+  )
+
+  z <- assemble_bic(
+    dat,
+    checkexist = TRUE,
+    removeFRfail = TRUE
+  )
+  z <- jackknifecal(z, checkexist = TRUE)
+
+  expect_error(
+    bicktopahatcal(z, seq_len(nrow(z$res))),
+    "2 positive-count jackknife deletions had no candidate model"
+  )
+})
