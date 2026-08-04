@@ -1,0 +1,84 @@
+test_that("tidylists aggregates duplicate histories and inserts zero cells", {
+  x <- data.frame(
+    A = c(1, 1, 0),
+    B = c(0, 0, 1),
+    count = c(2, 3, 4)
+  )
+
+  full <- tidylists(x, includezerocounts = TRUE)
+  positive <- tidylists(x, includezerocounts = FALSE)
+
+  expect_equal(sum(full$count), 9)
+  expect_equal(sum(positive$count), 9)
+  expect_true(any(full$count == 0))
+  expect_false(any(positive$count == 0))
+  expect_equal(
+    positive$count[positive$A == 1 & positive$B == 0],
+    5
+  )
+})
+
+test_that("removenoninformativelists removes empty and universal lists", {
+  x <- cbind(
+    empty = c(0, 0),
+    universal = c(1, 1),
+    informative = c(1, 0),
+    count = c(3, 4)
+  )
+
+  out <- removenoninformativelists(x)
+
+  expect_equal(ncol(out), 2)
+  expect_equal(colnames(out), c("informative", "count"))
+  expect_equal(out[, "count"], c(3, 4))
+})
+
+test_that("removenoninformativelists removes duplicate list columns", {
+  x <- cbind(
+    A = c(1, 0, 1),
+    Adup = c(1, 0, 1),
+    B = c(0, 1, 1),
+    count = c(2, 3, 4)
+  )
+
+  out <- removenoninformativelists(x)
+
+  expect_equal(ncol(out), 3)
+  expect_equal(out[, "count"], c(2, 3, 4))
+})
+
+test_that("ingest_data identifies zero-descendant parameters", {
+  x <- data.frame(
+    A = c(1, 0),
+    B = c(0, 1),
+    C = c(0, 0),
+    count = c(5, 7)
+  )
+
+  ing <- ingest_data(x)
+
+  abc <- encode_capture(c(1, 1, 1))
+  expect_equal(unname(ing$nstar[abc]), 0)
+})
+
+test_that("fit_hier_model records boundary parameters at minus infinity", {
+  x <- data.frame(
+    A = c(1, 0),
+    B = c(0, 1),
+    C = c(0, 0),
+    count = c(5, 7)
+  )
+
+  fit <- fit_hier_model(
+    ingest_data(x),
+    "[123]"
+  )
+
+  abc <- encode_capture(c(1, 1, 1))
+
+  expect_true(abc %in% fit$neginfpars)
+  expect_identical(
+    unname(fit$coefficients[as.character(abc)]),
+    -Inf
+  )
+})
