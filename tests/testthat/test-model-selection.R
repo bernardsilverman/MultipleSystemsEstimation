@@ -4,7 +4,7 @@ selected_interactions_ms <- function(stepfit) {
 }
 
 test_that("stepwise threshold zero gives the main-effects model", {
-  data("Western", package = "SparseMSE")
+  data("Western", package = "MultipleSystemsEstimation")
   fit <- stepwisefit(Western, pthresh = 0)
 
   expect_length(selected_interactions_ms(fit), 0)
@@ -16,7 +16,7 @@ test_that("stepwise threshold zero gives the main-effects model", {
 })
 
 test_that("published stepwise selections are reproduced", {
-  data("NewOrl", package = "SparseMSE")
+  data("NewOrl", package = "MultipleSystemsEstimation")
 
   test_that("downhill_fit handles an invalid initial model", {
     x <- cbind(
@@ -36,8 +36,8 @@ test_that("published stepwise selections are reproduced", {
   })
 
   test_that("ktopBCa returns finite results for standard sparse examples", {
-    data("Korea", package = "SparseMSE")
-    data("Artificial_3", package = "SparseMSE")
+    data("Korea", package = "MultipleSystemsEstimation")
+    data("Artificial_3", package = "MultipleSystemsEstimation")
 
     for (dat in list(Korea, Artificial_3)) {
       z <- assemble_bic(
@@ -64,7 +64,7 @@ test_that("published stepwise selections are reproduced", {
       expect_true(all(is.finite(out)))
     }
   })
-  data("Western", package = "SparseMSE")
+  data("Western", package = "MultipleSystemsEstimation")
 
   new_orleans <- stepwisefit(NewOrl, pthresh = 0.02)
   western <- stepwisefit(Western, pthresh = 0.02)
@@ -76,7 +76,7 @@ test_that("published stepwise selections are reproduced", {
 })
 
 test_that("small exhaustive BIC search reproduces the Korea result", {
-  data("Korea", package = "SparseMSE")
+  data("Korea", package = "MultipleSystemsEstimation")
 
   exhaustive <- suppressWarnings(
     assemble_bic(Korea, maxorder = 2, checkexist = TRUE,
@@ -95,7 +95,7 @@ test_that("small exhaustive BIC search reproduces the Korea result", {
 })
 
 test_that("maximum order one restricts Korea search to main effects", {
-  data("Korea", package = "SparseMSE")
+  data("Korea", package = "MultipleSystemsEstimation")
 
   main_only <- suppressWarnings(
     assemble_bic(Korea, maxorder = 1, checkexist = TRUE,
@@ -109,7 +109,7 @@ test_that("maximum order one restricts Korea search to main effects", {
 
 
 test_that("hierarchical model filtering returns valid model strings", {
-  data("hiermodels", package = "SparseMSE")
+  data("hiermodels", package = "MultipleSystemsEstimation")
   models <- gethiermodels(nlists = 3, maxorder = 2, modelvec = hiermodels)
 
   expect_gt(length(models), 0)
@@ -118,7 +118,7 @@ test_that("hierarchical model filtering returns valid model strings", {
 })
 
 test_that("downhill search follows the expected Korea path", {
-  data("Korea", package = "SparseMSE")
+  data("Korea", package = "MultipleSystemsEstimation")
 
   counts <- Korea[, ncol(Korea)]
   desmat <- Korea[, -ncol(Korea)]
@@ -175,7 +175,7 @@ test_that("downhill search follows the expected Korea path", {
 })
 
 test_that("non-verbose downhill fit returns selected abundance", {
-  data("Korea", package = "SparseMSE")
+  data("Korea", package = "MultipleSystemsEstimation")
 
   counts <- Korea[, ncol(Korea)]
   desmat <- Korea[, -ncol(Korea)]
@@ -208,7 +208,7 @@ test_that("non-verbose downhill fit returns selected abundance", {
 })
 
 test_that("downhill_funs passes checkid to downhill_fit", {
-  data("Korea", package = "SparseMSE")
+  data("Korea", package = "MultipleSystemsEstimation")
 
   expect_no_error(
     downhill_funs(
@@ -222,7 +222,7 @@ test_that("downhill_funs passes checkid to downhill_fit", {
 })
 
 test_that("downhill bootstrap is reproducible and well formed", {
-  data("Korea", package = "SparseMSE")
+  data("Korea", package = "MultipleSystemsEstimation")
 
   boot_a <- downhill_bootstrapcal(
     xdata = Korea,
@@ -265,7 +265,7 @@ test_that("downhill bootstrap is reproducible and well formed", {
 })
 
 test_that("downhill bootstrap is reproducible with model selection", {
-  data("Korea", package = "SparseMSE")
+  data("Korea", package = "MultipleSystemsEstimation")
 
   boot_a <- downhill_bootstrapcal(
     xdata = Korea,
@@ -297,7 +297,7 @@ test_that("downhill bootstrap is reproducible with model selection", {
   )
 })
 test_that("downhill jackknife is reproducible and finite", {
-  data("Korea", package = "SparseMSE")
+  data("Korea", package = "MultipleSystemsEstimation")
 
   jack1_a <- downhill_jackknifecal(
     xdata = Korea,
@@ -340,7 +340,7 @@ test_that("downhill jackknife is reproducible and finite", {
 })
 
 test_that("downhill_funs returns complete finite output", {
-  data("Korea", package = "SparseMSE")
+  data("Korea", package = "MultipleSystemsEstimation")
 
   result <- downhill_funs(
     xdata = Korea,
@@ -416,7 +416,7 @@ test_that("assemble_bic handles data with no valid models", {
 })
 
 test_that("ntopBCa omits bootstrap replicates with no valid model", {
-  data("Artificial_3", package = "SparseMSE")
+  data("Artificial_3", package = "MultipleSystemsEstimation")
 
   z <- assemble_bic(
     Artificial_3,
@@ -440,7 +440,7 @@ test_that("ntopBCa omits bootstrap replicates with no valid model", {
 })
 
 test_that("ktopBCa omits bootstrap replicates with no valid model", {
-  data("Artificial_3", package = "SparseMSE")
+  data("Artificial_3", package = "MultipleSystemsEstimation")
 
   z <- assemble_bic(
     Artificial_3,

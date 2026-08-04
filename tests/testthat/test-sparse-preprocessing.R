@@ -84,7 +84,7 @@ test_that("fit_hier_model records boundary parameters at minus infinity", {
 })
 
 test_that("existence and identifiability are distinguished", {
-  data("Artificial_3", package = "SparseMSE")
+  data("Artificial_3", package = "MultipleSystemsEstimation")
 
   ing <- ingest_data(Artificial_3)
   parvec <- convert_from_hierarchy("[12,13,23]")
@@ -105,7 +105,7 @@ test_that("existence and identifiability are distinguished", {
 })
 
 test_that("non-identifiable hierarchical fits are not assigned model scores", {
-  data("Artificial_3", package = "SparseMSE")
+  data("Artificial_3", package = "MultipleSystemsEstimation")
 
   fit <- fit_hier_model(
     ingest_data(Artificial_3),
@@ -119,8 +119,8 @@ test_that("non-identifiable hierarchical fits are not assigned model scores", {
 })
 
 test_that("jackknife NAs occur only in zero-count capture histories", {
-  data("Korea", package = "SparseMSE")
-  data("Artificial_3", package = "SparseMSE")
+  data("Korea", package = "MultipleSystemsEstimation")
+  data("Artificial_3", package = "MultipleSystemsEstimation")
 
   for (dat in list(Korea, Artificial_3)) {
     z <- assemble_bic(
@@ -156,8 +156,8 @@ test_that("removenoninformativelists never removes the count column", {
 })
 
 test_that("bootstrap replicates retain at least one finite model score", {
-  data("Korea", package = "SparseMSE")
-  data("Artificial_3", package = "SparseMSE")
+  data("Korea", package = "MultipleSystemsEstimation")
+  data("Artificial_3", package = "MultipleSystemsEstimation")
 
   datasets <- list(
     Korea = Korea,
@@ -185,8 +185,8 @@ test_that("bootstrap replicates retain at least one finite model score", {
 })
 
 test_that("positive-count jackknife samples retain a finite model score", {
-  data("Korea", package = "SparseMSE")
-  data("Artificial_3", package = "SparseMSE")
+  data("Korea", package = "MultipleSystemsEstimation")
+  data("Artificial_3", package = "MultipleSystemsEstimation")
 
   for (dat in list(Korea, Artificial_3)) {
     z <- assemble_bic(

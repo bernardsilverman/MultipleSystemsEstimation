@@ -1,5 +1,5 @@
 test_that("old and general fitters agree for nonsparse pairwise models", {
-  data("Western", package = "SparseMSE")
+  data("Western", package = "MultipleSystemsEstimation")
 
   old_main <- modelfit(Western, mX = NULL)
   new_main <- fit_hier_model(
@@ -20,7 +20,7 @@ test_that("old and general fitters agree for nonsparse pairwise models", {
 })
 
 test_that("old and general fitters agree when a pairwise parameter is minus infinity", {
-  data("Western", package = "SparseMSE")
+  data("Western", package = "MultipleSystemsEstimation")
 
   # A:B is a nonoverlapping pair in Western.  The 2021 paper reports
   # that all candidate pairwise models for this dataset are estimable.

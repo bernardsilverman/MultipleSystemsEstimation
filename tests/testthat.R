@@ -1,4 +1,4 @@
 library(testthat)
-library(SparseMSE)
+library(MultipleSystemsEstimation)
 
-test_check("SparseMSE")
+test_check("MultipleSystemsEstimation")

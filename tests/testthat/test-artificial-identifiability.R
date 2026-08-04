@@ -1,5 +1,5 @@
 test_that("Artificial_3 reproduces the published existence and identifiability classifications", {
-  data("Artificial_3", package = "SparseMSE")
+  data("Artificial_3", package = "MultipleSystemsEstimation")
 
   pairs <- matrix(c(
     1, 2,  # AB
@@ -18,7 +18,7 @@ test_that("Artificial_3 reproduces the published existence and identifiability c
 })
 
 test_that("the general hierarchical existence check agrees on Artificial_3", {
-  data("Artificial_3", package = "SparseMSE")
+  data("Artificial_3", package = "MultipleSystemsEstimation")
   dat <- ingest_data(Artificial_3)
 
   expect_gt(checkident.1("[1,2,3]", dat), 0)

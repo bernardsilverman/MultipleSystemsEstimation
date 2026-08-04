@@ -1,4 +1,4 @@
-Package: SparseMSE
+Package: MultipleSystemsEstimation
 Title: 'Multiple Systems Estimation for Sparse Capture Data'
 Version: 3.0.1
 Authors@R: c(
