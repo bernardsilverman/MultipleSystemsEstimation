@@ -184,3 +184,32 @@ test_that("bootstrap replicates retain at least one finite model score", {
   }
 })
 
+test_that("positive-count jackknife samples retain a finite model score", {
+  data("Korea", package = "SparseMSE")
+  data("Artificial_3", package = "SparseMSE")
+
+  for (dat in list(Korea, Artificial_3)) {
+    z <- assemble_bic(
+      dat,
+      checkexist = TRUE,
+      removeFRfail = TRUE
+    )
+
+    z <- jackknifecal(
+      z,
+      checkexist = TRUE
+    )
+
+    no_finite_bic <- apply(
+      z$jackbic,
+      2,
+      function(x) !any(is.finite(x))
+    )
+
+    expect_false(any(
+      no_finite_bic &
+        z$countsobserved > 0
+    ))
+  }
+})
+
