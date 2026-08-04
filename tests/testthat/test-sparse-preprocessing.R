@@ -103,3 +103,18 @@ test_that("existence and identifiability are distinguished", {
   expect_equal(length(setdiff(parvec, fit$neginfpars)), 5)
   expect_equal(sum(is.na(fit$coefficients)), 1)
 })
+
+test_that("non-identifiable hierarchical fits are not assigned model scores", {
+  data("Artificial_3", package = "SparseMSE")
+
+  fit <- fit_hier_model(
+    ingest_data(Artificial_3),
+    "[12,13,23]"
+  )
+
+  expect_true(anyNA(fit$coefficients))
+  expect_true(is.na(fit$abundance))
+  expect_true(is.na(fit$bic))
+  expect_true(is.na(fit$aic))
+})
+

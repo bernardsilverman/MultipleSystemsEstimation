@@ -1975,6 +1975,14 @@ fit_hier_model= function(xdatin, hiermod, bicRcap=TRUE, checkid=FALSE) {
   # carry out glm fit and calculate estimated abundance, BIC and AIC (using the number of cells not the number of cases as the number of data points)
   # note that the "structural zeroes" have fitted value zero and so their log likelihood is zero.
   zglm = glm.fit(xdes, yobs, family=poisson())
+  if (zglm$rank < ncol(xdes)) {
+    zglm$abundance <- NA_real_
+    zglm$bic <- NA_real_
+    zglm$aic <- NA_real_
+    zglm$neginfpars <- sparsepars
+    zglm$coefficients <- c(zglm$coefficients, sparseparest)
+    return(zglm)
+  }
   zf = zglm$fitted.values
 
   zglm$abundance = sum(yobs) + exp(zglm$coefficients[1])
