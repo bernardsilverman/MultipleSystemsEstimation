@@ -82,3 +82,24 @@ test_that("fit_hier_model records boundary parameters at minus infinity", {
     -Inf
   )
 })
+
+test_that("existence and identifiability are distinguished", {
+  data("Artificial_3", package = "SparseMSE")
+
+  ing <- ingest_data(Artificial_3)
+  parvec <- convert_from_hierarchy("[12,13,23]")
+  fit <- fit_hier_model(ing, "[12,13,23]")
+
+  expect_gt(checkident.1(parvec, ing), 0)
+  expect_equal(
+    checkident(
+      Artificial_3,
+      mX = matrix(c(1, 2, 1, 3, 2, 3), nrow = 2)
+    ),
+    2
+  )
+
+  expect_equal(fit$rank, 4)
+  expect_equal(length(setdiff(parvec, fit$neginfpars)), 5)
+  expect_equal(sum(is.na(fit$coefficients)), 1)
+})
