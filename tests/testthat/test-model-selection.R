@@ -414,3 +414,59 @@ test_that("assemble_bic handles data with no valid models", {
   expect_equal(nrow(z$res), 0)
   expect_equal(z$maxorder, 0)
 })
+
+test_that("ntopBCa omits bootstrap replicates with no valid model", {
+  data("Artificial_3", package = "SparseMSE")
+
+  z <- assemble_bic(
+    Artificial_3,
+    checkexist = TRUE,
+    removeFRfail = TRUE
+  )
+  z <- bootstrapcal(
+    z,
+    nboot = 1000,
+    iseed = 1234,
+    checkexist = TRUE
+  )
+  z <- jackknifecal(z, checkexist = TRUE)
+
+  expect_warning(
+    out <- ntopBCa(z),
+    "1 bootstrap replication omitted"
+  )
+
+  expect_true(all(is.finite(out)))
+})
+
+test_that("ktopBCa omits bootstrap replicates with no valid model", {
+  data("Artificial_3", package = "SparseMSE")
+
+  z <- assemble_bic(
+    Artificial_3,
+    checkexist = TRUE,
+    removeFRfail = TRUE
+  )
+
+  z <- bootstrapcal(
+    z,
+    nboot = 1000,
+    iseed = 1234,
+    checkexist = TRUE
+  )
+
+  z <- jackknifecal(
+    z,
+    checkexist = TRUE
+  )
+
+  bic_rank <- find_bic_rank_matrix(z)
+  bic_break <- BICrank_tiebreak(bic_rank, 2)
+
+  expect_warning(
+    out <- ktopBCa(z, bic_break),
+    "1 bootstrap replication omitted"
+  )
+
+  expect_true(all(is.finite(out)))
+})

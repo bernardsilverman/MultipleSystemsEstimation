@@ -62,8 +62,36 @@ ktopBCa = function(z,BICmatrix_break,alpha=c(0.025, 0.05, 0.1, 0.16,0.2, 0.5, 0.
   # set up and calculate order of model scores
   # restrict to models of prescribed order
   choosemods = (z$res[,3] <= maxorder)
-  bootabund = z$bootabund[choosemods,]
-  bootbic = z$bootbic[choosemods, ]
+  bootabund = z$bootabund[choosemods, , drop = FALSE]
+  bootbic = z$bootbic[choosemods, , drop = FALSE]
+  #
+  usable_reps <- apply(
+    bootbic,
+    2,
+    function(x) any(is.finite(x))
+  )
+
+  nfailed <- sum(!usable_reps)
+
+  if (!any(usable_reps)) {
+    stop(
+      "No bootstrap replication has a candidate model with a finite BIC.",
+      call. = FALSE
+    )
+  }
+
+  if (nfailed > 0) {
+    warning(
+      nfailed,
+      " bootstrap replication",
+      if (nfailed != 1) "s" else "",
+      " omitted because no candidate model had a finite BIC.",
+      call. = FALSE
+    )
+
+    bootabund <- bootabund[, usable_reps, drop = FALSE]
+    bootbic <- bootbic[, usable_reps, drop = FALSE]
+  }
   #
   nmods=dim(bootabund)[1]
   modelslist = dimnames(bootabund)[[1]]
