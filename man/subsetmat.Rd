@@ -41,15 +41,13 @@ original data matrix with capture histories and counts and the new actual value 
 from the input value if necessary or if the default input value of \eqn{\infty} is used).
 }
 \examples{
-data(UKdat_5)
-#Example 1
-z=assemble_bic(UKdat_5)
-subsetmat(z,ntopmodels=100,maxorder=2)
-subsetmat(z)
-#Example 2
-z=assemble_bic(UKdat_5)
-z=jackknifecal(z)
-z=bootstrapcal(z, nboot=2)
-subsetmat(z,ntopmodels=100,maxorder=2)
+data(Korea)
+
+z <- assemble_bic(Korea)
+subsetmat(z, ntopmodels = 5, maxorder = 2)
+
+z <- jackknifecal(z)
+z <- bootstrapcal(z, nboot = 2)
+subsetmat(z, ntopmodels = 5, maxorder = 2)
 
 }

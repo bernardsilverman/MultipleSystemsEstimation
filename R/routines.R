@@ -1708,16 +1708,14 @@ bicktopahatcal = function(z, modelorder) {
 #'   do not appear.
 #'
 #' @examples
-#' data(UKdat_5)
-#' #Example 1
-#' z=assemble_bic(UKdat_5)
-#' subsetmat(z,ntopmodels=100,maxorder=2)
-#' subsetmat(z)
-#' #Example 2
-#' z=assemble_bic(UKdat_5)
-#' z=jackknifecal(z)
-#' z=bootstrapcal(z, nboot=2)
-#' subsetmat(z,ntopmodels=100,maxorder=2)
+#' data(Korea)
+#'
+#' z <- assemble_bic(Korea)
+#' subsetmat(z, ntopmodels = 5, maxorder = 2)
+#'
+#' z <- jackknifecal(z)
+#' z <- bootstrapcal(z, nboot = 2)
+#' subsetmat(z, ntopmodels = 5, maxorder = 2)
 #'
 #' @export
 subsetmat <- function(z,
