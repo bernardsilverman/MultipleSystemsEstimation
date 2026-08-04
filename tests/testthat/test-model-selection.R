@@ -34,6 +34,36 @@ test_that("published stepwise selections are reproduced", {
       )
     ))
   })
+
+  test_that("ktopBCa returns finite results for standard sparse examples", {
+    data("Korea", package = "SparseMSE")
+    data("Artificial_3", package = "SparseMSE")
+
+    for (dat in list(Korea, Artificial_3)) {
+      z <- assemble_bic(
+        dat,
+        checkexist = TRUE,
+        removeFRfail = TRUE
+      )
+      z <- bootstrapcal(
+        z,
+        nboot = 20,
+        iseed = 1234,
+        checkexist = TRUE
+      )
+      z <- jackknifecal(
+        z,
+        checkexist = TRUE
+      )
+
+      bic_rank <- find_bic_rank_matrix(z)
+      bic_break <- BICrank_tiebreak(bic_rank, 2)
+      out <- ktopBCa(z, bic_break)
+
+      expect_true(all(is.finite(bic_rank)))
+      expect_true(all(is.finite(out)))
+    }
+  })
   data("Western", package = "SparseMSE")
 
   new_orleans <- stepwisefit(NewOrl, pthresh = 0.02)
