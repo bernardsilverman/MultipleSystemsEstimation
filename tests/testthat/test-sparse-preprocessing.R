@@ -154,3 +154,33 @@ test_that("removenoninformativelists never removes the count column", {
   expect_equal(colnames(out)[ncol(out)], "count")
   expect_equal(out[, "count"], x[, "count"])
 })
+
+test_that("bootstrap replicates retain at least one finite model score", {
+  data("Korea", package = "SparseMSE")
+  data("Artificial_3", package = "SparseMSE")
+
+  datasets <- list(
+    Korea = Korea,
+    Artificial_3 = Artificial_3
+  )
+
+  for (dat in datasets) {
+    z <- assemble_bic(
+      dat,
+      checkexist = TRUE,
+      removeFRfail = TRUE
+    )
+
+    z <- bootstrapcal(
+      z,
+      nboot = 20,
+      iseed = 1234,
+      checkexist = TRUE
+    )
+
+    expect_true(all(
+      apply(z$bootbic, 2, function(x) any(is.finite(x)))
+    ))
+  }
+})
+
