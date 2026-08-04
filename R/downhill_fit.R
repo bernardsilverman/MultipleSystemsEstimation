@@ -46,6 +46,18 @@ downhill_fit = function(counts, desmat, maxorder=dim(desmat)[2]-1, checkid=TRUE,
   # initialise vector of models considered and values of function
   hiers_considered = inithier
   funvals = fhm(inithier, xdata=xdata, checkid=checkid)
+  if (!is.finite(funvals["BIC", 1])) {
+    if (verbose) {
+      return(list(
+        optimum_hierarchy = NA_character_,
+        minimum_value = c(BIC = NA_real_, abundance = NA_real_),
+        hierarchies_considered = inithier,
+        function_values = funvals
+      ))
+    }
+
+    return(NA_real_)
+  }
   opthier = inithier
   best_value <- setNames(
     as.numeric(funvals[, 1]),

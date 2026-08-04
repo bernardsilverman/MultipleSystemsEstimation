@@ -17,6 +17,23 @@ test_that("stepwise threshold zero gives the main-effects model", {
 
 test_that("published stepwise selections are reproduced", {
   data("NewOrl", package = "SparseMSE")
+
+  test_that("downhill_fit handles an invalid initial model", {
+    x <- cbind(
+      A = c(1, 0),
+      B = c(0, 1),
+      C = c(0, 0),
+      count = c(5, 7)
+    )
+
+    expect_true(is.na(
+      downhill_fit(
+        counts = x[, "count"],
+        desmat = x[, c("A", "B", "C")],
+        checkid = TRUE
+      )
+    ))
+  })
   data("Western", package = "SparseMSE")
 
   new_orleans <- stepwisefit(NewOrl, pthresh = 0.02)
