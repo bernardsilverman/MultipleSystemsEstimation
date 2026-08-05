@@ -6,6 +6,9 @@
 \usage{
 bootstrap_mse(...)
 }
+\arguments{
+\item{...}{Arguments passed to \code{\link{estimate_population_bic}}.}
+}
 \value{
 The same value as \code{estimate_population_bic()}.
 }

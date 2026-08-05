@@ -1139,8 +1139,8 @@ estimate_population_stepwise <- function(
   return(list(popest=popest, MSEfit=MSEfit, bootreps=bootreps, ahat=ahat, BCaquantiles=confquantiles))
 }
 #' Deprecated name for \code{estimate_population_stepwise}
+#'@param ... Arguments passed to \code{\link{estimate_population_stepwise}}.
 #'
-#' @inheritParams estimate_population_stepwise
 #' @return The same value as \code{estimate_population_stepwise()}.
 #' @export
 estimatepopulation <- function(...) {
