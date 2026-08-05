@@ -1,49 +1,175 @@
-#' A routine for naive user
+#' Bootstrap inference accounting for BIC model selection
 #'
-#'@param zdat Data matrix with \eqn{t+1} columns. The first \eqn{t} columns, each corresponding to a particular list,
-#' are 0s and 1s defining the capture histories
-#' observed. The last column is the count of cases with that particular capture history.
-#' @param maxorder Maximum order of models to be included.
-#' @param nboot Number of bootstrap replications.
-#' @param iseed seed for initialisation
-#'@param alpha Levels of confidence intervals to be constructed and assessed
+#' Constructs BCa confidence limits for population size while allowing for
+#' uncertainty arising from BIC-based model selection.
 #'
-#'@return A list with the following components
-#'\describe{
-#' \item{confvals}{BCa confidence intervals for each considered model}
-#'   \item{probests}{Corresponding probabilities of the estimates}
-#'  }
+#' The routine enumerates the available hierarchical log-linear models,
+#' ranks them by BIC, retains a specified number of the best-ranked models,
+#' carries out bootstrap and jackknife calculations, and then evaluates the
+#' resulting BCa confidence limits for nested sets of top-BIC models.
 #'
+#' @param zdat A capture-history data matrix with \eqn{t+1} columns. The first
+#' \eqn{t} columns correspond to the capture lists and contain zeros and ones
+#' defining the observed capture histories. The final column contains the
+#' number of cases having each capture history. Capture histories not
+#' explicitly included in the data are assumed to have zero count.
 #'
-#'@references
-#' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
-#' Bootstrapping Multiple Systems Estimates to Account for Model Selection
-#' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
+#' @param maxorder Maximum interaction order permitted in the hierarchical
+#' log-linear models considered. The default is one less than the number of
+#' lists. For six-list data, only models with interactions of order at most 2
+#' are available. If a larger value is supplied, it is reduced to 2 with a
+#' warning.
 #'
-#'@examples
-#'data(Korea)
-#'bootstrap_mse(Korea, nboot=2)
+#' @param nboot Number of bootstrap replications. The default is 10000.
 #'
-#'@export
-bootstrap_mse=function(zdat,maxorder=dim(zdat)[2]-2, nboot=10000, iseed=1234,alpha=c(0.025, 0.1, 0.9, 0.975)){
+#' @param iseed Integer seed used to initialise the random-number generator.
+#' The default is 1234.
+#'
+#' @param alpha Numeric vector of cumulative probability levels at which the
+#' BCa confidence limits are to be evaluated. The default is
+#' \code{c(0.025, 0.1, 0.9, 0.975)}.
+#'
+#' @details
+#' This routine implements the bootstrap procedure described by Silverman,
+#' Chan and Vincent (2024). Hierarchical log-linear models are fitted to the
+#' observed data and ordered by increasing BIC. Bootstrap model selection is
+#' then repeated within nested sets of the best-ranked models.
+#'
+#' For up to three lists, all available models are retained. For four-list
+#' data, the 20 models with the smallest BIC values are retained. For
+#' five-list data, the 100 models with the smallest BIC values are retained.
+#' For six-list data, only pairwise-interaction models are available and the
+#' 100 models with the smallest BIC values are retained.
+#'
+#' The exhaustive BIC model catalogue is available only for data with at most
+#' six lists. For data with more than six lists, the routine stops with an
+#' informative error.
+#'
+#' For six-list data, the routine must first fit 32,768 hierarchical
+#' pairwise-interaction models before selecting the best 100 models. This
+#' initial model-fitting stage can take a considerable time. An immediate
+#' warning is issued before it begins.
+#'
+#' A small value of \code{nboot}, such as that used in the example, is useful
+#' only for checking that the routine runs. A substantially larger number of
+#' bootstrap replications should be used for substantive inference.
+#'
+#' @return A numeric matrix of BCa confidence limits. The columns correspond
+#' to the cumulative probability levels supplied in \code{alpha}. The
+#' retained models are ordered by increasing BIC for the original data.
+#' Row \eqn{k} gives the confidence limits obtained when model selection
+#' within each bootstrap replication is restricted to the first \eqn{k}
+#' models in this ordering. Thus, the first row uses only the best-BIC model,
+#' the second row allows selection between the best two models, and the final
+#' row allows selection among all retained models. The row name identifies
+#' the model added when moving from \eqn{k-1} to \eqn{k} candidate models.
+#'
+#' @references
+#' Silverman, B. W., Chan, L. and Vincent, K. (2024).
+#' Bootstrapping Multiple Systems Estimates to Account for Model Selection.
+#' \emph{Statistics and Computing}, \strong{34}, 44.
+#' Available from
+#' \url{https://doi.org/10.1007/s11222-023-10346-9}.
+#'
+#' @examples
+#' data(Korea)
+#'
+#' # A very small number of bootstrap replications is used here only
+#' # to keep the example quick.
+#' estimate_population_bic(Korea, nboot = 2)
+#'
+#' @export
+estimate_population_bic <- function(
+    zdat,
+    maxorder = dim(zdat)[2] - 2,
+    nboot = 10000,
+    iseed = 1234,
+    alpha = c(0.025, 0.1, 0.9, 0.975)
+) {
+  nlists <- ncol(zdat) - 1L
 
-  if (maxorder == 6){
-    z= assemble_bic(zdat, maxorder =2 ,checkexist =TRUE)} else {
-      z=assemble_bic(zdat, maxorder=maxorder, checkexist=TRUE)
-    }
+  if (nlists > 6L) {
+    stop(
+      paste0(
+        "The BIC enumeration approach is available only for data with at ",
+        "most six lists. For six lists, only models with interactions of ",
+        "order at most 2 are available."
+      ),
+      call. = FALSE
+    )
+  }
 
-  if (maxorder == 4){z= subsetmat(z, ntopmodels = 20, maxorder = maxorder)
-  } else if(maxorder == 5 | maxorder ==6){
-    z =subsetmat(z,ntopmodels = 100, maxorder = maxorder)} else {
-      z=subsetmat(z, ntopmodels = Inf, maxorder = maxorder)
-    }
+  if (nlists == 6L && maxorder > 2L) {
+    warning(
+      paste0(
+        "For six-list data, the stored hierarchical-model catalogue contains ",
+        "only models with interactions of order at most 2. ",
+        "`maxorder` has therefore been reduced from ",
+        maxorder, " to 2."
+      ),
+      call. = FALSE,
+      immediate. = TRUE
+    )
+    maxorder <- 2L
+  }
+  if (nlists == 6L) {
+    warning(
+      paste0(
+        "Six-list BIC enumeration requires fitting 32,768 hierarchical ",
+        "pairwise-interaction models before the best 100 models are selected. ",
+        "This may take a considerable time."
+      ),
+      call. = FALSE,
+      immediate. = TRUE
+    )
+  }
+  z <- assemble_bic(
+    zdat,
+    maxorder = maxorder,
+    checkexist = TRUE
+  )
 
+  if (nlists == 6L) {
+    z <- subsetmat(
+      z,
+      ntopmodels = 100,
+      maxorder = maxorder
+    )
+  } else if (maxorder == 4L) {
+    z <- subsetmat(
+      z,
+      ntopmodels = 20,
+      maxorder = maxorder
+    )
+  } else if (maxorder == 5L) {
+    z <- subsetmat(
+      z,
+      ntopmodels = 100,
+      maxorder = maxorder
+    )
+  } else {
+    z <- subsetmat(
+      z,
+      ntopmodels = Inf,
+      maxorder = maxorder
+    )
+  }
 
   z=bootstrapcal(z, nboot=nboot, iseed=iseed, checkexist=TRUE)
   z=jackknifecal(z,checkexist=TRUE)
   ntopBCa(z, alpha=alpha, maxorder=maxorder)
 
-
-
+}
+#' Deprecated name for \code{estimate_population_bic}
+#'
+#' @description
+#' \code{bootstrap_mse()} is deprecated. Use
+#' \code{estimate_population_bic()} instead.
+#'
+#' @inheritParams estimate_population_bic
+#' @return The same value as \code{estimate_population_bic()}.
+#' @export
+bootstrap_mse <- function(...) {
+  .Deprecated("estimate_population_bic")
+  estimate_population_bic(...)
 }

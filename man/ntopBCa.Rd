@@ -2,7 +2,7 @@
 % Please edit documentation in R/routines.R
 \name{ntopBCa}
 \alias{ntopBCa}
-\title{Find BCa confidence intervals for all possible ntop}
+\title{BCa confidence limits for nested sets of top-BIC models}
 \usage{
 ntopBCa(
   z,
@@ -12,23 +12,40 @@ ntopBCa(
 )
 }
 \arguments{
-\item{z}{The output of \code{assemble_bic}, \code{bootstrapcal} and \code{jackknifecal}}
+\item{z}{The output of \code{assemble_bic}, \code{bootstrapcal}, and
+\code{jackknifecal}.}
 
-\item{alpha}{Levels of confidence intervals to be constructed and assessed}
+\item{alpha}{Cumulative probability levels at which BCa confidence limits
+are calculated.}
 
-\item{maxorder}{Maximum order of models to be included}
+\item{maxorder}{Maximum interaction order of models to be included.}
 
-\item{BCaFD}{If TRUE, return also the probabilities of the estimates}
+\item{BCaFD}{If \code{TRUE}, also return estimated BCa cumulative
+probabilities corresponding to the confidence limits.}
 }
 \value{
-A list with the following components
+If \code{BCaFD = FALSE}, a numeric matrix of BCa confidence
+limits. Columns correspond to the probability levels in \code{alpha}.
+Models are ordered by increasing BIC for the original data. Row \eqn{k}
+gives the confidence limits obtained when model selection within each
+bootstrap replication is restricted to the first \eqn{k} models in this
+ordering. The row name identifies the model added when moving from
+\eqn{k-1} to \eqn{k} candidate models.
+
+If \code{BCaFD = TRUE}, a list with components:
 \describe{
-\item{confvals}{BCa confidence intervals for each considered model}
-  \item{probests}{Corresponding probabilities of the estimates}
- }
+  \item{\code{confvals}}{The matrix of BCa confidence limits described
+  above.}
+  \item{\code{probests}}{A matrix of estimated BCa cumulative
+  probabilities corresponding to the entries of \code{confvals}.}
+}
 }
 \description{
-Find BCa confidence intervals for all possible ntop
+Calculates BCa confidence limits while varying the number of top-ranked
+BIC models allowed in the model-selection step. For each possible number
+of retained models, bootstrap model selection is restricted to the
+corresponding nested set of models with the smallest BIC values in the
+original data.
 }
 \examples{
 data(Korea)

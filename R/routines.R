@@ -972,69 +972,143 @@ count_triples <- function(zdat) {
   return(ntriples)
 }
 
-#' Bootstrapping to evaluate confidence intervals using BCa methods
+#' Population estimation using stepwise model selection
 #'
-#' This routine implements the bootstrapping and jacknife approach as detailed in Section 3.3 of Chan, Silverman and Vincent (2021).
-#'  It calls the routine \code{\link{estimatepopulation.0}} and so is the preferred routine to be called if a user wishes to estimate the
-#'   population and obtain BCa confidence intervals.
+#' Estimates the total population, including the unobserved population, using
+#' the stepwise model-selection procedure of Chan, Silverman and Vincent
+#' (2021). Optional bootstrap and jackknife calculations provide BCa
+#' confidence limits while repeating the stepwise selection procedure for
+#' each resampled data set.
 #'
-#' @param zdat Data matrix with \eqn{t+1} columns. The first \eqn{t} columns, each corresponding to a particular list,
-#' are 0s and 1s defining the capture histories
-#' observed. The last column is the count of cases with that particular capture history.
-#' List names A, B, ... are constructed if not supplied. Where a capture history is not explicitly listed,
-#' it is assumed that it has zero count.
+#' @param zdat A capture-history data matrix with \eqn{t+1} columns. The first
+#' \eqn{t} columns correspond to the capture lists and contain zeros and ones
+#' defining the observed capture histories. The final column contains the
+#' number of cases having each capture history. List names \code{A},
+#' \code{B}, and so on are constructed if they are not supplied. Capture
+#' histories not explicitly included in the data are assumed to have zero
+#' count.
 #'
-#' @param nboot Number of bootstrap replications.
+#' @param nboot Non-negative integer giving the number of bootstrap
+#' replications. If \code{nboot = 0}, only the point estimate and fitted model
+#' are returned and no bootstrap or jackknife calculations are performed.
+#' The default is 1000.
 #'
-#' @param pthresh p-value threshold used in \code{\link{estimatepopulation.0}}.
+#' @param pthresh P-value threshold used by the stepwise model-selection
+#' procedure. The default is 0.02.
 #'
-#' @param iseed seed for initialisation.
+#' @param iseed Integer seed used to initialise the random-number generator
+#' when \code{nboot > 0}. The default is 1234.
 #'
-#' @param alpha Bootstrap quantiles of interests.
+#' @param alpha Numeric vector of cumulative probability levels at which BCa
+#' confidence limits are to be calculated. This argument is used only when
+#' \code{nboot > 0}. The default is
+#' \code{c(0.025, 0.05, 0.1, 0.16, 0.84, 0.9, 0.95, 0.975)}.
 #'
-#' @param ... other arguments which will be passed to \code{\link{estimatepopulation.0}}
+#' @details
+#' The stepwise model-selection procedure is first applied to the observed
+#' data to obtain the point estimate and fitted model.
 #'
-#' @return A list with components as below:
+#' Setting \code{nboot = 0} provides the stepwise point estimate and fitted
+#' model without bootstrap inference.
 #'
-#'\code{popest}  point estimate of the total population of the original data set
+#' If \code{nboot > 0}, multinomial bootstrap samples are generated from the
+#' observed capture-history counts. The complete stepwise model-selection
+#' procedure is repeated for each bootstrap sample, so the resulting
+#' inference allows for variation in the selected model rather than treating
+#' the model selected from the original data as fixed.
 #'
-#'\code{MSEfit} model fitted to the data, in the format described in \code{\link{modelfit}}
+#' A delete-one jackknife calculation is also carried out to estimate the
+#' acceleration parameter required for the BCa confidence limits. The
+#' jackknife calculation takes account of the number of individuals having
+#' each observed capture history.
 #'
-#'\code{bootreps} point estimates of total population sizes from each bootstrap sample
+#' A small positive value of \code{nboot}, such as that used in the example,
+#' is useful only for checking that the routine runs. A substantially larger
+#' number of bootstrap replications should be used for substantive inference.
 #'
-#'\code{ahat} the estimated acceleration factor
+#' @return A list with the following components:
+#' \describe{
+#'   \item{\code{popest}}{The estimated total population for the original
+#'   data, including the estimated unobserved population.}
 #'
-#'\code{BCaquantiles} BCa confidence intervals
+#'   \item{\code{MSEfit}}{The model selected and fitted to the original data,
+#'   in the format returned by \code{\link{stepwisefit}}.}
 #'
+#'   \item{\code{bootreps}}{A numeric vector containing the estimated total
+#'   population from each bootstrap sample. This is \code{NULL} when
+#'   \code{nboot = 0}.}
+#'
+#'   \item{\code{ahat}}{The estimated BCa acceleration parameter. This is
+#'   \code{NULL} when \code{nboot = 0}.}
+#'
+#'   \item{\code{BCaquantiles}}{The BCa confidence limits at the cumulative
+#'   probability levels specified by \code{alpha}. This is \code{NULL} when
+#'   \code{nboot = 0}.}
+#' }
 #'
 #' @references
-#'Chan, L., Silverman, B. W., and Vincent, K. (2021).
-#'  Multiple Systems Estimation for Sparse Capture Data: Inferential Challenges when there are Non-Overlapping Lists.
-#' \emph{Journal of American Statistcal Association}, \strong{116(535)}, 1297-1306,
-#' Available from \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2019.1708748}.
+#' Chan, L., Silverman, B. W., and Vincent, K. (2021).
+#' Multiple Systems Estimation for Sparse Capture Data: Inferential
+#' Challenges when there are Non-Overlapping Lists.
+#' \emph{Journal of the American Statistical Association},
+#' \strong{116}(535), 1297--1306.
+#' Available from
+#' \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2019.1708748}.
 #'
-#' DiCiccio, T. J. and Efron, B. (1996). Bootstrap Confidence Intervals. \emph{Statistical Science}, \strong{40(3)}, 189-228.
+#' DiCiccio, T. J. and Efron, B. (1996).
+#' Bootstrap Confidence Intervals.
+#' \emph{Statistical Science}, \strong{11}(3), 189--228.
 #'
 #' @examples
 #' data(Korea)
-#' zdat=Korea
-#' estimatepopulation(zdat,nboot=10)
+#'
+#' # Point estimate and fitted model without bootstrapping
+#' estimate_population_stepwise(Korea, nboot = 0)
+#'
+#' # A very small number of bootstrap replications is used here only
+#' # to keep the example quick.
+#' estimate_population_stepwise(Korea, nboot = 2)
 #'
 #' @export
-#'
 
-estimatepopulation <- function(zdat, nboot=1000, pthresh=0.02, iseed=1234, alpha= c(0.025, 0.05, 0.1, 0.16, 0.84, 0.9, 0.95, 0.975), ...) {
+estimate_population_stepwise <- function(
+    zdat,
+    nboot = 1000,
+    pthresh = 0.02,
+    iseed = 1234,
+    alpha = c(0.025, 0.05, 0.1, 0.16, 0.84, 0.9, 0.95, 0.975)
+) {
   #  find nboot bootstrap estimates of population size
+  if (length(nboot) != 1L ||
+      is.na(nboot) ||
+      nboot < 0 ||
+      nboot != as.integer(nboot)) {
+    stop("`nboot` must be a non-negative integer.", call. = FALSE)
+  }
+  #   find point estimate and corresponding model using given pthresh
+  populationestimatefromdata <- estimatepopulation.0(
+    zdat,
+    method = "stepwise",
+    quantiles = NULL,
+    pthresh = pthresh
+  )
+  popest = populationestimatefromdata$estimate
+  MSEfit = populationestimatefromdata$MSEfit
+  if (nboot == 0L) {
+    return(list(
+      popest = popest,
+      MSEfit = MSEfit,
+      bootreps = NULL,
+      ahat = NULL,
+      BCaquantiles = NULL
+    ))
+  }
   set.seed(iseed)
   n1 = dim(zdat)[1]
   n2 = dim(zdat)[2]
   countsobserved = zdat[, n2]
   nobs=sum(countsobserved)
   bootreps = rep(NA, nboot)
-  #   find point estimate and corresponding model using given pthresh
-  populationestimatefromdata = estimatepopulation.0(zdat, quantiles=NULL, pthresh=pthresh, ...)
-  popest = populationestimatefromdata$estimate
-  MSEfit = populationestimatefromdata$MSEfit
   #   set up bootstrap model
   #   generate nboot multinomial samples.
   #   Then use a multinomial distribution to find the actual realization.  Then set out synthetic data.
@@ -1042,7 +1116,8 @@ estimatepopulation <- function(zdat, nboot=1000, pthresh=0.02, iseed=1234, alpha
     counts = rmultinom(1,nobs,countsobserved)
     zdatboot = cbind(zdat[,-n2], counts)
     #   for each sample, find estimated total population size
-    bootreps[j] = estimatepopulation.0(zdatboot, quantiles=NULL, pthresh=pthresh,...)$estimate
+    bootreps[j] = estimatepopulation.0(zdatboot, method="stepwise",
+                                       quantiles=NULL, pthresh=pthresh)$estimate
   }
   # use jackknife to find acceleration factor
   jackest = rep(0, n1)
@@ -1051,7 +1126,7 @@ estimatepopulation <- function(zdat, nboot=1000, pthresh=0.02, iseed=1234, alpha
     if (nj > 0) {
       zd1 = zdat
       zd1[j,n2] = nj - 1
-      jackest[j] = estimatepopulation.0(zd1,quantiles=NULL, pthresh=pthresh, ...)$estimate
+      jackest[j] = estimatepopulation.0(zd1,method="stepwise", quantiles=NULL, pthresh=pthresh)$estimate
     }
   }
   jr = sum(countsobserved*jackest)/sum(countsobserved) - jackest
@@ -1062,7 +1137,15 @@ estimatepopulation <- function(zdat, nboot=1000, pthresh=0.02, iseed=1234, alpha
   confquantiles = bcaconfvalues(bootreps, popest,ahat, alpha)
   return(list(popest=popest, MSEfit=MSEfit, bootreps=bootreps, ahat=ahat, BCaquantiles=confquantiles))
 }
-
+#' Deprecated name for \code{estimate_population_stepwise}
+#'
+#' @inheritParams estimate_population_stepwise
+#' @return The same value as \code{estimate_population_stepwise()}.
+#' @export
+estimatepopulation <- function(...) {
+  .Deprecated("estimate_population_stepwise")
+  estimate_population_stepwise(...)
+}
 #' BCa confidence intervals
 #'
 #' The BCa confidence intervals use percentiles of the bootstrap distribution of the population size
@@ -1110,7 +1193,13 @@ bcaconfvalues<-function(bootreps, popest, ahat, alpha=c(0.025, 0.05, 0.1, 0.16, 
 #'  If the original data set has low counts, so that there is a possibility of a simulated data set containing empty lists, then it
 #'  may be advisable to use the option \code{noninformativelist=TRUE}.
 #'
-#'@param zdat Data matrix with \eqn{t+1} columns. The first \eqn{t} columns, each corresponding to a particular list,
+#' @details
+#' This function requires the optional package \pkg{Rcapture}. If it is
+#' installed but not attached, the user will be prompted to load it when
+#' the function is called. If it is not installed, the function will display
+#' installation instructions and return without running the simulation.
+#'
+#' @param zdat Data matrix with \eqn{t+1} columns. The first \eqn{t} columns, each corresponding to a particular list,
 #' are 0s and 1s defining the capture histories
 #' observed. The last column is the count of cases with that particular capture history.
 #' List names A, B, ... are constructed if not supplied. Where a capture history is not explicitly listed,
@@ -1172,6 +1261,14 @@ bcaconfvalues<-function(bootreps, popest, ahat, alpha=c(0.025, 0.05, 0.1, 0.16, 
 #'@export
 
 BICandbootstrapsim <- function(zdat, nsims=1000,nboot=100,pthresh=0.02, iseed=1234, alpha=c(0.025, 0.05, 0.1, 0.16, 0.5, 0.84, 0.9, 0.95, 0.975),noninformativelist=FALSE,verbose=FALSE, ...){
+  # load up Rcapture if necessary
+  if (!requireNamespace("Rcapture", quietly = TRUE)) {
+    message(
+      "BICandbootstrapsim() requires the optional package 'Rcapture'.\n",
+      "Please install it using install.packages(\"Rcapture\") and then try again."
+    )
+    return(invisible(NULL))
+  }
   #  simulate data
   set.seed(iseed)
   nobserved = sum(zdat[, dim(zdat)[2]])
@@ -1527,6 +1624,94 @@ convert_from_hierarchy = function(modelstr, findancestors=TRUE) {
   if (findancestors) captures = unique(ancestors(captures, nlists))
   return(captures)
 }
+
+.mX_to_hiermod <- function(mX, nlists) {
+  if (length(nlists) != 1L ||
+      is.na(nlists) ||
+      nlists < 1L ||
+      nlists != as.integer(nlists)) {
+    stop("`nlists` must be a positive integer.", call. = FALSE)
+  }
+
+  # Main-effects model.
+  if (is.null(mX)) {
+    return(
+      paste0(
+        "[",
+        paste(seq_len(nlists), collapse = ","),
+        "]"
+      )
+    )
+  }
+
+  # All pairwise interactions.
+  if (length(mX) == 1L && isTRUE(mX == 0)) {
+    pairs <- utils::combn(seq_len(nlists), 2L)
+  } else {
+    # Allow one interaction to be supplied as c(i, j).
+    if (is.atomic(mX) && is.null(dim(mX)) && length(mX) == 2L) {
+      mX <- matrix(mX, nrow = 2L)
+    }
+
+    if (!is.matrix(mX) || nrow(mX) != 2L) {
+      stop(
+        paste0(
+          "`mX` must be NULL, 0, a vector of length 2, ",
+          "or a matrix with two rows."
+        ),
+        call. = FALSE
+      )
+    }
+
+    pairs <- mX
+  }
+
+  if (anyNA(pairs) ||
+      any(pairs != as.integer(pairs)) ||
+      any(pairs < 1L) ||
+      any(pairs > nlists)) {
+    stop(
+      "All entries of `mX` must be list numbers between 1 and `nlists`.",
+      call. = FALSE
+    )
+  }
+
+  if (any(pairs[1L, ] == pairs[2L, ])) {
+    stop(
+      "Each column of `mX` must specify two different lists.",
+      call. = FALSE
+    )
+  }
+
+  # Put the smaller list number first in each pair.
+  pairs <- apply(pairs, 2L, sort)
+
+  if (is.null(dim(pairs))) {
+    pairs <- matrix(pairs, nrow = 2L)
+  }
+
+  pair_labels <- unique(
+    apply(pairs, 2L, paste0, collapse = "")
+  )
+
+  # Lists that occur in no pair must be included explicitly as main effects.
+  unused_lists <- setdiff(
+    seq_len(nlists),
+    unique(as.vector(pairs))
+  )
+
+  generators <- c(
+    pair_labels,
+    as.character(unused_lists)
+  )
+
+  paste0(
+    "[",
+    paste(generators, collapse = ","),
+    "]"
+  )
+}
+
 #' Encode capture history
 #'
 #' Given a 0/1 capture history, encode it as number that corresponds to the row number of the capture history data set
@@ -1546,23 +1731,37 @@ encode_capture = function(z) {
   k = 1+sum(z*2^{(0:(nlists-1))})
   return(k)
 }
-#' Find BCa confidence intervals for all possible ntop
+#' BCa confidence limits for nested sets of top-BIC models
 #'
-#'@param z The output of \code{assemble_bic}, \code{bootstrapcal} and \code{jackknifecal}
-#'@param alpha Levels of confidence intervals to be constructed and assessed
-#'@param maxorder Maximum order of models to be included
-#'@param BCaFD If TRUE, return also the probabilities of the estimates
+#' Calculates BCa confidence limits while varying the number of top-ranked
+#' BIC models allowed in the model-selection step. For each possible number
+#' of retained models, bootstrap model selection is restricted to the
+#' corresponding nested set of models with the smallest BIC values in the
+#' original data.
 #'
+#' @param z The output of \code{assemble_bic}, \code{bootstrapcal}, and
+#' \code{jackknifecal}.
+#' @param alpha Cumulative probability levels at which BCa confidence limits
+#' are calculated.
+#' @param maxorder Maximum interaction order of models to be included.
+#' @param BCaFD If \code{TRUE}, also return estimated BCa cumulative
+#' probabilities corresponding to the confidence limits.
 #'
+#' @return If \code{BCaFD = FALSE}, a numeric matrix of BCa confidence
+#' limits. Columns correspond to the probability levels in \code{alpha}.
+#' Models are ordered by increasing BIC for the original data. Row \eqn{k}
+#' gives the confidence limits obtained when model selection within each
+#' bootstrap replication is restricted to the first \eqn{k} models in this
+#' ordering. The row name identifies the model added when moving from
+#' \eqn{k-1} to \eqn{k} candidate models.
 #'
-#'
-#'
-#'@return A list with the following components
-#'\describe{
-#' \item{confvals}{BCa confidence intervals for each considered model}
-#'   \item{probests}{Corresponding probabilities of the estimates}
-#'  }
-#'
+#' If \code{BCaFD = TRUE}, a list with components:
+#' \describe{
+#'   \item{\code{confvals}}{The matrix of BCa confidence limits described
+#'   above.}
+#'   \item{\code{probests}}{A matrix of estimated BCa cumulative
+#'   probabilities corresponding to the entries of \code{confvals}.}
+#' }
 #'
 #'@references
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
@@ -1657,7 +1856,7 @@ ntopBCa = function(z,alpha=c(0.025, 0.05, 0.1, 0.16,0.2, 0.5, 0.8, 0.84, 0.9, 0.
   dimnames(pbcac)=dimnames(bcac)
   return(list(confvals=bcac, probests=pbcac))
   }
-  return(confvals=bcac)
+  return(bcac)
 }
 #' Acceleration factor calculation
 #'
@@ -2458,4 +2657,310 @@ jackknifecal <- function(z, checkexist = TRUE) {
   z$countsobserved = countsobserved
   return(z)
 }
+#' Population estimation using a fixed hierarchical model
+#'
+#' Estimates the total population, including the unobserved population, using
+#' a specified hierarchical log-linear model. The model may be supplied
+#' directly in hierarchy notation or, for models containing only main effects
+#' and two-list interactions, through the older \code{mX} notation.
+#'
+#' Optional bootstrap and jackknife calculations provide BCa confidence
+#' limits while fitting the same fixed model to every resampled data set.
+#'
+#' @param zdat A capture-history data matrix with \eqn{t+1} columns. The first
+#' \eqn{t} columns correspond to the capture lists and contain zeros and ones
+#' defining the observed capture histories. The final column contains the
+#' number of cases having each capture history. Capture histories not
+#' explicitly included in the data are assumed to have zero count.
+#'
+#' @param hiermod A character string specifying a hierarchical log-linear
+#' model by its maximal interactions. For example, \code{"[12,23]"} specifies
+#' the hierarchical model generated by interactions 12 and 23, including all
+#' implied lower-order terms. Higher-order interactions may also be supplied,
+#' for example \code{"[123,4]"}. If \code{hiermod = NULL}, the model is
+#' determined by \code{mX}. Supply at most one of \code{hiermod} and
+#' \code{mX}.
+#'
+#' @param mX An optional specification of two-list interactions. A vector of
+#' length 2 specifies a single interaction. A two-row matrix specifies one
+#' interaction in each column. If \code{mX = NULL} and \code{hiermod = NULL},
+#' the main-effects model is fitted. If \code{mX = 0}, all two-list
+#' interactions are included. This argument is provided as a convenient
+#' alternative to \code{hiermod} for models involving only main effects and
+#' pairwise interactions.
+#'
+#' @param nboot Non-negative integer giving the number of bootstrap
+#' replications. If \code{nboot = 0}, only the point estimate and fitted model
+#' are returned and no bootstrap or jackknife calculations are performed.
+#' The default is 0.
+#'
+#' @param iseed Integer seed used to initialise the random-number generator
+#' when \code{nboot > 0}. The default is 1234.
+#'
+#' @param alpha Numeric vector of cumulative probability levels at which BCa
+#' confidence limits are to be calculated. This argument is used only when
+#' \code{nboot > 0}. The default is
+#' \code{c(0.025, 0.05, 0.1, 0.16, 0.84, 0.9, 0.95, 0.975)}.
+#'
+#' @param checkid Logical value indicating whether the identifiability and
+#' existence condition should be checked before fitting each model. The
+#' default is \code{TRUE}.
+#'
+#' @details
+#' The specified hierarchical model is first fitted to the observed data
+#' using \code{\link{fit_hier_model}}. Parameters on the extended-MLE
+#' boundary are handled by that fitting routine.
+#'
+#' If neither \code{hiermod} nor \code{mX} is supplied, the main-effects
+#' model is used. If both are supplied, the routine stops with an error.
+#'
+#' Setting \code{nboot = 0} returns the point estimate and fitted model
+#' without bootstrap inference.
+#'
+#' If \code{nboot > 0}, multinomial bootstrap samples are generated from the
+#' observed capture-history counts. The same fixed hierarchical model is
+#' fitted to every bootstrap sample. Unlike
+#' \code{\link{estimate_population_stepwise}}, there is no model-selection
+#' step within the bootstrap replications.
+#'
+#' Bootstrap replications for which the fixed model cannot be fitted are
+#' omitted with a warning. If the model cannot be fitted to any bootstrap
+#' sample, the routine stops with an error.
+#'
+#' A delete-one jackknife calculation is also carried out to estimate the
+#' acceleration parameter required for the BCa confidence limits. If the
+#' fixed model cannot be fitted after a positive-count deletion, the routine
+#' stops with an informative error.
+#'
+#' A small positive value of \code{nboot}, such as that used in the example,
+#' is useful only for checking that the routine runs. A substantially larger
+#' number of bootstrap replications should be used for substantive inference.
+#'
+#' @return A list with the following components:
+#' \describe{
+#'   \item{\code{popest}}{The estimated total population for the original
+#'   data, including the estimated unobserved population.}
+#'
+#'   \item{\code{MSEfit}}{The fitted object returned by
+#'   \code{\link{fit_hier_model}} for the original data.}
+#'
+#'   \item{\code{hiermod}}{The hierarchy-string representation of the fixed
+#'   model used in the analysis.}
+#'
+#'   \item{\code{bootreps}}{A numeric vector containing the estimated total
+#'   population from each usable bootstrap sample. This is \code{NULL} when
+#'   \code{nboot = 0}.}
+#'
+#'   \item{\code{ahat}}{The estimated BCa acceleration parameter. This is
+#'   \code{NULL} when \code{nboot = 0}.}
+#'
+#'   \item{\code{BCaquantiles}}{The BCa confidence limits at the cumulative
+#'   probability levels specified by \code{alpha}. This is \code{NULL} when
+#'   \code{nboot = 0}.}
+#' }
+#'
+#' @references
+#' Chan, L., Silverman, B. W., and Vincent, K. (2021).
+#' Multiple Systems Estimation for Sparse Capture Data: Inferential
+#' Challenges when there are Non-Overlapping Lists.
+#' \emph{Journal of the American Statistical Association},
+#' \strong{116}(535), 1297--1306.
+#' Available from
+#' \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2019.1708748}.
+#'
+#' DiCiccio, T. J. and Efron, B. (1996).
+#' Bootstrap Confidence Intervals.
+#' \emph{Statistical Science}, \strong{11}(3), 189--228.
+#'
+#' @examples
+#' data(Korea)
+#'
+#' # Main-effects model without bootstrapping
+#' estimate_population_fixed(Korea)
+#'
+#' # A fixed pairwise-interaction model using hierarchy notation
+#' estimate_population_fixed(Korea, hiermod = "[23,1]")
+#'
+#' # The same model using mX notation
+#' estimate_population_fixed(Korea, mX = c(2, 3))
+#'
+#' # A very small number of bootstrap replications is used here only
+#' # to keep the example quick.
+#' estimate_population_fixed(
+#'   Korea,
+#'   hiermod = "[23,1]",
+#'   nboot = 2
+#' )
+#'
+#' @export
 
+estimate_population_fixed <- function(
+    zdat,
+    hiermod = NULL,
+    mX = NULL,
+    nboot = 0,
+    iseed = 1234,
+    alpha = c(0.025, 0.05, 0.1, 0.16, 0.84, 0.9, 0.95, 0.975),
+    checkid = TRUE
+) {
+  if (length(nboot) != 1L ||
+      is.na(nboot) ||
+      nboot < 0 ||
+      nboot != as.integer(nboot)) {
+    stop("`nboot` must be a non-negative integer.", call. = FALSE)
+  }
+
+  if (!is.null(hiermod) && !is.null(mX)) {
+    stop(
+      "Supply either `hiermod` or `mX`, but not both.",
+      call. = FALSE
+    )
+  }
+
+  nlists <- ncol(zdat) - 1L
+
+  if (is.null(hiermod)) {
+    hiermod <- .mX_to_hiermod(
+      mX = mX,
+      nlists = nlists
+    )
+  }
+
+  ing_dat <- ingest_data(zdat)
+
+  MSEfit <- fit_hier_model(
+    xdatin = ing_dat,
+    hiermod = hiermod,
+    checkid = checkid
+  )
+
+  popest <- MSEfit$abundance
+  if (!is.finite(popest)) {
+    stop(
+      "The specified fixed hierarchical model could not be fitted to the original data.",
+      call. = FALSE
+    )
+  }
+
+  if (nboot == 0L) {
+    return(list(
+      popest = popest,
+      MSEfit = MSEfit,
+      hiermod = hiermod,
+      bootreps = NULL,
+      ahat = NULL,
+      BCaquantiles = NULL
+    ))
+  }
+  set.seed(iseed)
+
+  n1 <- nrow(zdat)
+  n2 <- ncol(zdat)
+  countsobserved <- zdat[, n2]
+  nobs <- sum(countsobserved)
+
+  # Generate bootstrap estimates using the same fixed hierarchical model.
+  bootreps <- rep(NA_real_, nboot)
+
+  for (j in seq_len(nboot)) {
+    counts <- as.vector(
+      stats::rmultinom(
+        n = 1,
+        size = nobs,
+        prob = countsobserved
+      )
+    )
+
+    zdatboot <- cbind(
+      zdat[, -n2, drop = FALSE],
+      counts
+    )
+
+    bootfit <- fit_hier_model(
+      xdatin = ingest_data(zdatboot),
+      hiermod = hiermod,
+      checkid = checkid
+    )
+
+    bootreps[j] <- bootfit$abundance
+  }
+
+  # Omit bootstrap replications for which the fixed model could not be fitted.
+  usable_bootreps <- is.finite(bootreps)
+  nfailed <- sum(!usable_bootreps)
+
+  if (!any(usable_bootreps)) {
+    stop(
+      "The fixed hierarchical model could not be fitted to any bootstrap sample.",
+      call. = FALSE
+    )
+  }
+
+  if (nfailed > 0L) {
+    warning(
+      nfailed,
+      " bootstrap replication",
+      if (nfailed != 1L) "s were" else " was",
+      " omitted because the fixed hierarchical model could not be fitted.",
+      call. = FALSE
+    )
+
+    bootreps <- bootreps[usable_bootreps]
+  }
+
+  # Delete-one jackknife estimates for the BCa acceleration.
+  jackest <- rep(0, n1)
+
+  for (j in seq_len(n1)) {
+    nj <- zdat[j, n2]
+
+    if (nj > 0) {
+      zd1 <- zdat
+      zd1[j, n2] <- nj - 1
+
+      jackfit <- fit_hier_model(
+        xdatin = ingest_data(zd1),
+        hiermod = hiermod,
+        checkid = checkid
+      )
+
+      if (!is.finite(jackfit$abundance)) {
+        stop(
+          paste0(
+            "The fixed hierarchical model could not be fitted after deleting ",
+            "one individual from capture-history row ",
+            j,
+            "."
+          ),
+          call. = FALSE
+        )
+      }
+
+      jackest[j] <- jackfit$abundance
+    }
+  }
+
+  jr <- (
+    sum(countsobserved * jackest) /
+      sum(countsobserved)
+  ) - jackest
+
+  ahat <- sum(countsobserved * jr^3) /
+    (6 * sum(countsobserved * jr^2)^(3 / 2))
+
+  confquantiles <- bcaconfvalues(
+    bootreps,
+    popest,
+    ahat,
+    alpha
+  )
+
+  list(
+    popest = popest,
+    MSEfit = MSEfit,
+    hiermod = hiermod,
+    bootreps = bootreps,
+    ahat = ahat,
+    BCaquantiles = confquantiles
+  )
+}

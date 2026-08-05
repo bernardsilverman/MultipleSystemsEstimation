@@ -66,6 +66,12 @@ This routine carries out the simulation study as detailed in Section 3.4 of Chan
  If the original data set has low counts, so that there is a possibility of a simulated data set containing empty lists, then it
  may be advisable to use the option \code{noninformativelist=TRUE}.
 }
+\details{
+This function requires the optional package \pkg{Rcapture}. If it is
+installed but not attached, the user will be prompted to load it when
+the function is called. If it is not installed, the function will display
+installation instructions and return without running the simulation.
+}
 \examples{
 zdat=UKdat_5
 BICandbootstrapsim(zdat,nsims=2, nboot=2, pthresh=0.02, iseed=1234, noninformativelist=TRUE)
