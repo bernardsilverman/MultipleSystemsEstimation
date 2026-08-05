@@ -20,7 +20,10 @@
 #' are available. If a larger value is supplied, it is reduced to 2 with a
 #' warning.
 #'
-#' @param nboot Number of bootstrap replications. The default is 10000.
+#' @param nboot Non-negative integer giving the number of bootstrap
+#' replications. If \code{nboot = 0}, only the original-data BIC model fits
+#' are returned and no bootstrap or jackknife calculations are performed.
+#' The default is 0.
 #'
 #' @param iseed Integer seed used to initialise the random-number generator.
 #' The default is 1234.
@@ -32,7 +35,14 @@
 #' @details
 #' This routine implements the bootstrap procedure described by Silverman,
 #' Chan and Vincent (2024). Hierarchical log-linear models are fitted to the
-#' observed data and ordered by increasing BIC. Bootstrap model selection is
+#' observed data and ordered by increasing BIC.
+#'
+#' Setting \code{nboot = 0} returns the retained original-data model fits,
+#' ordered by BIC, without carrying out bootstrap or jackknife calculations.
+#'
+#' If \code{nboot > 0}, multinomial bootstrap samples are generated and the
+#' BIC model-selection procedure is repeated for each bootstrap sample.
+#' Bootstrap model selection is
 #' then repeated within nested sets of the best-ranked models.
 #'
 #' For up to three lists, all available models are retained. For four-list
@@ -54,7 +64,18 @@
 #' only for checking that the routine runs. A substantially larger number of
 #' bootstrap replications should be used for substantive inference.
 #'
-#' @return A numeric matrix of BCa confidence limits. The columns correspond
+#' @return
+#' If \code{nboot = 0}, a list with components:
+#' \describe{
+#'   \item{\code{res}}{A matrix containing the abundance estimate, BIC and
+#'   model order for each retained model, ordered by BIC.}
+#'   \item{\code{xdata}}{The ingested capture-history data used in fitting.}
+#'   \item{\code{maxorder}}{The effective maximum interaction order.}
+#' }
+#'
+#' If \code{nboot > 0}, the object returned by \code{\link{ntopBCa}},
+#' containing BCa inference based on repeated BIC model selection, viz.
+#' a numeric matrix of BCa confidence limits. The columns correspond
 #' to the cumulative probability levels supplied in \code{alpha}. The
 #' retained models are ordered by increasing BIC for the original data.
 #' Row \eqn{k} gives the confidence limits obtained when model selection
@@ -63,6 +84,7 @@
 #' the second row allows selection between the best two models, and the final
 #' row allows selection among all retained models. The row name identifies
 #' the model added when moving from \eqn{k-1} to \eqn{k} candidate models.
+#'
 #'
 #' @references
 #' Silverman, B. W., Chan, L. and Vincent, K. (2024).
@@ -76,17 +98,23 @@
 #'
 #' # A very small number of bootstrap replications is used here only
 #' # to keep the example quick.
-#' estimate_population_bic(Korea, nboot = 2)
+#' estimate_population_bic(Korea, nboot = 10)
 #'
 #' @export
 estimate_population_bic <- function(
     zdat,
     maxorder = dim(zdat)[2] - 2,
-    nboot = 10000,
+    nboot = 0,
     iseed = 1234,
     alpha = c(0.025, 0.1, 0.9, 0.975)
 ) {
-  nlists <- ncol(zdat) - 1L
+    if (length(nboot) != 1L ||
+        is.na(nboot) ||
+        nboot < 0 ||
+        nboot != as.integer(nboot)) {
+      stop("`nboot` must be a non-negative integer.", call. = FALSE)
+    }
+    nlists <- ncol(zdat) - 1L
 
   if (nlists > 6L) {
     stop(
@@ -155,10 +183,28 @@ estimate_population_bic <- function(
     )
   }
 
-  z=bootstrapcal(z, nboot=nboot, iseed=iseed, checkexist=TRUE)
-  z=jackknifecal(z,checkexist=TRUE)
-  ntopBCa(z, alpha=alpha, maxorder=maxorder)
 
+  if (nboot == 0L) {
+    return(z)
+  }
+
+  z <- bootstrapcal(
+    z,
+    nboot = nboot,
+    iseed = iseed,
+    checkexist = TRUE
+  )
+
+  z <- jackknifecal(
+    z,
+    checkexist = TRUE
+  )
+
+  ntopBCa(
+    z,
+    alpha = alpha,
+    maxorder = maxorder
+  )
 }
 #' Deprecated name for \code{estimate_population_bic}
 #'

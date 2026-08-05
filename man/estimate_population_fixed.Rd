@@ -10,7 +10,7 @@ estimate_population_fixed(
   mX = NULL,
   nboot = 0,
   iseed = 1234,
-  alpha = c(0.025, 0.05, 0.1, 0.16, 0.84, 0.9, 0.95, 0.975),
+  alpha = c(0.025, 0.1, 0.9, 0.975),
   checkid = TRUE
 )
 }
@@ -48,7 +48,7 @@ when \code{nboot > 0}. The default is 1234.}
 \item{alpha}{Numeric vector of cumulative probability levels at which BCa
 confidence limits are to be calculated. This argument is used only when
 \code{nboot > 0}. The default is
-\code{c(0.025, 0.05, 0.1, 0.16, 0.84, 0.9, 0.95, 0.975)}.}
+\code{c(0.025, 0.1, 0.9, 0.975)}.}
 
 \item{checkid}{Logical value indicating whether the identifiability and
 existence condition should be checked before fitting each model. The

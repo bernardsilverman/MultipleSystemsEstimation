@@ -991,7 +991,7 @@ count_triples <- function(zdat) {
 #' @param nboot Non-negative integer giving the number of bootstrap
 #' replications. If \code{nboot = 0}, only the point estimate and fitted model
 #' are returned and no bootstrap or jackknife calculations are performed.
-#' The default is 1000.
+#' The default is 0.
 #'
 #' @param pthresh P-value threshold used by the stepwise model-selection
 #' procedure. The default is 0.02.
@@ -1002,7 +1002,7 @@ count_triples <- function(zdat) {
 #' @param alpha Numeric vector of cumulative probability levels at which BCa
 #' confidence limits are to be calculated. This argument is used only when
 #' \code{nboot > 0}. The default is
-#' \code{c(0.025, 0.05, 0.1, 0.16, 0.84, 0.9, 0.95, 0.975)}.
+#' \code{c(0.025, 0.1, 0.9, 0.975)}.
 #'
 #' @details
 #' The stepwise model-selection procedure is first applied to the observed
@@ -1063,20 +1063,20 @@ count_triples <- function(zdat) {
 #' data(Korea)
 #'
 #' # Point estimate and fitted model without bootstrapping
-#' estimate_population_stepwise(Korea, nboot = 0)
+#' estimate_population_stepwise(Korea)
 #'
 #' # A very small number of bootstrap replications is used here only
 #' # to keep the example quick.
-#' estimate_population_stepwise(Korea, nboot = 2)
+#' estimate_population_stepwise(Korea, nboot = 10)
 #'
 #' @export
 
 estimate_population_stepwise <- function(
     zdat,
-    nboot = 1000,
+    nboot = 0,
     pthresh = 0.02,
     iseed = 1234,
-    alpha = c(0.025, 0.05, 0.1, 0.16, 0.84, 0.9, 0.95, 0.975)
+    alpha = c(0.025, 0.1, 0.9, 0.975)
 ) {
   #  find nboot bootstrap estimates of population size
   if (length(nboot) != 1L ||
@@ -2700,7 +2700,7 @@ jackknifecal <- function(z, checkexist = TRUE) {
 #' @param alpha Numeric vector of cumulative probability levels at which BCa
 #' confidence limits are to be calculated. This argument is used only when
 #' \code{nboot > 0}. The default is
-#' \code{c(0.025, 0.05, 0.1, 0.16, 0.84, 0.9, 0.95, 0.975)}.
+#' \code{c(0.025, 0.1, 0.9, 0.975)}.
 #'
 #' @param checkid Logical value indicating whether the identifiability and
 #' existence condition should be checked before fitting each model. The
@@ -2800,7 +2800,7 @@ estimate_population_fixed <- function(
     mX = NULL,
     nboot = 0,
     iseed = 1234,
-    alpha = c(0.025, 0.05, 0.1, 0.16, 0.84, 0.9, 0.95, 0.975),
+    alpha = c(0.025, 0.1, 0.9, 0.975),
     checkid = TRUE
 ) {
   if (length(nboot) != 1L ||

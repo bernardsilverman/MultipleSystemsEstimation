@@ -51,7 +51,10 @@ test_that("fixed-model estimation optionally provides BCa bootstrap output", {
   expect_length(result$bootreps, 10L)
   expect_true(all(is.finite(result$bootreps)))
   expect_true(is.finite(result$ahat))
-  expect_length(result$BCaquantiles, 8L)
+  expect_equal(
+    names(result$BCaquantiles),
+    c("0.025", "0.1", "0.9", "0.975")
+  )
 })
 
 test_that("fixed-model estimation rejects conflicting model specifications", {

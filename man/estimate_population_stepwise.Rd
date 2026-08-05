@@ -6,10 +6,10 @@
 \usage{
 estimate_population_stepwise(
   zdat,
-  nboot = 1000,
+  nboot = 0,
   pthresh = 0.02,
   iseed = 1234,
-  alpha = c(0.025, 0.05, 0.1, 0.16, 0.84, 0.9, 0.95, 0.975)
+  alpha = c(0.025, 0.1, 0.9, 0.975)
 )
 }
 \arguments{
@@ -24,7 +24,7 @@ count.}
 \item{nboot}{Non-negative integer giving the number of bootstrap
 replications. If \code{nboot = 0}, only the point estimate and fitted model
 are returned and no bootstrap or jackknife calculations are performed.
-The default is 1000.}
+The default is 0.}
 
 \item{pthresh}{P-value threshold used by the stepwise model-selection
 procedure. The default is 0.02.}
@@ -35,7 +35,7 @@ when \code{nboot > 0}. The default is 1234.}
 \item{alpha}{Numeric vector of cumulative probability levels at which BCa
 confidence limits are to be calculated. This argument is used only when
 \code{nboot > 0}. The default is
-\code{c(0.025, 0.05, 0.1, 0.16, 0.84, 0.9, 0.95, 0.975)}.}
+\code{c(0.025, 0.1, 0.9, 0.975)}.}
 }
 \value{
 A list with the following components:
@@ -91,11 +91,11 @@ number of bootstrap replications should be used for substantive inference.
 data(Korea)
 
 # Point estimate and fitted model without bootstrapping
-estimate_population_stepwise(Korea, nboot = 0)
+estimate_population_stepwise(Korea)
 
 # A very small number of bootstrap replications is used here only
 # to keep the example quick.
-estimate_population_stepwise(Korea, nboot = 2)
+estimate_population_stepwise(Korea, nboot = 10)
 
 }
 \references{
