@@ -53,3 +53,26 @@ test_that("fixed-model estimation optionally provides BCa bootstrap output", {
   expect_true(is.finite(result$ahat))
   expect_length(result$BCaquantiles, 8L)
 })
+
+test_that("fixed-model estimation rejects conflicting model specifications", {
+  expect_error(
+    estimate_population_fixed(
+      Korea,
+      hiermod = "[23,1]",
+      mX = c(2, 3)
+    ),
+    "either `hiermod` or `mX`"
+  )
+})
+
+test_that("fixed-model estimation validates nboot", {
+  expect_error(
+    estimate_population_fixed(Korea, nboot = -1),
+    "non-negative integer"
+  )
+
+  expect_error(
+    estimate_population_fixed(Korea, nboot = 2.5),
+    "non-negative integer"
+  )
+})
