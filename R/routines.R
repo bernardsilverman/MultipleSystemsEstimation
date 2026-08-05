@@ -1092,7 +1092,8 @@ estimate_population_stepwise <- function(
     quantiles = NULL,
     pthresh = pthresh
   )
-  popest = populationestimatefromdata$estimate
+  popest <- unname(populationestimatefromdata$estimate)
+
   MSEfit = populationestimatefromdata$MSEfit
   if (nboot == 0L) {
     return(list(
@@ -2834,7 +2835,7 @@ estimate_population_fixed <- function(
     checkid = checkid
   )
 
-  popest <- MSEfit$abundance
+  popest <- unname(MSEfit$abundance)
   if (!is.finite(popest)) {
     stop(
       "The specified fixed hierarchical model could not be fitted to the original data.",

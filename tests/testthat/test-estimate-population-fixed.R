@@ -79,3 +79,17 @@ test_that("fixed-model estimation validates nboot", {
     "non-negative integer"
   )
 })
+
+test_that("single-model estimators return unnamed scalar point estimates", {
+  stepwise_result <- estimate_population_stepwise(Korea)
+  fixed_result <- estimate_population_fixed(Korea)
+
+  expect_type(stepwise_result$popest, "double")
+  expect_length(stepwise_result$popest, 1L)
+  expect_null(names(stepwise_result$popest))
+
+  expect_type(fixed_result$popest, "double")
+  expect_length(fixed_result$popest, 1L)
+  expect_null(names(fixed_result$popest))
+})
+
