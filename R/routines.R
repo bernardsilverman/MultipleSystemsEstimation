@@ -366,7 +366,6 @@ check_identifiability <- function(zdat, mX=0, verbose=FALSE)
 #'
 #' @importFrom stats qnorm
 #'
-#'@export
 estimatepopulation.0 <-function(zdat,method="stepwise", quantiles=c(0.025,0.975),mX=NULL, pthresh=0.02){
   if (method=="stepwise"){
     zMSE=stepwisefit(zdat, pthresh)
@@ -1132,7 +1131,6 @@ estimate_population_stepwise <- function(
 #'@param ... Arguments passed to \code{\link{estimate_population_stepwise}}.
 #'
 #' @return The same value as \code{estimate_population_stepwise()}.
-#' @export
 estimatepopulation <- function(...) {
   .Deprecated("estimate_population_stepwise")
   estimate_population_stepwise(...)
@@ -1517,7 +1515,6 @@ child_captures = function(k, nlists) {
 #' #Create master design matrix with 3 lists
 #' make_master_design(3)
 #'
-#'@export
 make_master_design = function(nlists) {
   # make design matrix where rows correspond to observations
   #  and columns to parameters
@@ -2204,7 +2201,6 @@ assemble_bic <-
 #' fit_hier_model(xdatin,"[12,3]")
 #'
 #' @importFrom stats glm.fit na.omit splinefun
-#' @export
 fit_hier_model= function(xdatin, hiermod, bicRcap=TRUE, checkid=FALSE) {
 
   # convert hiermod to a vector of encoded parameters
@@ -2415,7 +2411,6 @@ boundary_captures = function(kcap, nlists) {
 #'z=bootstrapcal(z, nboot=2)
 #'find_unique_patterns(z$bootreplications)
 #'
-#' @export
 find_unique_patterns = function(x) {
   # find non-zeroes and convert resulting matrix to numeric
   xn = (x > 0)

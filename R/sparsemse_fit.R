@@ -206,16 +206,4 @@ estimate_population_bic <- function(
     maxorder = maxorder
   )
 }
-#' Deprecated name for \code{estimate_population_bic}
-#'
-#' @description
-#' \code{bootstrap_mse()} is deprecated. Use
-#' \code{estimate_population_bic()} instead.
-#' @param ... Arguments passed to \code{\link{estimate_population_bic}}.
-#'
-#' @return The same value as \code{estimate_population_bic()}.
-#' @export
-bootstrap_mse <- function(...) {
-  .Deprecated("estimate_population_bic")
-  estimate_population_bic(...)
-}
+
