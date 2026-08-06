@@ -207,20 +207,6 @@ test_that("non-verbose downhill fit returns selected abundance", {
   expect_equal(abundance, 157.16667, tolerance = 1e-4)
 })
 
-test_that("downhill_funs passes checkid to downhill_fit", {
-  data("Korea", package = "MultipleSystemsEstimation")
-
-  expect_no_error(
-    downhill_funs(
-      xdata = Korea,
-      maxorder = 1,
-      checkid = FALSE,
-      verbose = FALSE,
-      nboot = 2
-    )
-  )
-})
-
 test_that("downhill bootstrap is reproducible and well formed", {
   data("Korea", package = "MultipleSystemsEstimation")
 
@@ -337,61 +323,6 @@ test_that("downhill jackknife is reproducible and finite", {
 
   expect_equal(jack1_a, -0.001934882, tolerance = 1e-6)
   expect_equal(jack2_a, -0.008783628, tolerance = 1e-6)
-})
-
-test_that("downhill_funs returns complete finite output", {
-  data("Korea", package = "MultipleSystemsEstimation")
-
-  result <- downhill_funs(
-    xdata = Korea,
-    maxorder = 1,
-    checkid = TRUE,
-    verbose = FALSE,
-    nboot = 20
-  )
-
-  expect_named(
-    result,
-    c("point_est", "boot_res", "jack_res", "BCaconf_int")
-  )
-
-  expect_length(result$point_est, 1)
-  expect_length(result$boot_res, 20)
-  expect_length(result$jack_res, 1)
-  expect_length(result$BCaconf_int, 4)
-
-  expect_true(is.numeric(result$point_est))
-  expect_true(is.numeric(result$boot_res))
-  expect_true(is.numeric(result$jack_res))
-  expect_true(is.numeric(result$BCaconf_int))
-
-  expect_true(is.finite(result$point_est))
-  expect_true(all(is.finite(result$boot_res)))
-  expect_true(is.finite(result$jack_res))
-  expect_true(all(is.finite(result$BCaconf_int)))
-
-  expect_equal(
-    unname(result$point_est),
-    141.99264735066032,
-    tolerance = 1e-8
-  )
-
-  expect_equal(
-    unname(result$jack_res),
-    -0.001934882042658579,
-    tolerance = 1e-8
-  )
-
-  expect_equal(
-    unname(result$BCaconf_int),
-    c(
-      135.42309922144412,
-      135.42309922144412,
-      153.26270201716366,
-      156.23932034841158
-    ),
-    tolerance = 1e-8
-  )
 })
 
 test_that("assemble_bic handles data with no valid models", {

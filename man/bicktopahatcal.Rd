@@ -26,7 +26,6 @@ modscores = (1:nmods)
 modelorder= order(modscores)
 bicktopahatcal(z,modelorder)
 
-
 }
 \references{
 Silverman, B. W., Chan, L. and  Vincent, K., (2024).

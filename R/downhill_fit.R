@@ -31,7 +31,6 @@
 #' desmat = xdata[,1:(dim(xdata)[2]-1)]
 #' downhill_fit(counts, desmat)
 #' @importFrom stats setNames
-#'@export
 downhill_fit = function(counts, desmat, maxorder=dim(desmat)[2]-1, checkid=TRUE, niter=20,verbose=FALSE) {
   # initialise
  nlists = dim(desmat)[2]

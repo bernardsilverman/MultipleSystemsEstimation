@@ -951,8 +951,6 @@ ordercaptures <- function(zmat){
 #' count_triples(Western)
 #' count_triples(Artificial_3)
 #'
-#'@export
-
 count_triples <- function(zdat) {
 
   m = dim(zdat)[2] - 1
@@ -1168,7 +1166,6 @@ estimatepopulation <- function(...) {
 #' DiCiccio, T. J. and Efron, B. (1996). Bootstrap Confidence Intervals. \emph{Statistical Science}, \strong{40(3)}, 189-228.
 #'
 #' Efron, B. (1987). Better Bootstrap Confidence Intervals. \emph{Journal of the American Statistical Association}, \strong{82(397)}, 171-185.
-#' @export
 bcaconfvalues<-function(bootreps, popest, ahat, alpha=c(0.025, 0.05, 0.1, 0.16, 0.84, 0.9, 0.95, 0.975) ) {
   # find BCA critical values
   z0 = qnorm(mean(bootreps < popest, na.rm=TRUE))
@@ -1875,8 +1872,6 @@ ntopBCa = function(z,alpha=c(0.025, 0.05, 0.1, 0.16,0.2, 0.5, 0.8, 0.84, 0.9, 0.
 #' modelorder= order(modscores)
 #' bicktopahatcal(z,modelorder)
 #'
-#'
-#'@export
 bicktopahatcal = function(z, modelorder) {
   # set up
   nmods=length(modelorder)
@@ -2135,7 +2130,6 @@ checkident.1= function(parset, datlist) {
 #'data(Korea)
 #'assemble_bic(Korea, checkexist=TRUE)
 #'
-#'@export
 assemble_bic <-
   function(xdata,maxorder=dim(xdata)[2]-2, checkexist=TRUE, removeFRfail=TRUE, ...){
     # number of lists
@@ -2380,7 +2374,6 @@ convert_to_hierarchy = function(kcap, nlists) {
 #'zhier = unique(ancestors(zhierroots, nlists))
 #'boundary_captures(zhier,nlists)
 #'
-#' @export
 boundary_captures = function(kcap, nlists) {
   #  Here kcap is a vector of captures.  Find the captures which are not in kcap but
   #    all of whose parents are.
