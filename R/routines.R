@@ -54,7 +54,6 @@ utils::globalVariables("hiermodels")
 #'
 #' @importFrom stats as.formula
 #'
-#'@export
 
 
 buildmodel <- function(zdat, mX) {
@@ -189,7 +188,6 @@ tidy_lists <- function(zdat, includezerocounts = FALSE) {
 #' data(NewOrl)
 #' buildmodelmatrix(NewOrl, mX=NULL)
 #'
-#' @export
 
 buildmodelmatrix <- function(zdat, mX=NULL) {
   m = dim(zdat)[2] - 1
@@ -435,7 +433,6 @@ estimatepopulation.0 <-function(zdat,method="stepwise", quantiles=c(0.025,0.975)
 #'
 #' @importFrom stats glm poisson
 #'
-#' @export
 
 modelfit = function (zdat, mX = NULL, check = TRUE){
   if (check) {
@@ -515,7 +512,6 @@ modelfit = function (zdat, mX = NULL, check = TRUE){
 #'@importFrom stats ppois predict
 #'
 #'
-#'@export
 
 stepwisefit<- function(zdat, pthresh=0.02) {
   m = dim(zdat)[2] - 1
@@ -718,7 +714,6 @@ investigateAIC <- function(nsim=10000, Nsamp= 1000, seed = 1001) {
 #'checkallmodels(Artificial_3)
 #'checkallmodels(Western)
 #'
-#'@export
 
 checkallmodels <-function (zdat, nreport= 1024) {
   m = dim(zdat)[2] - 1
@@ -827,7 +822,6 @@ checkallmodels <-function (zdat, nreport= 1024) {
 #' \emph{Journal of American Statistcal Association}, \strong{116(535)}, 1297-1306,
 #' Available from \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2019.1708748}.
 #'
-#'@export
 subsetsearch <- function(n, checkfun, testnull = TRUE, ...) {
 
   #--- test the null set first
@@ -878,7 +872,6 @@ subsetsearch <- function(n, checkfun, testnull = TRUE, ...) {
 #' \emph{Journal of American Statistcal Association}, \strong{116(535)}, 1297-1306,
 #' Available from \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2019.1708748}.
 #'
-#'@export
 checkthetasubset <- function(zset, amat, tvec, nlists) {
 
   #---construct the subsetted a matrix and t vector
@@ -924,7 +917,6 @@ checkthetasubset <- function(zset, amat, tvec, nlists) {
 #' UKdat_5_cap <- UKdat_5[, 1:dim(UKdat_5)[2]-1]
 #' ordercaptures(UKdat_5_cap)
 #
-#' @export
 
 ordercaptures <- function(zmat){
   #  Given a matrix of capture histories order them first by the number of 1s and then lexicographically by columns
@@ -1977,7 +1969,6 @@ bicktopahatcal = function(z, modelorder) {
 #' z <- bootstrapcal(z, nboot = 2)
 #' subsetmat(z, ntopmodels = 5, maxorder = 2)
 #'
-#' @export
 subsetmat <- function(z,
                       ntopmodels = Inf,
                       maxorder = Inf) {
@@ -2028,7 +2019,6 @@ subsetmat <- function(z,
 #'y="[12,24,25,35,45]"
 #'modelorder(y)
 #'
-#'@export
 
 modelorder = function(x) {
   return(max(nchar(unlist(
@@ -2097,7 +2087,6 @@ get_hierarchical_models=function(nlists, maxorder=nlists-1, modelvec=hiermodels)
 #' parset ="[0,0,1]"
 #' checkident.1(parset,datlist)
 #'
-#' @export
 checkident.1= function(parset, datlist) {
   if (is.character(parset)) parset = convert_from_hierarchy(parset)
   estneginf = parset[datlist$nstar[parset] == 0]
@@ -2478,7 +2467,6 @@ find_unique_patterns = function(x) {
 #' n2=dim(z$xdata)[2]
 #' checkident.2(z$bootreplications, z$xdata[,-n2], dimnames(z$res)[[1]])
 #'
-#'@export
 checkident.2 = function(x, xcap, zmods) {
   # set up the unique patterns within x and initialise
   zu = find_unique_patterns(x)
@@ -2543,7 +2531,6 @@ checkident.2 = function(x, xcap, zmods) {
 #'z=assemble_bic(Korea)
 #'bootstrapcal(z, nboot=2, checkexist=TRUE, saveinterval=50, savefile="Koreabootresults.Rdata")
 #'
-#' @export
 bootstrapcal <- function(z,
                            nboot = 1000,
                            iseed = 1234,
@@ -2619,7 +2606,6 @@ bootstrapcal <- function(z,
 #' z=assemble_bic(Korea)
 #' jackknifecal(z,checkexist=TRUE)
 #'
-#' @export
 jackknifecal <- function(z, checkexist = TRUE) {
 
   zdat = tidy_lists(z$xdata, includezerocounts = TRUE)

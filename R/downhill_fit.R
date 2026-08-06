@@ -117,7 +117,6 @@ downhill_fit = function(counts, desmat, maxorder=dim(desmat)[2]-1, checkid=TRUE,
 #' @examples
 #' data(Korea)
 #' downhill_bootstrapcal(Korea, nboot = 2)
-#' @export
 downhill_bootstrapcal <- function(xdata, nboot = 1000, iseed = 1234,
       checkid = TRUE, verbose=FALSE, maxorder=dim(xdata)[2]-2) {
   set.seed(iseed)
@@ -155,7 +154,6 @@ downhill_bootstrapcal <- function(xdata, nboot = 1000, iseed = 1234,
 #' data(Korea)
 #' downhill_jackknifecal(Korea)
 #'
-#' @export
 downhill_jackknifecal <- function(xdata,checkid = TRUE, maxorder=dim(xdata)[2]-2) {
   xdata = tidy_lists(xdata, includezerocounts=FALSE)
   n1= dim(xdata)[1]
