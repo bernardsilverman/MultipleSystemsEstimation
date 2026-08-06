@@ -1,12 +1,12 @@
-test_that("tidylists aggregates duplicate histories and inserts zero cells", {
+test_that("tidy_lists aggregates duplicate histories and inserts zero cells", {
   x <- data.frame(
     A = c(1, 1, 0),
     B = c(0, 0, 1),
     count = c(2, 3, 4)
   )
 
-  full <- tidylists(x, includezerocounts = TRUE)
-  positive <- tidylists(x, includezerocounts = FALSE)
+  full <- tidy_lists(x, includezerocounts = TRUE)
+  positive <- tidy_lists(x, includezerocounts = FALSE)
 
   expect_equal(sum(full$count), 9)
   expect_equal(sum(positive$count), 9)
@@ -18,7 +18,7 @@ test_that("tidylists aggregates duplicate histories and inserts zero cells", {
   )
 })
 
-test_that("removenoninformativelists removes empty and universal lists", {
+test_that("remove_noninformative_lists removes empty and universal lists", {
   x <- cbind(
     empty = c(0, 0),
     universal = c(1, 1),
@@ -26,14 +26,14 @@ test_that("removenoninformativelists removes empty and universal lists", {
     count = c(3, 4)
   )
 
-  out <- removenoninformativelists(x)
+  out <- remove_noninformative_lists(x)
 
   expect_equal(ncol(out), 2)
   expect_equal(colnames(out), c("informative", "count"))
   expect_equal(out[, "count"], c(3, 4))
 })
 
-test_that("removenoninformativelists removes duplicate list columns", {
+test_that("remove_noninformative_lists removes duplicate list columns", {
   x <- cbind(
     A = c(1, 0, 1),
     Adup = c(1, 0, 1),
@@ -41,7 +41,7 @@ test_that("removenoninformativelists removes duplicate list columns", {
     count = c(2, 3, 4)
   )
 
-  out <- removenoninformativelists(x)
+  out <- remove_noninformative_lists(x)
 
   expect_equal(ncol(out), 3)
   expect_equal(out[, "count"], c(2, 3, 4))
@@ -92,7 +92,7 @@ test_that("existence and identifiability are distinguished", {
 
   expect_gt(checkident.1(parvec, ing), 0)
   expect_equal(
-    checkident(
+    check_identifiability(
       Artificial_3,
       mX = matrix(c(1, 2, 1, 3, 2, 3), nrow = 2)
     ),
@@ -142,14 +142,14 @@ test_that("jackknife NAs occur only in zero-count capture histories", {
   }
 })
 
-test_that("removenoninformativelists never removes the count column", {
+test_that("remove_noninformative_lists never removes the count column", {
   x <- cbind(
     A = c(1, 0, 1),
     B = c(0, 1, 1),
     count = c(1, 0, 1)
   )
 
-  out <- removenoninformativelists(x)
+  out <- remove_noninformative_lists(x)
 
   expect_equal(colnames(out)[ncol(out)], "count")
   expect_equal(out[, "count"], x[, "count"])

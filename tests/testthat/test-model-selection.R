@@ -110,7 +110,7 @@ test_that("maximum order one restricts Korea search to main effects", {
 
 test_that("hierarchical model filtering returns valid model strings", {
   data("hiermodels", package = "MultipleSystemsEstimation")
-  models <- gethiermodels(nlists = 3, maxorder = 2, modelvec = hiermodels)
+  models <- get_hierarchical_models(nlists = 3, maxorder = 2, modelvec = hiermodels)
 
   expect_gt(length(models), 0)
   expect_false(anyNA(models))

@@ -21,7 +21,7 @@ assemble_bic(
 
 \item{removeFRfail}{If checkexist is TRUE then models which fail the FR condition are removed from the results}
 
-\item{...}{Parameters to be fed to \code{gethiermodels}.}
+\item{...}{Parameters to be fed to \code{get_hierarchical_models}.}
 }
 \value{
 A list with the following components
@@ -29,7 +29,7 @@ A list with the following components
 \item{res}{A matrix with the models considered, their abundance, BIC and their order, sorted
  into increasing order of BIC}
   \item{xdata}{The original data matrix with capture histories and counts.}
-  \item{maxorder}{Order parameter that was feed into \code{gethiermodels}}
+  \item{maxorder}{Order parameter that was feed into \code{get_hierarchical_models}}
   }
 }
 \description{

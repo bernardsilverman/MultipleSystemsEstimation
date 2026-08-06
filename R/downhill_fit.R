@@ -122,7 +122,7 @@ downhill_bootstrapcal <- function(xdata, nboot = 1000, iseed = 1234,
       checkid = TRUE, verbose=FALSE, maxorder=dim(xdata)[2]-2) {
   set.seed(iseed)
   nlists = dim(xdata)[2] - 1
-  xdata = tidylists(xdata, includezerocounts = TRUE)
+  xdata = tidy_lists(xdata, includezerocounts = TRUE)
   countsobserved = xdata[, nlists+1]
   desmat = xdata[, 1:nlists]
   nobs = sum(countsobserved)
@@ -157,7 +157,7 @@ downhill_bootstrapcal <- function(xdata, nboot = 1000, iseed = 1234,
 #'
 #' @export
 downhill_jackknifecal <- function(xdata,checkid = TRUE, maxorder=dim(xdata)[2]-2) {
-  xdata = tidylists(xdata, includezerocounts=FALSE)
+  xdata = tidy_lists(xdata, includezerocounts=FALSE)
   n1= dim(xdata)[1]
   nlists = dim(xdata)[2] - 1
   countsobserved = xdata[, nlists+1]

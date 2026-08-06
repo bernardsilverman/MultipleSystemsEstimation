@@ -60,7 +60,7 @@ utils::globalVariables("hiermodels")
 buildmodel <- function(zdat, mX) {
   m = dim(zdat)[2] - 1
   #Recover the data matrix with combination of lists which have count zero
-  zdfull = tidylists(zdat, includezerocounts = TRUE)
+  zdfull = tidy_lists(zdat, includezerocounts = TRUE)
   vn = dimnames(zdfull)[[2]]
   #count
   cn = vn[m+1]
@@ -121,10 +121,10 @@ buildmodel <- function(zdat, mX) {
 #'
 #' @examples
 #' data(NewOrl)
-#' tidylists(NewOrl,includezerocounts=TRUE)
+#' tidy_lists(NewOrl,includezerocounts=TRUE)
 #'
 #'@export
-tidylists <- function(zdat, includezerocounts = FALSE) {
+tidy_lists <- function(zdat, includezerocounts = FALSE) {
   zdat = as.matrix(zdat)
   m = dim(zdat)[2] - 1
   # ----construct full capture history matrix
@@ -159,7 +159,7 @@ tidylists <- function(zdat, includezerocounts = FALSE) {
 
 #' Build the model matrix based on particular data, as required to check for identifiability and existence of the maximum likelihood estimate
 #'
-#' This routine builds a model matrix as required by the linear program check \code{\link{checkident}} and checks if the matrix is of full rank.
+#' This routine builds a model matrix as required by the linear program check \code{\link{check_identifiability}} and checks if the matrix is of full rank.
 #'  In addition, for each individual list, and for each pair of lists included in the model,
 #'   it returns the total count of individuals appearing on the specific list or lists whether or not in combination with other lists.
 #'
@@ -194,7 +194,7 @@ tidylists <- function(zdat, includezerocounts = FALSE) {
 buildmodelmatrix <- function(zdat, mX=NULL) {
   m = dim(zdat)[2] - 1
   #Recover the data matrix
-  zdfull = tidylists(zdat, includezerocounts =TRUE)
+  zdfull = tidy_lists(zdat, includezerocounts =TRUE)
   if (length(mX)==0) { mX= matrix(nrow=2,ncol=0)
   }
   else {
@@ -286,16 +286,16 @@ buildmodelmatrix <- function(zdat, mX=NULL) {
 #' m=dim(Artificial_3)[2]-1
 #' mX = t(expand.grid(1:m, 1:m)); mX = mX[ , mX[1,]<mX[2,]]
 #' # When the model is not identifiable
-#' checkident(Artificial_3,mX=mX, verbose=TRUE)
+#' check_identifiability(Artificial_3,mX=mX, verbose=TRUE)
 #' # When the maximum likelihood estimate does not exist
-#' checkident(Artificial_3, mX=mX[,1],verbose=TRUE)
+#' check_identifiability(Artificial_3, mX=mX[,1],verbose=TRUE)
 #' #Model passes both tests
-#' checkident(Artificial_3, mX=mX[,2:3],verbose=TRUE)
+#' check_identifiability(Artificial_3, mX=mX[,2:3],verbose=TRUE)
 #'
 #' @export
 #'
 
-checkident <- function(zdat, mX=0, verbose=FALSE)
+check_identifiability <- function(zdat, mX=0, verbose=FALSE)
 {
   #---use LP to check if ML estimate exists
   #--- construct model matrix
@@ -415,7 +415,7 @@ estimatepopulation.0 <-function(zdat,method="stepwise", quantiles=c(0.025,0.975)
 #' for the parameter corresponding to lists 1 and 3.
 #'
 #' @param check If \code{check = TRUE} check first of all if the maximum likelihood
-#' estimate exists and is identifiable, using the routine \code{\link{checkident}}.  If either condition fails, print an appropriate error message
+#' estimate exists and is identifiable, using the routine \code{\link{check_identifiability}}.  If either condition fails, print an appropriate error message
 #' and return the error code.
 #'
 #'
@@ -439,7 +439,7 @@ estimatepopulation.0 <-function(zdat,method="stepwise", quantiles=c(0.025,0.975)
 
 modelfit = function (zdat, mX = NULL, check = TRUE){
   if (check) {
-    zcheck = checkident(zdat, mX, verbose = TRUE)
+    zcheck = check_identifiability(zdat, mX, verbose = TRUE)
     if (zcheck$ierr > 0)
       return(zcheck$ierr)
   }
@@ -481,7 +481,7 @@ modelfit = function (zdat, mX = NULL, check = TRUE){
 #'
 #'Starting with a model with main effects only, two-list parameters are added one by one.
 #'At each stage the parameter with the lowest p-value is added, provided that p-value is lower than \code{pthresh}, and provided that the resulting
-#' model does not fail either of the tests in \code{\link{checkident}}.
+#' model does not fail either of the tests in \code{\link{check_identifiability}}.
 #'
 #' For each candidate two-list parameter for possible addition to the model, the p-value is calculated as follows.
 #' The total of cases occurring on both lists indexed by the parameter (regardless of
@@ -521,7 +521,7 @@ stepwisefit<- function(zdat, pthresh=0.02) {
   m = dim(zdat)[2] - 1
   ierrfullmodel=NA
   if (pthresh == 1){
-    ierrfullmodel = checkident(zdat, mX=0)}
+    ierrfullmodel = check_identifiability(zdat, mX=0)}
   if ((pthresh==1) & (ierrfullmodel==0)) {
     zfit=modelfit(zdat,mX=0, check=FALSE)
   } else if(pthresh == 0){
@@ -552,7 +552,7 @@ stepwisefit<- function(zdat, pthresh=0.02) {
           pvalnew[j] = min( ppois(nstar[j],pstar), ppois(nstar[j]-1, pstar, FALSE) )
           #----- test the potential model and set the p-value to 1 if the model
           #---      would yield an infinite result or be non-identifiable
-          ierr = checkident(zdat, cbind(mX, ints[,j]))
+          ierr = check_identifiability(zdat, cbind(mX, ints[,j]))
           if (ierr > 0) pvalnew[j] = 1
         }
       }
@@ -724,7 +724,7 @@ checkallmodels <-function (zdat, nreport= 1024) {
   m = dim(zdat)[2] - 1
   if (count_triples(zdat) ==0) cat("The model including all two-list parameters is not identifiable. \n")
   varnames = dimnames(zdat)[[2]][1:m]
-  zdfull = tidylists(zdat, includezerocounts = TRUE)
+  zdfull = tidy_lists(zdat, includezerocounts = TRUE)
   Omegamat = zdfull[, 1:m]
   Countobserved = zdfull[, m+1]
   #--------construct parameter set as capture histories
@@ -1217,7 +1217,7 @@ bcaconfvalues<-function(bootreps, popest, ahat, alpha=c(0.025, 0.05, 0.1, 0.16, 
 #' @param alpha bootstrap quantiles of interests.
 #'
 #' @param noninformativelist  if \code{noninformativelist=TRUE} then each generated data set in the simulation study (including all bootstrap replications)
-#'     will be passed to \code{\link{removenoninformativelists}}.
+#'     will be passed to \code{\link{remove_noninformative_lists}}.
 #'
 #' @param verbose If \code{verbose=FALSE}, then the progress of the simulation will not show.
 #' If \code{verbose=TRUE}, then the progress of the simulation will be shown.
@@ -1292,7 +1292,7 @@ BICandbootstrapsim <- function(zdat, nsims=1000,nboot=100,pthresh=0.02, iseed=12
     simreps[,j] = rmultinom(1,nobs,predfreq)
     # find the BIC estimates at the same time
     zdatsim = cbind(modelmat, simreps[,j])
-    if (noninformativelist) zdatsim=removenoninformativelists(zdatsim)
+    if (noninformativelist) zdatsim=remove_noninformative_lists(zdatsim)
     zallres=Rcapture::closedpMS.t(zdatsim, dfreq=TRUE,maxorder=2)
     zr = zallres$results
     indmin = which.min(zr[, 7])
@@ -1310,7 +1310,7 @@ BICandbootstrapsim <- function(zdat, nsims=1000,nboot=100,pthresh=0.02, iseed=12
   for (j in (1:nsims)) {
     count = simreps[,j]
     zdatsim = cbind(modelmat, count)
-    if (noninformativelist) zdatsim=removenoninformativelists(zdatsim)
+    if (noninformativelist) zdatsim=remove_noninformative_lists(zdatsim)
     bootoutput = estimatepopulation(zdatsim, nboot=nboot, alpha=alpha, pthresh=pthresh)
     popests[j]=bootoutput$popest
     bootCIs[j,] = bootoutput$BCaquantiles
@@ -1339,7 +1339,7 @@ BICandbootstrapsim <- function(zdat, nsims=1000,nboot=100,pthresh=0.02, iseed=12
 #' Available from \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2019.1708748}.
 #'
 #' @export
-removenoninformativelists <- function(zdat) {
+remove_noninformative_lists <- function(zdat) {
   zdat <- as.matrix(zdat)
 
   m2 <- ncol(zdat)
@@ -2055,13 +2055,13 @@ modelorder = function(x) {
 #' @examples
 #' data(hiermodels)
 #' # Five lists with maximum order of 4
-#' gethiermodels(nlists=5,maxorder=4)
+#' get_hierarchical_models(nlists=5,maxorder=4)
 #' # Five lists with maximum order of 2
-#' gethiermodels(nlists=5, maxorder=2)
+#' get_hierarchical_models(nlists=5, maxorder=2)
 #'
 #'@importFrom stats glm.fit na.omit splinefun
 #'@export
-gethiermodels=function(nlists, maxorder=nlists-1, modelvec=hiermodels){
+get_hierarchical_models=function(nlists, maxorder=nlists-1, modelvec=hiermodels){
   # define extraction functions
   model_order = function(x) max(nchar(unlist(strsplit(gsub("\\[|\\]", "", x), ","))))
   nlistfind = function(x) {
@@ -2130,14 +2130,14 @@ checkident.1= function(parset, datlist) {
 #'@param maxorder Maximum order of models to be included
 #'@param checkexist If TRUE then the Fienberg-Rinaldo condition is checked for each model
 #'@param removeFRfail If checkexist is TRUE then models which fail the FR condition are removed from the results
-#' @param ... Parameters to be fed to \code{gethiermodels}.
+#' @param ... Parameters to be fed to \code{get_hierarchical_models}.
 #'
 #'@return A list with the following components
 #'\describe{
 #' \item{res}{A matrix with the models considered, their abundance, BIC and their order, sorted
 #'  into increasing order of BIC}
 #'   \item{xdata}{The original data matrix with capture histories and counts.}
-#'   \item{maxorder}{Order parameter that was feed into \code{gethiermodels}}
+#'   \item{maxorder}{Order parameter that was feed into \code{get_hierarchical_models}}
 #'   }
 #'
 #'
@@ -2151,7 +2151,7 @@ assemble_bic <-
   function(xdata,maxorder=dim(xdata)[2]-2, checkexist=TRUE, removeFRfail=TRUE, ...){
     # number of lists
     nlists=dim(xdata)[2]-1
-    hiermodels_cons=gethiermodels(nlists,maxorder=maxorder, modelvec=hiermodels)
+    hiermodels_cons=get_hierarchical_models(nlists,maxorder=maxorder, modelvec=hiermodels)
     # Use ingest data for fit_hier_model
     ing_dat= ingest_data(xdata)
     #Obtain fit for each considered hierarchical model
@@ -2551,7 +2551,7 @@ bootstrapcal <- function(z,
                            saveinterval = Inf,
                            savefile = "bootout.Rdata") {
   set.seed(iseed)
-  zdat = tidylists(z$xdata, includezerocounts = TRUE)
+  zdat = tidy_lists(z$xdata, includezerocounts = TRUE)
   n1 = dim(zdat)[1]
   n2 = dim(zdat)[2]
   countsobserved = zdat[, n2]
@@ -2622,7 +2622,7 @@ bootstrapcal <- function(z,
 #' @export
 jackknifecal <- function(z, checkexist = TRUE) {
 
-  zdat = tidylists(z$xdata, includezerocounts = TRUE)
+  zdat = tidy_lists(z$xdata, includezerocounts = TRUE)
   n1 = dim(zdat)[1]
   n2 = dim(zdat)[2]
   countsobserved = zdat[, n2]

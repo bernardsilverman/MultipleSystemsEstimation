@@ -21,10 +21,10 @@
 #' Artificial data set to demonstrate possible instabilities
 #'
 #' This is a simple data set based on three lists, which gives examples of models that
-#'  fail on one or the other of the criteria tested by \code{\link{checkident}}. This is Table 2 in Chan, Silverman and Vincent (2021).
+#'  fail on one or the other of the criteria tested by \code{\link{check_identifiability}}. This is Table 2 in Chan, Silverman and Vincent (2021).
 #'
 #' If all three two-list effects are included in the fitted model then the linear program
-#' in \code{\link{checkident}} yields a strictly positive value but the matrix A is not of full column rank, so the parameters are not identifiable.
+#' in \code{\link{check_identifiability}} yields a strictly positive value but the matrix A is not of full column rank, so the parameters are not identifiable.
 #' If the model contains AB either alone or in conjunction with one of AC and BC, then the linear program result is zero, so the MLE does not exist.
 #' If only main effects are considered, or if either or both of AC and BC, but not AB are included,
 #' then the model passes both tests.

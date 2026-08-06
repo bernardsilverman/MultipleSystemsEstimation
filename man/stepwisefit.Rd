@@ -30,7 +30,7 @@ A list with components as below
 \description{
 Starting with a model with main effects only, two-list parameters are added one by one.
 At each stage the parameter with the lowest p-value is added, provided that p-value is lower than \code{pthresh}, and provided that the resulting
-model does not fail either of the tests in \code{\link{checkident}}.
+model does not fail either of the tests in \code{\link{check_identifiability}}.
 }
 \details{
 For each candidate two-list parameter for possible addition to the model, the p-value is calculated as follows.

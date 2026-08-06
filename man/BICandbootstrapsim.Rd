@@ -34,7 +34,7 @@ it is assumed that it has zero count.}
 \item{alpha}{bootstrap quantiles of interests.}
 
 \item{noninformativelist}{if \code{noninformativelist=TRUE} then each generated data set in the simulation study (including all bootstrap replications)
-will be passed to \code{\link{removenoninformativelists}}.}
+will be passed to \code{\link{remove_noninformative_lists}}.}
 
 \item{verbose}{If \code{verbose=FALSE}, then the progress of the simulation will not show.
 If \code{verbose=TRUE}, then the progress of the simulation will be shown.}

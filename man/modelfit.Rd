@@ -21,7 +21,7 @@ If only one two-list parameter is to be fitted, it may be specified as a vector 
 for the parameter corresponding to lists 1 and 3.}
 
 \item{check}{If \code{check = TRUE} check first of all if the maximum likelihood
-estimate exists and is identifiable, using the routine \code{\link{checkident}}.  If either condition fails, print an appropriate error message
+estimate exists and is identifiable, using the routine \code{\link{check_identifiability}}.  If either condition fails, print an appropriate error message
 and return the error code.}
 }
 \value{

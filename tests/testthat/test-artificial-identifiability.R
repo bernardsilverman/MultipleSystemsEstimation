@@ -7,14 +7,14 @@ test_that("Artificial_3 reproduces the published existence and identifiability c
     2, 3   # BC
   ), nrow = 2)
 
-  expect_equal(checkident(Artificial_3, mX = NULL), 0)
-  expect_equal(checkident(Artificial_3, mX = pairs[, 1]), 1)
-  expect_equal(checkident(Artificial_3, mX = pairs[, 2]), 0)
-  expect_equal(checkident(Artificial_3, mX = pairs[, 3]), 0)
-  expect_equal(checkident(Artificial_3, mX = pairs[, c(1, 2)]), 1)
-  expect_equal(checkident(Artificial_3, mX = pairs[, c(1, 3)]), 1)
-  expect_equal(checkident(Artificial_3, mX = pairs[, c(2, 3)]), 0)
-  expect_equal(checkident(Artificial_3, mX = pairs), 2)
+  expect_equal(check_identifiability(Artificial_3, mX = NULL), 0)
+  expect_equal(check_identifiability(Artificial_3, mX = pairs[, 1]), 1)
+  expect_equal(check_identifiability(Artificial_3, mX = pairs[, 2]), 0)
+  expect_equal(check_identifiability(Artificial_3, mX = pairs[, 3]), 0)
+  expect_equal(check_identifiability(Artificial_3, mX = pairs[, c(1, 2)]), 1)
+  expect_equal(check_identifiability(Artificial_3, mX = pairs[, c(1, 3)]), 1)
+  expect_equal(check_identifiability(Artificial_3, mX = pairs[, c(2, 3)]), 0)
+  expect_equal(check_identifiability(Artificial_3, mX = pairs), 2)
 })
 
 test_that("the general hierarchical existence check agrees on Artificial_3", {

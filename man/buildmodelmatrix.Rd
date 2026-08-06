@@ -30,7 +30,7 @@ A list with components as below
 \code{rankdef} The column rank deficiency of the matrix \code{modmat}. If \code{rankdef = 0}, the matrix has full column rank.
 }
 \description{
-This routine builds a model matrix as required by the linear program check \code{\link{checkident}} and checks if the matrix is of full rank.
+This routine builds a model matrix as required by the linear program check \code{\link{check_identifiability}} and checks if the matrix is of full rank.
  In addition, for each individual list, and for each pair of lists included in the model,
   it returns the total count of individuals appearing on the specific list or lists whether or not in combination with other lists.
 }
