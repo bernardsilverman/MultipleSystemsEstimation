@@ -28,10 +28,9 @@
 #' is then performed.
 #'
 #' @param nboot Non-negative integer giving the number of bootstrap
-#' replications.
-#' Setting \code{nboot = 0} returns all original-data model fits allowed by
-#' \code{maxorder}, ordered by BIC, without carrying out model subsetting,
-#' bootstrap or jackknife calculations.
+#' replications. If \code{nboot = 0}, the best-BIC population estimate and
+#' model are returned together with the complete original-data BIC
+#' enumeration, but no bootstrap or jackknife calculations are performed.
 #'
 #' @param iseed Integer seed used to initialise the random-number generator.
 #' The default is 1234.
@@ -44,9 +43,6 @@
 #' This routine implements the bootstrap procedure described by Silverman,
 #' Chan and Vincent (2024). Hierarchical log-linear models are fitted to the
 #' observed data and ordered by increasing BIC.
-#'
-#' Setting \code{nboot = 0} returns the retained original-data model fits,
-#' ordered by BIC, without carrying out bootstrap or jackknife calculations.
 #'
 #' If \code{nboot > 0}, multinomial bootstrap samples are generated and the
 #' BIC model-selection procedure is repeated for each bootstrap sample.
@@ -72,27 +68,33 @@
 #' only for checking that the routine runs. A substantially larger number of
 #' bootstrap replications should be used for substantive inference.
 #'
-#' @return
-#' If \code{nboot = 0}, a list with components:
+#' @return A list with components:
 #' \describe{
-#'   \item{\code{res}}{A matrix containing the abundance estimate, BIC and
-#'   model order for each model allowed by \code{maxorder}, ordered by BIC.}
-#'   \item{\code{xdata}}{The ingested capture-history data used in fitting.}
-#'   \item{\code{maxorder}}{The effective maximum interaction order.}
+#'   \item{\code{popest}}{The population-size estimate from the model with
+#'   the smallest BIC on the original data.}
+#'   \item{\code{model}}{The hierarchical model with the smallest BIC on
+#'   the original data.}
+#'   \item{\code{BIC}}{The BIC value of the selected model.}
+#'   \item{\code{bic_results}}{The complete result of the original-data BIC
+#'   enumeration, including all models allowed by \code{maxorder}, ordered
+#'   by BIC.}
+#'   \item{\code{BCaquantiles}}{The BCa confidence-limit results returned
+#'   by \code{\link{ntopBCa}} when \code{nboot > 0}, and \code{NULL} when
+#'   \code{nboot = 0}.}
 #' }
 #'
-#' If \code{nboot > 0}, the object returned by \code{\link{ntopBCa}},
-#' containing BCa inference based on repeated BIC model selection, viz.
-#' a numeric matrix of BCa confidence limits. The columns correspond
-#' to the cumulative probability levels supplied in \code{alpha}. The
-#' retained models are ordered by increasing BIC for the original data.
-#' Row \eqn{k} gives the confidence limits obtained when model selection
-#' within each bootstrap replication is restricted to the first \eqn{k}
-#' models in this ordering. Thus, the first row uses only the best-BIC model,
-#' the second row allows selection between the best two models, and the final
-#' row allows selection among all retained models. The row name identifies
-#' the model added when moving from \eqn{k-1} to \eqn{k} candidate models.
-#'
+#' When \code{nboot > 0}, the \code{BCaquantiles} component contains the
+#' object returned by \code{\link{ntopBCa}}, giving BCa inference based on
+#' repeated BIC model selection. This is a numeric matrix of BCa confidence
+#' limits. The columns correspond to the cumulative probability levels
+#' supplied in \code{alpha}. The retained models are ordered by increasing
+#' BIC for the original data. Row \eqn{k} gives the confidence limits obtained
+#' when model selection within each bootstrap replication is restricted to
+#' the first \eqn{k} models in this ordering. Thus, the first row uses only
+#' the best-BIC model, the second row allows selection between the best two
+#' models, and the final row allows selection among all retained models. The
+#' row name identifies the model added when moving from \eqn{k-1} to
+#' \eqn{k} candidate models.
 #'
 #' @references
 #' Silverman, B. W., Chan, L. and Vincent, K. (2024).
@@ -173,16 +175,28 @@ estimate_population_bic <- function(
     )
   }
 
-  # Fit all models allowed by maxorder.
-  z <- assemble_bic(
+  # Fit all models allowed by maxorder and rank them by BIC.
+  bic_results <- assemble_bic(
     zdat,
     maxorder = maxorder,
     checkexist = TRUE
   )
 
-  # ntopmodels is irrelevant when no bootstrap inference is requested.
+  # The first row is the best-BIC model.
+  popest <- unname(bic_results$res[1L, "abundance"])
+  model <- rownames(bic_results$res)[1L]
+  BIC <- unname(bic_results$res[1L, "BIC"])
+
+  # If no bootstrap inference is requested, return the point estimate
+  # together with the complete original-data BIC enumeration.
   if (nboot == 0L) {
-    return(z)
+    return(list(
+      popest = popest,
+      model = model,
+      BIC = BIC,
+      bic_results = bic_results,
+      BCaquantiles = NULL
+    ))
   }
 
   # Restrict the model set used in bootstrap inference.
@@ -198,7 +212,7 @@ estimate_population_bic <- function(
   }
 
   z <- subsetmat(
-    z,
+    bic_results,
     ntopmodels = ntopmodels,
     maxorder = maxorder
   )
@@ -215,10 +229,17 @@ estimate_population_bic <- function(
     checkexist = TRUE
   )
 
-  ntopBCa(
+  BCaquantiles <- ntopBCa(
     z,
     alpha = alpha,
     maxorder = maxorder
   )
-}
 
+  list(
+    popest = popest,
+    model = model,
+    BIC = BIC,
+    bic_results = bic_results,
+    BCaquantiles = BCaquantiles
+  )
+}

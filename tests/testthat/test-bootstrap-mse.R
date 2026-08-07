@@ -1,14 +1,17 @@
-test_that("estimate_population_bic returns a matrix of confidence limits", {
+test_that("estimate_population_bic returns BCa confidence limits", {
   result <- estimate_population_bic(Korea, nboot = 2)
 
-  expect_true(is.matrix(result))
-  expect_type(result, "double")
-  expect_equal(ncol(result), 4L)
+  expect_type(result, "list")
+  expect_true(is.matrix(result$BCaquantiles))
+  expect_type(result$BCaquantiles, "double")
+  expect_equal(ncol(result$BCaquantiles), 4L)
+
   expect_identical(
-    colnames(result),
+    colnames(result$BCaquantiles),
     c("0.025", "0.1", "0.9", "0.975")
   )
-  expect_true(!is.null(rownames(result)))
+
+  expect_true(!is.null(rownames(result$BCaquantiles)))
 })
 
 test_that("ntopBCa returns the documented structures", {
@@ -37,12 +40,14 @@ test_that("BIC estimation supports no-bootstrap fitting", {
     nboot = 0
   )
 
-  expect_named(result, c("res", "xdata", "maxorder"))
-  expect_true(is.matrix(result$res))
-  expect_true(all(c("abundance", "BIC", "modelsorder") %in%
-                    colnames(result$res)))
-  expect_true(all(is.finite(result$res[, "abundance"])))
-  expect_true(all(is.finite(result$res[, "BIC"])))
+  expect_true(
+    all(
+      c("abundance", "BIC", "modelsorder") %in%
+        colnames(result$bic_results$res)
+    )
+  )
+  expect_true(all(is.finite(result$bic_results$res[, "abundance"])))
+  expect_true(all(is.finite(result$bic_results$res[, "BIC"])))
 })
 
 test_that("BIC estimation validates nboot", {
@@ -71,15 +76,11 @@ test_that("stepwise estimation defaults to no bootstrap", {
 })
 
 test_that("BIC estimation uses the common alpha defaults", {
-  result <- estimate_population_bic(
-    Korea,
-    nboot = 10,
-    iseed = 1234
-  )
+  result <- estimate_population_bic(Korea, nboot = 10)
 
-  expect_true(is.matrix(result))
+  expect_true(is.matrix(result$BCaquantiles))
   expect_equal(
-    colnames(result),
+    colnames(result$BCaquantiles),
     c("0.025", "0.1", "0.9", "0.975")
   )
 })
@@ -99,7 +100,7 @@ test_that("six-list automatic maxorder is 2", {
     "32,768"
   )
 
-  expect_equal(out$maxorder, 2L)
+  expect_equal(out$bic_results$maxorder, 2L)
 })
 
 test_that("ntopmodels has no effect when nboot is zero", {
@@ -163,7 +164,25 @@ test_that("six-list maxorder above 2 is reduced with a warning", {
 
   expect_true(any(grepl("reduced from 3 to 2", warnings, fixed = TRUE)))
   expect_true(any(grepl("32,768", warnings, fixed = TRUE)))
-  expect_equal(out$maxorder, 2L)
+  expect_equal(out$bic_results$maxorder, 2L)
+})
+
+test_that("BIC estimation returns the best-BIC point estimate", {
+  out <- estimate_population_bic(Korea, nboot = 0)
+
+  expect_equal(out$popest, out$bic_results$res[1L, "abundance"])
+  expect_identical(out$model, rownames(out$bic_results$res)[1L])
+  expect_equal(out$BIC, out$bic_results$res[1L, "BIC"])
+  expect_null(out$BCaquantiles)
+})
+
+test_that("BIC point estimate is returned whether or not bootstrap is requested", {
+  out0 <- estimate_population_bic(Korea, nboot = 0)
+  out1 <- estimate_population_bic(Korea, nboot = 10)
+
+  expect_equal(out1$popest, out0$popest)
+  expect_identical(out1$model, out0$model)
+  expect_equal(out1$BIC, out0$BIC)
 })
 
 

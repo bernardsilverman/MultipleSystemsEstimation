@@ -93,9 +93,9 @@ estimate_population <- function(
     stop("`zdat` must be a matrix or data frame.", call. = FALSE)
   }
 
-  if (ncol(zdat) < 2L) {
+  if (ncol(zdat) < 3L) {
     stop(
-      "`zdat` must contain at least one list column and a count column.",
+      "`zdat` must contain at least two list columns and a count column.",
       call. = FALSE
     )
   }

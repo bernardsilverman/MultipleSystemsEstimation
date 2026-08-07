@@ -63,8 +63,8 @@ test_that("estimate_population validates zdat", {
   )
 
   expect_error(
-    estimate_population(matrix(1, nrow = 1, ncol = 1)),
-    "at least one list column"
+    estimate_population(matrix(1, nrow = 1, ncol = 2)),
+    "at least two list columns"
   )
 })
 

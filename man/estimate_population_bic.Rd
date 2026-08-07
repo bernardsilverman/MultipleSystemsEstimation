@@ -21,10 +21,9 @@ number of cases having each capture history. Capture histories not
 explicitly included in the data are assumed to have zero count.}
 
 \item{nboot}{Non-negative integer giving the number of bootstrap
-replications.
-Setting \code{nboot = 0} returns all original-data model fits allowed by
-\code{maxorder}, ordered by BIC, without carrying out model subsetting,
-bootstrap or jackknife calculations.}
+replications. If \code{nboot = 0}, the best-BIC population estimate and
+model are returned together with the complete original-data BIC
+enumeration, but no bootstrap or jackknife calculations are performed.}
 
 \item{iseed}{Integer seed used to initialise the random-number generator.
 The default is 1234.}
@@ -46,25 +45,33 @@ argument is irrelevant when \code{nboot = 0}, because no model subsetting
 is then performed.}
 }
 \value{
-If \code{nboot = 0}, a list with components:
+A list with components:
 \describe{
-  \item{\code{res}}{A matrix containing the abundance estimate, BIC and
-  model order for each model allowed by \code{maxorder}, ordered by BIC.}
-  \item{\code{xdata}}{The ingested capture-history data used in fitting.}
-  \item{\code{maxorder}}{The effective maximum interaction order.}
+  \item{\code{popest}}{The population-size estimate from the model with
+  the smallest BIC on the original data.}
+  \item{\code{model}}{The hierarchical model with the smallest BIC on
+  the original data.}
+  \item{\code{BIC}}{The BIC value of the selected model.}
+  \item{\code{bic_results}}{The complete result of the original-data BIC
+  enumeration, including all models allowed by \code{maxorder}, ordered
+  by BIC.}
+  \item{\code{BCaquantiles}}{The BCa confidence-limit results returned
+  by \code{\link{ntopBCa}} when \code{nboot > 0}, and \code{NULL} when
+  \code{nboot = 0}.}
 }
 
-If \code{nboot > 0}, the object returned by \code{\link{ntopBCa}},
-containing BCa inference based on repeated BIC model selection, viz.
-a numeric matrix of BCa confidence limits. The columns correspond
-to the cumulative probability levels supplied in \code{alpha}. The
-retained models are ordered by increasing BIC for the original data.
-Row \eqn{k} gives the confidence limits obtained when model selection
-within each bootstrap replication is restricted to the first \eqn{k}
-models in this ordering. Thus, the first row uses only the best-BIC model,
-the second row allows selection between the best two models, and the final
-row allows selection among all retained models. The row name identifies
-the model added when moving from \eqn{k-1} to \eqn{k} candidate models.
+When \code{nboot > 0}, the \code{BCaquantiles} component contains the
+object returned by \code{\link{ntopBCa}}, giving BCa inference based on
+repeated BIC model selection. This is a numeric matrix of BCa confidence
+limits. The columns correspond to the cumulative probability levels
+supplied in \code{alpha}. The retained models are ordered by increasing
+BIC for the original data. Row \eqn{k} gives the confidence limits obtained
+when model selection within each bootstrap replication is restricted to
+the first \eqn{k} models in this ordering. Thus, the first row uses only
+the best-BIC model, the second row allows selection between the best two
+models, and the final row allows selection among all retained models. The
+row name identifies the model added when moving from \eqn{k-1} to
+\eqn{k} candidate models.
 }
 \description{
 Constructs BCa confidence limits for population size while allowing for
@@ -81,9 +88,6 @@ sets of top-BIC models.
 This routine implements the bootstrap procedure described by Silverman,
 Chan and Vincent (2024). Hierarchical log-linear models are fitted to the
 observed data and ordered by increasing BIC.
-
-Setting \code{nboot = 0} returns the retained original-data model fits,
-ordered by BIC, without carrying out bootstrap or jackknife calculations.
 
 If \code{nboot > 0}, multinomial bootstrap samples are generated and the
 BIC model-selection procedure is repeated for each bootstrap sample.
