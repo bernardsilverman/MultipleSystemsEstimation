@@ -96,9 +96,6 @@ boundary are handled by that fitting routine.
 If neither \code{hiermod} nor \code{mX} is supplied, the main-effects
 model is used. If both are supplied, the routine stops with an error.
 
-Setting \code{nboot = 0} returns the point estimate and fitted model
-without bootstrap inference.
-
 If \code{nboot > 0}, multinomial bootstrap samples are generated from the
 observed capture-history counts. The same fixed hierarchical model is
 fitted to every bootstrap sample. Unlike

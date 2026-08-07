@@ -997,9 +997,6 @@ count_triples <- function(zdat) {
 #' The stepwise model-selection procedure is first applied to the observed
 #' data to obtain the point estimate and fitted model.
 #'
-#' Setting \code{nboot = 0} provides the stepwise point estimate and fitted
-#' model without bootstrap inference.
-#'
 #' If \code{nboot > 0}, multinomial bootstrap samples are generated from the
 #' observed capture-history counts. The complete stepwise model-selection
 #' procedure is repeated for each bootstrap sample, so the resulting
@@ -2689,9 +2686,6 @@ jackknifecal <- function(z, checkexist = TRUE) {
 #' If neither \code{hiermod} nor \code{mX} is supplied, the main-effects
 #' model is used. If both are supplied, the routine stops with an error.
 #'
-#' Setting \code{nboot = 0} returns the point estimate and fitted model
-#' without bootstrap inference.
-#'
 #' If \code{nboot > 0}, multinomial bootstrap samples are generated from the
 #' observed capture-history counts. The same fixed hierarchical model is
 #' fitted to every bootstrap sample. Unlike
@@ -2768,7 +2762,6 @@ jackknifecal <- function(z, checkexist = TRUE) {
 #' )
 #'
 #' @export
-
 estimate_population_fixed <- function(
     zdat,
     hiermod = NULL,
