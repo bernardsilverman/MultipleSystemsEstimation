@@ -6,10 +6,11 @@
 \usage{
 estimate_population_bic(
   zdat,
-  maxorder = dim(zdat)[2] - 2,
   nboot = 0,
   iseed = 1234,
-  alpha = c(0.025, 0.1, 0.9, 0.975)
+  alpha = c(0.025, 0.1, 0.9, 0.975),
+  maxorder = NULL,
+  ntopmodels = NULL
 )
 }
 \arguments{
@@ -19,16 +20,11 @@ defining the observed capture histories. The final column contains the
 number of cases having each capture history. Capture histories not
 explicitly included in the data are assumed to have zero count.}
 
-\item{maxorder}{Maximum interaction order permitted in the hierarchical
-log-linear models considered. The default is one less than the number of
-lists. For six-list data, only models with interactions of order at most 2
-are available. If a larger value is supplied, it is reduced to 2 with a
-warning.}
-
 \item{nboot}{Non-negative integer giving the number of bootstrap
-replications. If \code{nboot = 0}, only the original-data BIC model fits
-are returned and no bootstrap or jackknife calculations are performed.
-The default is 0.}
+replications.
+Setting \code{nboot = 0} returns all original-data model fits allowed by
+\code{maxorder}, ordered by BIC, without carrying out model subsetting,
+bootstrap or jackknife calculations.}
 
 \item{iseed}{Integer seed used to initialise the random-number generator.
 The default is 1234.}
@@ -36,12 +32,24 @@ The default is 1234.}
 \item{alpha}{Numeric vector of cumulative probability levels at which the
 BCa confidence limits are to be evaluated. The default is
 \code{c(0.025, 0.1, 0.9, 0.975)}.}
+
+\item{maxorder}{Maximum order of interaction to include in the
+hierarchical models considered. If \code{NULL}, an automatic choice is
+made according to the number of lists: 1 for two lists, 2 for three
+lists, 3 for four or five lists, and 2 for six lists.}
+
+\item{ntopmodels}{Number of models, ranked by BIC on the original data,
+to retain for bootstrap inference. If \code{NULL}, an automatic choice is
+made when \code{nboot > 0}: all available models for two or three lists,
+20 models for four lists, and 100 models for five or six lists. This
+argument is irrelevant when \code{nboot = 0}, because no model subsetting
+is then performed.}
 }
 \value{
 If \code{nboot = 0}, a list with components:
 \describe{
   \item{\code{res}}{A matrix containing the abundance estimate, BIC and
-  model order for each retained model, ordered by BIC.}
+  model order for each model allowed by \code{maxorder}, ordered by BIC.}
   \item{\code{xdata}}{The ingested capture-history data used in fitting.}
   \item{\code{maxorder}}{The effective maximum interaction order.}
 }
@@ -63,10 +71,11 @@ Constructs BCa confidence limits for population size while allowing for
 uncertainty arising from BIC-based model selection.
 }
 \details{
-The routine enumerates the available hierarchical log-linear models,
-ranks them by BIC, retains a specified number of the best-ranked models,
-carries out bootstrap and jackknife calculations, and then evaluates the
-resulting BCa confidence limits for nested sets of top-BIC models.
+The routine enumerates the available hierarchical log-linear models and
+ranks them by BIC. If bootstrap inference is requested, a specified number
+of the best-ranked models is retained for bootstrap and jackknife
+calculations, after which BCa confidence limits are evaluated for nested
+sets of top-BIC models.
 
 
 This routine implements the bootstrap procedure described by Silverman,
@@ -81,20 +90,20 @@ BIC model-selection procedure is repeated for each bootstrap sample.
 Bootstrap model selection is
 then repeated within nested sets of the best-ranked models.
 
-For up to three lists, all available models are retained. For four-list
-data, the 20 models with the smallest BIC values are retained. For
-five-list data, the 100 models with the smallest BIC values are retained.
-For six-list data, only pairwise-interaction models are available and the
-100 models with the smallest BIC values are retained.
+With the default settings, all available models are retained for bootstrap
+inference for two- and three-list data. For four-list data, the 20 models
+with the smallest BIC values are retained, and for five- and six-list data
+the 100 models with the smallest BIC values are retained.
 
-The exhaustive BIC model catalogue is available only for data with at most
-six lists. For data with more than six lists, the routine stops with an
-informative error.
+The possible hierarchical models are drawn from an exhaustive model
+catalogue within the package. This contains all hierarchical models for up
+to five lists, but for six lists is restricted to models with interactions
+of order at most 2. There are 32,768 such six-list models. Allowing
+interactions of order 3 would increase this to 3,702,013 models, making
+exhaustive enumeration and fitting computationally impractical.
 
-For six-list data, the routine must first fit 32,768 hierarchical
-pairwise-interaction models before selecting the best 100 models. This
-initial model-fitting stage can take a considerable time. An immediate
-warning is issued before it begins.
+For data with more than six lists, the routine stops with an informative
+error.
 
 A small value of \code{nboot}, such as that used in the example, is useful
 only for checking that the routine runs. A substantially larger number of

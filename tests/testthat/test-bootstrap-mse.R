@@ -83,3 +83,90 @@ test_that("BIC estimation uses the common alpha defaults", {
     c("0.025", "0.1", "0.9", "0.975")
   )
 })
+
+test_that("six-list automatic maxorder is 2", {
+  z6 <- matrix(0, nrow = 1, ncol = 7)
+
+  local_mocked_bindings(
+    assemble_bic = function(zdat, maxorder, checkexist) {
+      list(maxorder = maxorder)
+    },
+    .package = "MultipleSystemsEstimation"
+  )
+
+  expect_warning(
+    out <- estimate_population_bic(z6, nboot = 0),
+    "32,768"
+  )
+
+  expect_equal(out$maxorder, 2L)
+})
+
+test_that("ntopmodels has no effect when nboot is zero", {
+  out_default <- estimate_population_bic(
+    Korea,
+    nboot = 0
+  )
+
+  out_one <- estimate_population_bic(
+    Korea,
+    nboot = 0,
+    ntopmodels = 1
+  )
+
+  out_large <- estimate_population_bic(
+    Korea,
+    nboot = 0,
+    ntopmodels = 1000
+  )
+
+  expect_equal(out_one, out_default)
+  expect_equal(out_large, out_default)
+})
+
+test_that("estimate_population_bic does not subset models when nboot is zero", {
+  local_mocked_bindings(
+    subsetmat = function(...) {
+      stop("subsetmat should not be called")
+    },
+    .package = "MultipleSystemsEstimation"
+  )
+
+  expect_no_error(
+    estimate_population_bic(Korea, nboot = 0, ntopmodels = 1)
+  )
+})
+
+test_that("six-list maxorder above 2 is reduced with a warning", {
+  z6 <- matrix(0, nrow = 1, ncol = 7)
+
+  local_mocked_bindings(
+    assemble_bic = function(zdat, maxorder, checkexist) {
+      list(maxorder = maxorder)
+    },
+    .package = "MultipleSystemsEstimation"
+  )
+
+  warnings <- character()
+
+  out <- withCallingHandlers(
+    estimate_population_bic(
+      z6,
+      nboot = 0,
+      maxorder = 3
+    ),
+    warning = function(w) {
+      warnings <<- c(warnings, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+
+  expect_true(any(grepl("reduced from 3 to 2", warnings, fixed = TRUE)))
+  expect_true(any(grepl("32,768", warnings, fixed = TRUE)))
+  expect_equal(out$maxorder, 2L)
+})
+
+
+
+
+
