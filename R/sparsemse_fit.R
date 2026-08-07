@@ -1,4 +1,4 @@
-#' Bootstrap inference accounting for BIC model selection
+#' Population estimation using BIC model selection
 #'
 #' Constructs BCa confidence limits for population size while allowing for
 #' uncertainty arising from BIC-based model selection.
@@ -70,8 +70,9 @@
 #'
 #' @return A list with components:
 #' \describe{
-#'   \item{\code{popest}}{The population-size estimate from the model with
-#'   the smallest BIC on the original data.}
+#'   \item{\code{popest}}{The estimated total population for
+#'   the original data, including the estimated unobserved population,
+#'   from the model with the smallest BIC.}
 #'   \item{\code{model}}{The hierarchical model with the smallest BIC on
 #'   the original data.}
 #'   \item{\code{BIC}}{The BIC value of the selected model.}

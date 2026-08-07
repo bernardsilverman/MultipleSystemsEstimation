@@ -2,7 +2,7 @@
 % Please edit documentation in R/sparsemse_fit.R
 \name{estimate_population_bic}
 \alias{estimate_population_bic}
-\title{Bootstrap inference accounting for BIC model selection}
+\title{Population estimation using BIC model selection}
 \usage{
 estimate_population_bic(
   zdat,
@@ -47,8 +47,9 @@ is then performed.}
 \value{
 A list with components:
 \describe{
-  \item{\code{popest}}{The population-size estimate from the model with
-  the smallest BIC on the original data.}
+  \item{\code{popest}}{The estimated total population for
+  the original data, including the estimated unobserved population,
+  from the model with the smallest BIC.}
   \item{\code{model}}{The hierarchical model with the smallest BIC on
   the original data.}
   \item{\code{BIC}}{The BIC value of the selected model.}

@@ -12,6 +12,9 @@
 #' burdensome. Accordingly, \code{method = "auto"} selects the stepwise
 #' method for six-list data and issues an informational message.
 #'
+#' The estimation method can be selected explicitly using
+#' \code{method = "bic"}, \code{"stepwise"}, or \code{"fixed"}.
+#'
 #' Method-specific arguments are passed through \code{...} to the selected
 #' estimation function. See the documentation for the individual methods
 #' for details of the available arguments and their defaults.
@@ -36,18 +39,6 @@
 #'   \code{\link{estimate_population_bic}},
 #'   \code{\link{estimate_population_stepwise}}, or
 #'   \code{\link{estimate_population_fixed}}.
-#'
-#' @details
-#' The automatic method choice is intended to provide a practical initial
-#' analysis. For data with up to five lists, the BIC method is selected.
-#' For data with six or more lists, the stepwise method is selected.
-#'
-#' For six-list data, the BIC method can still be requested explicitly
-#' using \code{method = "bic"}. The BIC routine then applies its own
-#' method-specific defaults.
-#'
-#' The fixed-model method must be selected explicitly and requires the
-#' model specification expected by \code{estimate_population_fixed()}.
 #'
 #' @seealso
 #' \code{\link{estimate_population_bic}},
