@@ -16,16 +16,19 @@
 #' bootstrap inference to be investigated. The maximum may be set to
 #' \code{Inf}, in which case all candidate models are considered.
 #'
-#' The models are first ranked according to their BIC values for the
-#' original data. For each bootstrap and jackknife replication, and for
-#' each value of \code{ntop} up to the specified maximum, the best-fitting
-#' model among the first \code{ntop} models in this ranking is selected.
-#' The calculations for the different values of \code{ntop} are obtained
+#' The models are ranked using the original-data BIC values. For each
+#' bootstrap and jackknife replication, and for each value of
+#' \code{ntop} up to the specified maximum, the best-fitting model among
+#' the first \code{ntop} models in this ranking is selected. The
+#' calculations for the different values of \code{ntop} are obtained
 #' from the same set of model fits.
 #'
-#' This function implements the algorithm described in Section 2.5 of
-#' Silverman, Chan and Vincent (2024), and can be used to reproduce the
-#' calculations underlying Figures 1 and 2 of that paper.
+#' With the default \code{degree = 1}, this function implements the
+#' algorithm described in Section 2.5 of Silverman, Chan and Vincent
+#' (2024), and can be used to reproduce the calculations underlying
+#' Figures 1 and 2 of that paper. An optional neighbourhood-based ranking,
+#' corresponding to \code{degree = 2} and considered in Section 5.1, is
+#' also available; see Details.
 #'
 #' @param zdat The capture data, in the standard format used by
 #'   \pkg{MultipleSystemsEstimation}.
@@ -38,6 +41,12 @@
 #'   from 1 to \code{ntopmax}. If \code{ntopmax = Inf}, all candidate
 #'   models are considered and inference is calculated for every value
 #'   of \code{ntop} up to the total number of candidate models.
+#'
+#' @param degree The degree of the model ranking. Must be either 1 or 2.
+#'   The default, \code{degree = 1}, orders models by their BIC values for
+#'   the original data. The option \code{degree = 2} uses the alternative
+#'   neighbourhood-based ranking investigated in Section 5.1 of
+#'   Silverman, Chan and Vincent (2024).
 #'
 #' @param nboot The number of bootstrap replications.
 #'
@@ -60,13 +69,27 @@
 #' @details
 #' For each bootstrap and jackknife replication, the population-size
 #' estimate and BIC are calculated for every model up to
-#' \code{ntopmax}. Results for smaller values of \code{ntop} are then
-#' obtained from these fitted models without repeating the model fits.
+#' \code{ntopmax} in the chosen ranking. Results for smaller values of
+#' \code{ntop} are then obtained from these fitted models without
+#' repeating the model fits.
 #'
 #' If \code{ntopmax = Inf}, all candidate models are fitted for each
-#' bootstrap and jackknife replication. This gives the exhaustive
-#' calculation but may be computationally expensive when the number of
-#' candidate models is large.
+#' bootstrap and jackknife replication. In this case the ordering has no
+#' effect on the resulting inference, because all candidate models are
+#' considered. The exhaustive calculation may be computationally
+#' expensive when the number of candidate models is large.
+#'
+#' With \code{degree = 2}, the degree-2 BIC rank of a model is the
+#' smallest ordinary BIC rank among its 1-neighbours, including the model
+#' itself, where two models are 1-neighbours if the symmetric difference
+#' between their sets of parameters has size at most 1. Ties in degree-2
+#' rank are broken by ordinary BIC rank.
+#'
+#' The \code{degree = 2} option is included mainly to reproduce and
+#' investigate the alternative ordering considered in Section 5.1 of
+#' Silverman, Chan and Vincent (2024). In that paper the
+#' neighbourhood-based ordering did not improve on the ordinary BIC
+#' ordering in a useful way.
 #'
 #' The results are intended to inform the choice of \code{ntop} used in
 #' the user-facing BIC bootstrap routines, in particular the default and
@@ -91,18 +114,19 @@
 #'
 #' @examples
 #' data(UKdat_5)
-#' vary_ntop_bca(UKdat_5, maxorder = 2, ntopmax = 5, nboot = 20,
-#'               iseed = 1234)
+#' vary_ntop_bca(UKdat_5, maxorder = 2, ntopmax = 5, degree = 1,
+#'               nboot = 20, iseed = 1234)
 #'
 #' @export
 vary_ntop_bca <- function(
     zdat,
     maxorder,
     ntopmax = 50,
+    degree = 1,
     nboot = 1000,
     iseed = 1234,
     alpha = c(0.025, 0.1, 0.9, 0.975)
-) {
+){
 
   ## Check arguments
 
@@ -135,12 +159,16 @@ vary_ntop_bca <- function(
          call. = FALSE)
   }
 
+  if (length(degree) != 1 ||
+      !is.finite(degree) ||
+      degree != as.integer(degree) ||
+      !degree %in% c(1, 2)) {
+    stop("`degree` must be either 1 or 2.", call. = FALSE)
+  }
+
   ## Fit and rank the full candidate model set on the original data
 
-  z <- assemble_bic(
-    zdat,
-    maxorder = maxorder
-  )
+  z <- assemble_bic(zdat, maxorder = maxorder)
 
   nmodels <- nrow(z$res)
 
@@ -151,20 +179,27 @@ vary_ntop_bca <- function(
     )
   }
 
-  ## The point estimate always uses the full candidate model set
-
   estimate <- z$res[1, "abundance"]
 
-  ## Resolve the maximum number of models required for the
-  ## bootstrap and jackknife calculations
+  if (degree == 2) {
+
+    models <- rownames(z$res)
+    nlists <- ncol(zdat) - 1
+
+    ord2 <- .degree2_order(
+      models,
+      nlists = nlists,
+      maxorder = maxorder
+    )
+
+    z$res <- z$res[ord2, , drop = FALSE]
+  }
 
   if (is.infinite(ntopmax)) {
     ntop_used <- nmodels
   } else {
     ntop_used <- min(as.integer(ntopmax), nmodels)
   }
-
-  ## Retain the required models, already in original-data BIC order
 
   z$res <- z$res[seq_len(ntop_used), , drop = FALSE]
 
@@ -313,3 +348,35 @@ vary_ntop_bca <- function(
 
   ahat
 }
+
+.degree2_order <- function(models, nlists, maxorder) {
+
+  nmodels <- length(models)
+  bic_rank <- seq_len(nmodels)
+
+  neighbour_list <- lapply(
+    models,
+    find_neighbour_hierarchies,
+    nlists = nlists,
+    keepmaineffects = TRUE,
+    maxorder = maxorder
+  )
+
+  names(bic_rank) <- models
+
+  degree2_rank <- vapply(
+    seq_len(nmodels),
+    function(i) {
+      neighbours <- intersect(
+        c(models[i], neighbour_list[[i]]),
+        models
+      )
+      min(bic_rank[neighbours])
+    },
+    integer(1)
+  )
+
+  order(degree2_rank, bic_rank)
+}
+
+
