@@ -56,16 +56,15 @@ A list with components:
   \item{\code{bic_results}}{The complete result of the original-data BIC
   enumeration, including all models allowed by \code{maxorder}, ordered
   by BIC.}
-  \item{\code{BCaquantiles}}{The BCa confidence-limit results returned
-  by \code{\link{ntopBCa}} when \code{nboot > 0}, and \code{NULL} when
-  \code{nboot = 0}.}
+  \item{\code{BCaquantiles}}{A matrix of BCa confidence limits for
+  nested sets of the retained top-BIC models when \code{nboot > 0},
+  and \code{NULL} when \code{nboot = 0}.}
 }
 
-When \code{nboot > 0}, the \code{BCaquantiles} component contains the
-object returned by \code{\link{ntopBCa}}, giving BCa inference based on
-repeated BIC model selection. This is a numeric matrix of BCa confidence
-limits. The columns correspond to the cumulative probability levels
-supplied in \code{alpha}. The retained models are ordered by increasing
+When \code{nboot > 0}, the \code{BCaquantiles} component gives BCa
+inference based on repeated BIC model selection. This is a numeric matrix
+of BCa confidence limits. The columns correspond to the cumulative
+probability levels supplied in \code{alpha}. The retained models are ordered by increasing
 BIC for the original data. Row \eqn{k} gives the confidence limits obtained
 when model selection within each bootstrap replication is restricted to
 the first \eqn{k} models in this ordering. Thus, the first row uses only

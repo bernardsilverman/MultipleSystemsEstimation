@@ -84,25 +84,29 @@ test_that("vary_ntop_bca is reproducible for a fixed seed", {
   expect_equal(out1, out2)
 })
 
-test_that("degree-2 ordering agrees with existing BIC-rank calculation", {
-
+test_that("degree-2 ordering gives the expected Korea ranking", {
   data(Korea)
 
   z <- assemble_bic(Korea, maxorder = 2)
-
   models <- rownames(z$res)
 
-  ord_new <- .degree2_order(
+  ord <- .degree2_order(
     models,
     nlists = ncol(Korea) - 1,
     maxorder = 2
   )
 
-  br <- find_bic_rank_matrix(z, nbicranks = 2)
-
-  ord_old <- order(br[, 2], br[, 1])
-
-  expect_identical(ord_new, ord_old)
+  expect_identical(
+    models[ord],
+    c(
+      "[12,23]",
+      "[12,3]",
+      "[23,1]",
+      "[1,2,3]",
+      "[13,23]",
+      "[13,2]"
+    )
+  )
 })
 
 test_that("degree 1 reproduces the existing vary_ntop_bca calculation", {

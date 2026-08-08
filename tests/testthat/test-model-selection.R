@@ -35,35 +35,7 @@ test_that("published stepwise selections are reproduced", {
     ))
   })
 
-  test_that("ktopBCa returns finite results for standard sparse examples", {
-    data("Korea", package = "MultipleSystemsEstimation")
-    data("Artificial_3", package = "MultipleSystemsEstimation")
 
-    for (dat in list(Korea, Artificial_3)) {
-      z <- assemble_bic(
-        dat,
-        checkexist = TRUE,
-        removeFRfail = TRUE
-      )
-      z <- bootstrapcal(
-        z,
-        nboot = 20,
-        iseed = 1234,
-        checkexist = TRUE
-      )
-      z <- jackknifecal(
-        z,
-        checkexist = TRUE
-      )
-
-      bic_rank <- find_bic_rank_matrix(z)
-      bic_break <- BICrank_tiebreak(bic_rank, 2)
-      out <- ktopBCa(z, bic_break)
-
-      expect_true(all(is.finite(bic_rank)))
-      expect_true(all(is.finite(out)))
-    }
-  })
   data("Western", package = "MultipleSystemsEstimation")
 
   new_orleans <- stepwisefit(NewOrl, pthresh = 0.02)
@@ -346,63 +318,8 @@ test_that("assemble_bic handles data with no valid models", {
   expect_equal(z$maxorder, 0)
 })
 
-test_that("ntopBCa omits bootstrap replicates with no valid model", {
-  data("Artificial_3", package = "MultipleSystemsEstimation")
 
-  z <- assemble_bic(
-    Artificial_3,
-    checkexist = TRUE,
-    removeFRfail = TRUE
-  )
-  z <- bootstrapcal(
-    z,
-    nboot = 1000,
-    iseed = 1234,
-    checkexist = TRUE
-  )
-  z <- jackknifecal(z, checkexist = TRUE)
-
-  expect_warning(
-    out <- ntopBCa(z),
-    "1 bootstrap replication omitted"
-  )
-
-  expect_true(all(is.finite(out)))
-})
-
-test_that("ktopBCa omits bootstrap replicates with no valid model", {
-  data("Artificial_3", package = "MultipleSystemsEstimation")
-
-  z <- assemble_bic(
-    Artificial_3,
-    checkexist = TRUE,
-    removeFRfail = TRUE
-  )
-
-  z <- bootstrapcal(
-    z,
-    nboot = 1000,
-    iseed = 1234,
-    checkexist = TRUE
-  )
-
-  z <- jackknifecal(
-    z,
-    checkexist = TRUE
-  )
-
-  bic_rank <- find_bic_rank_matrix(z)
-  bic_break <- BICrank_tiebreak(bic_rank, 2)
-
-  expect_warning(
-    out <- ktopBCa(z, bic_break),
-    "1 bootstrap replication omitted"
-  )
-
-  expect_true(all(is.finite(out)))
-})
-
-test_that("BCa acceleration rejects positive-weight jackknife failures", {
+test_that("BCa acceleration is unavailable after positive-weight jackknife failures", {
   dat <- cbind(
     A = c(1, 0, 1, 0, 1, 0, 1),
     B = c(0, 1, 1, 0, 0, 1, 1),
@@ -415,10 +332,18 @@ test_that("BCa acceleration rejects positive-weight jackknife failures", {
     checkexist = TRUE,
     removeFRfail = TRUE
   )
+
   z <- jackknifecal(z, checkexist = TRUE)
 
-  expect_error(
-    bicktopahatcal(z, seq_len(nrow(z$res))),
-    "2 positive-count jackknife deletions had no candidate model"
+  jackest <- .cumulative_bic_estimates(
+    z$jackabund,
+    z$jackbic
   )
+
+  ahat <- .jackknife_ahat(
+    jackest,
+    z$countsobserved
+  )
+
+  expect_true(anyNA(ahat))
 })
