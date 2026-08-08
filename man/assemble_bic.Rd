@@ -37,9 +37,4 @@ This routine sorts the models in increasing order according to their BICs, retur
 corresponding BICs and abundance. The original data as well as the maxorder of the models
 considered are returned as well.
 }
-\examples{
-data(hiermodels)
-data(Korea)
-assemble_bic(Korea, checkexist=TRUE)
-
-}
+\keyword{internal}

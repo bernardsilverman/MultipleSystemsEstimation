@@ -34,7 +34,7 @@ it is assumed that it has zero count.}
 \item{alpha}{bootstrap quantiles of interests.}
 
 \item{noninformativelist}{if \code{noninformativelist=TRUE} then each generated data set in the simulation study (including all bootstrap replications)
-will be passed to \code{\link{remove_noninformative_lists}}.}
+will be removed using \code{\link{tidy_lists}}.}
 
 \item{verbose}{If \code{verbose=FALSE}, then the progress of the simulation will not show.
 If \code{verbose=TRUE}, then the progress of the simulation will be shown.}
@@ -72,10 +72,6 @@ installed but not attached, the user will be prompted to load it when
 the function is called. If it is not installed, the function will display
 installation instructions and return without running the simulation.
 }
-\examples{
-zdat=UKdat_5
-BICandbootstrapsim(zdat,nsims=2, nboot=2, pthresh=0.02, iseed=1234, noninformativelist=TRUE)
-}
 \references{
 Chan, L., Silverman, B. W., and Vincent, K. (2021).
  Multiple Systems Estimation for Sparse Capture Data: Inferential Challenges when there are Non-Overlapping Lists.
@@ -86,3 +82,4 @@ DiCiccio, T. J. and Efron, B. (1996). Bootstrap Confidence Intervals. \emph{Stat
 
 Rivest, L-P. and Baillargeon, S. (2014) Rcapture. CRAN package. Available from Available from \url{https://CRAN.R-project.org/package=Rcapture}.
 }
+\keyword{internal}

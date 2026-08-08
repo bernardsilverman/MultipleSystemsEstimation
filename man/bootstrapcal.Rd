@@ -42,14 +42,10 @@ If there are already components with these names they will be overwritten.
 This routine takes the output from \code{assemble_bic} or \code{subsetmat} and returns bootstrap
 abundance matrix and BIC matrix. This version makes use of the \code{checkident.2}.
 }
-\examples{
-z=assemble_bic(Korea)
-bootstrapcal(z, nboot=2, checkexist=TRUE, saveinterval=50, savefile="Koreabootresults.Rdata")
-
-}
 \references{
 Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 Bootstrapping Multiple Systems Estimates to Account for Model Selection
 \emph{Statistics and Computing}, \strong{34(44)},
 Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
 }
+\keyword{internal}

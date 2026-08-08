@@ -4,7 +4,7 @@
 \alias{tidy_lists}
 \title{Produce a data matrix with a unique row for each capture history}
 \usage{
-tidy_lists(zdat, includezerocounts = FALSE)
+tidy_lists(zdat, includezerocounts = FALSE, remove_noninformative = FALSE)
 }
 \arguments{
 \item{zdat}{Data matrix with \eqn{t+1} columns. The first \eqn{t} columns, each corresponding to a particular list,
@@ -16,6 +16,9 @@ it is assumed that it has zero count.}
 \item{includezerocounts}{If \code{FALSE} then remove rows corresponding to capture histories with zero count.
 If \code{TRUE} then include all possible capture histories including those with zero count,
 excluding the all-zero row corresponding to the dark figure.}
+
+\item{remove_noninformative}{Logical; if \code{TRUE}, remove non-informative
+capture lists before returning the data.}
 }
 \value{
 A data matrix in the form specified above, including all capture histories with zero counts if  \code{includezerocounts=TRUE}.

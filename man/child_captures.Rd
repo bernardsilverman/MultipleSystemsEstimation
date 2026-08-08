@@ -17,14 +17,10 @@ a vector giving the encoded versions of the children
 \description{
 Given any encoded capture history that corresponds to the row number of the capture history data set and the number of lists, find the encoded capture histories which are obtained by adding one more list in turn
 }
-\examples{
-child_captures(2,5)
-child_captures(1,4)
-
-}
 \references{
 Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 Bootstrapping Multiple Systems Estimates to Account for Model Selection
 \emph{Statistics and Computing}, \strong{34(44)},
 Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
 }
+\keyword{internal}

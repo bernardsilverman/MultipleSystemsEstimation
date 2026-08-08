@@ -112,12 +112,7 @@
 #'   \emph{Statistical Science}, \strong{1}, 54--75.
 #' }
 #'
-#' @examples
-#' data(UKdat_5)
-#' vary_ntop_bca(UKdat_5, maxorder = 2, ntopmax = 5, degree = 1,
-#'               nboot = 20, iseed = 1234)
-#'
-#' @export
+#' @keywords internal
 vary_ntop_bca <- function(
     zdat,
     maxorder,

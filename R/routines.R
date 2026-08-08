@@ -106,6 +106,9 @@ buildmodel <- function(zdat, mX) {
 #' If \code{TRUE} then include all possible capture histories including those with zero count,
 #' excluding the all-zero row corresponding to the dark figure.
 #'
+#' @param remove_noninformative Logical; if \code{TRUE}, remove non-informative
+#' capture lists before returning the data.
+#'
 #' @return A data matrix in the form specified above, including all capture histories with zero counts if  \code{includezerocounts=TRUE}.
 #'
 #' @examples
@@ -113,37 +116,92 @@ buildmodel <- function(zdat, mX) {
 #' tidy_lists(NewOrl,includezerocounts=TRUE)
 #'
 #'@export
-tidy_lists <- function(zdat, includezerocounts = FALSE) {
-  zdat = as.matrix(zdat)
-  m = dim(zdat)[2] - 1
-  # ----construct full capture history matrix
-  zm = NULL
-  #-----produce an unordered matrix of all possible capture history including the one corresponds to dark figure
-  for (j in (1:m)) zm = rbind(cbind(1, zm), cbind(0, zm))
-  # ----calculate the number of 1s in each row of the unordered matrix
-  ztot = apply(zm, 1, sum)
-  #----order the rows of the matrix according to the number of 1s appearing on each row in ascending order
-  zm = zm[order(ztot), ]
-  #---remove the row that has 0s for all its entries and add a column of 0s
-  zm = cbind(zm[-1, ], 0)
-  #---supply column names if necessary
-  vn = dimnames(zdat)[[2]]
-  if(is.null(vn)) {
-    vn = c(LETTERS[1:m], "count")
+tidy_lists <- function(
+    zdat,
+    includezerocounts = FALSE,
+    remove_noninformative = FALSE
+) {
+
+  zdat <- as.matrix(zdat)
+
+  if (remove_noninformative) {
+
+    m2 <- ncol(zdat)
+    countname <- colnames(zdat)[m2]
+    count <- zdat[, m2]
+
+    # Remove duplicate list columns
+    listdat <- unique(zdat[, -m2, drop = FALSE], MARGIN = 2)
+    zdat <- cbind(listdat, count)
+    colnames(zdat)[ncol(zdat)] <- countname
+
+    # Remove empty lists and lists containing every observed case
+    m2 <- ncol(zdat)
+
+    ltot <- t(zdat[, -m2, drop = FALSE]) %*% zdat[, m2]
+    mtot <- sum(zdat[, m2])
+
+    jkeep <- (ltot > 0) & (ltot < mtot)
+
+    if (any(jkeep)) {
+      zdat <- zdat[, c(jkeep, TRUE), drop = FALSE]
+    } else {
+      zdat <- matrix(
+        mtot,
+        nrow = 1,
+        ncol = 1,
+        dimnames = list(NULL, countname)
+      )
+
+      return(as.data.frame(zdat))
+    }
   }
-  dimnames(zm)[[2]] = vn
-  # find row of zm corresponding to each row of zmse and update count
-  bcode = zdat[, -(m + 1)] %*% (2^(1:m))
-  bc = zm[, -(m + 1)] %*% (2^(1:m))
-  for (j in (1:dim(zdat)[1])) {
-    ij = (1:dim(zm)[1])[bc == bcode[j]]
-    zm[ij, m + 1] = zm[ij, m + 1] + zdat[j, m + 1]
+
+  m <- ncol(zdat) - 1
+
+  # Construct full capture history matrix
+  zm <- NULL
+
+  # Produce an unordered matrix of all possible capture histories,
+  # including the one corresponding to the dark figure
+  for (j in seq_len(m)) {
+    zm <- rbind(cbind(1, zm), cbind(0, zm))
   }
-  # remove rows with zero counts if includezerocounts is FALSE
-  if (!includezerocounts)
-    zm = zm[zm[, m + 1] > 0, ]
-  zdatr = as.data.frame(zm)
-  return(zdatr)
+
+  # Calculate the number of 1s in each row
+  ztot <- apply(zm, 1, sum)
+
+  # Order rows by number of captures
+  zm <- zm[order(ztot), ]
+
+  # Remove the all-zero capture history and add count column
+  zm <- cbind(zm[-1, ], 0)
+
+  # Supply column names if necessary
+  vn <- colnames(zdat)
+
+  if (is.null(vn)) {
+    vn <- c(LETTERS[seq_len(m)], "count")
+  }
+
+  colnames(zm) <- vn
+
+  # Find row corresponding to each observed capture history
+  # and update count
+  bcode <- zdat[, -(m + 1), drop = FALSE] %*% (2^seq_len(m))
+  bc <- zm[, -(m + 1), drop = FALSE] %*% (2^seq_len(m))
+
+  for (j in seq_len(nrow(zdat))) {
+    ij <- which(bc == bcode[j])
+    zm[ij, m + 1] <- zm[ij, m + 1] + zdat[j, m + 1]
+  }
+
+  # Remove rows with zero counts unless requested
+  if (!includezerocounts) {
+    zm <- zm[zm[, m + 1] > 0, , drop = FALSE]
+  }
+
+  as.data.frame(zm)
 }
 
 #' Build the model matrix based on particular data, as required to check for identifiability and existence of the maximum likelihood estimate
@@ -587,7 +645,7 @@ stepwisefit<- function(zdat, pthresh=0.02) {
 #'@importFrom stats qchisq rpois ppoints
 #'@importFrom graphics matplot abline
 #'
-#' @export
+#' @keywords internal
 investigateAIC <- function(nsim=10000, Nsamp= 1000, seed = 1001) {
   #
   # ---- define functions to be called
@@ -1152,7 +1210,7 @@ bcaconfvalues<-function(bootreps, popest, ahat, alpha=c(0.025, 0.05, 0.1, 0.16, 
 #' @param alpha bootstrap quantiles of interests.
 #'
 #' @param noninformativelist  if \code{noninformativelist=TRUE} then each generated data set in the simulation study (including all bootstrap replications)
-#'     will be passed to \code{\link{remove_noninformative_lists}}.
+#'          will be removed using \code{\link{tidy_lists}}.
 #'
 #' @param verbose If \code{verbose=FALSE}, then the progress of the simulation will not show.
 #' If \code{verbose=TRUE}, then the progress of the simulation will be shown.
@@ -1191,10 +1249,7 @@ bcaconfvalues<-function(bootreps, popest, ahat, alpha=c(0.025, 0.05, 0.1, 0.16, 
 #'
 #'@importFrom stats pnorm quantile rbinom rmultinom predict ppois
 #'
-#'@examples
-#'zdat=UKdat_5
-#'BICandbootstrapsim(zdat,nsims=2, nboot=2, pthresh=0.02, iseed=1234, noninformativelist=TRUE)
-#'@export
+#' @keywords internal
 
 BICandbootstrapsim <- function(zdat, nsims=1000,nboot=100,pthresh=0.02, iseed=1234, alpha=c(0.025, 0.05, 0.1, 0.16, 0.5, 0.84, 0.9, 0.95, 0.975),noninformativelist=FALSE,verbose=FALSE, ...){
   # load up Rcapture if necessary
@@ -1227,7 +1282,13 @@ BICandbootstrapsim <- function(zdat, nsims=1000,nboot=100,pthresh=0.02, iseed=12
     simreps[,j] = rmultinom(1,nobs,predfreq)
     # find the BIC estimates at the same time
     zdatsim = cbind(modelmat, simreps[,j])
-    if (noninformativelist) zdatsim=remove_noninformative_lists(zdatsim)
+    if (noninformativelist) {
+      zdatsim <- tidy_lists(
+        zdatsim,
+        includezerocounts = TRUE,
+        remove_noninformative = TRUE
+      )
+    }
     zallres=Rcapture::closedpMS.t(zdatsim, dfreq=TRUE,maxorder=2)
     zr = zallres$results
     indmin = which.min(zr[, 7])
@@ -1245,8 +1306,14 @@ BICandbootstrapsim <- function(zdat, nsims=1000,nboot=100,pthresh=0.02, iseed=12
   for (j in (1:nsims)) {
     count = simreps[,j]
     zdatsim = cbind(modelmat, count)
-    if (noninformativelist) zdatsim=remove_noninformative_lists(zdatsim)
-    bootoutput = estimatepopulation(zdatsim, nboot=nboot, alpha=alpha, pthresh=pthresh)
+    if (noninformativelist) {
+      zdatsim <- tidy_lists(
+        zdatsim,
+        includezerocounts = TRUE,
+        remove_noninformative = TRUE
+      )
+    }
+    bootoutput = estimate_population_stepwise(zdatsim, nboot=nboot, alpha=alpha, pthresh=pthresh)
     popests[j]=bootoutput$popest
     bootCIs[j,] = bootoutput$BCaquantiles
     if (verbose)  cat(j)
@@ -1254,56 +1321,6 @@ BICandbootstrapsim <- function(zdat, nsims=1000,nboot=100,pthresh=0.02, iseed=12
   return(list(popest=popest, BICmodels = BICmods, BICvals=BICvals, simreps=simreps, modelmat=modelmat, popestsim=popests, BCaquantiles=bootCIs, BICconf=BICconf))
 }
 
-#' Remove non-informative list
-#'
-#' The routine cleans up the data set by removing any lists that contain no data, any lists which contain all the observed data, and
-#'  any list whose results duplicate those of another list.
-#'   If as a result the original data set has no list left, it returns a matrix with the value of the total count.
-#'
-#' @param zdat Data matrix with \eqn{t+1} columns. The first \eqn{t} columns, each corresponding to a particular list,
-#' are 0s and 1s defining the capture histories
-#' observed. The last column is the count of cases with that particular capture history.
-#'
-#' @return data matrix that contains no duplicate lists, no lists with no data, and no lists that contain all the observed data.
-#' If all lists are removed, the total count is returned.
-#'
-#'@references
-#'Chan, L., Silverman, B. W., and Vincent, K. (2021).
-#'  Multiple Systems Estimation for Sparse Capture Data: Inferential Challenges when there are Non-Overlapping Lists.
-#' \emph{Journal of American Statistcal Association}, \strong{116(535)}, 1297-1306,
-#' Available from \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2019.1708748}.
-#'
-#' @export
-remove_noninformative_lists <- function(zdat) {
-  zdat <- as.matrix(zdat)
-
-  m2 <- ncol(zdat)
-  countname <- colnames(zdat)[m2]
-  count <- zdat[, m2]
-
-  listdat <- unique(zdat[, -m2, drop = FALSE], MARGIN = 2)
-  zdat <- cbind(listdat, count)
-  colnames(zdat)[ncol(zdat)] <- countname
-
-  m2 <- ncol(zdat)
-
-  ltot <- t(zdat[, -m2, drop = FALSE]) %*% zdat[, m2]
-  mtot <- sum(zdat[, m2])
-  jkeep <- (ltot > 0) & (ltot < mtot)
-
-  if (sum(jkeep) > 0) {
-    zdat <- zdat[, c(jkeep, TRUE), drop = FALSE]
-  } else {
-    zdat <- matrix(
-      mtot,
-      nrow = 1,
-      ncol = 1,
-      dimnames = list(NULL, countname)
-    )
-  }
-
-  return(zdat)
-}
 #' Decode capture history
 #'
 #' Given a capture history as a number and the number of lists, decode it into a logical vector giving
@@ -1407,11 +1424,7 @@ ancestors = function(k,nlists=10) {
 #' \emph{Statistics and Computing}, \strong{34(44)},
 #' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
 #'
-#' @examples
-#' parent_captures(2,10)
-#' parent_captures(1,4)
-#'
-#' @export
+#' @keywords internal
 parent_captures = function(k, nlists=10) {
   z = decode_capture(k, nlists)
   kd = 2^{(0:(nlists-1))}[z]
@@ -1431,11 +1444,7 @@ parent_captures = function(k, nlists=10) {
 #' \emph{Statistics and Computing}, \strong{34(44)},
 #' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
 #'
-#' @examples
-#' child_captures(2,5)
-#' child_captures(1,4)
-#'
-#' @export
+#' @keywords internal
 child_captures = function(k, nlists) {
   z = decode_capture(k, nlists)
   kd = 2^{(0:(nlists-1))}[!z]
@@ -1493,15 +1502,7 @@ make_master_design = function(nlists) {
 #' \emph{Statistics and Computing}, \strong{34(44)},
 #' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
 #'
-#'@examples
-#'#Korea data
-#'data(Korea)
-#'ingest_data(Korea)
-#'#Kosovo data
-#'data(Kosovo)
-#'ingest_data(Kosovo)
-#'
-#'@export
+#' @keywords internal
 ingest_data = function(xdat)  {
   nlists = dim(xdat)[2]  - 1
   listnames = dimnames(xdat)[[2]][-(1+nlists)]
@@ -1842,12 +1843,8 @@ checkident.1= function(parset, datlist) {
 #'   }
 #'
 #'
-#'@examples
-#'data(hiermodels)
-#'data(Korea)
-#'assemble_bic(Korea, checkexist=TRUE)
 #'
-#'@export
+#' @keywords internal
 assemble_bic <-
   function(xdata,maxorder=dim(xdata)[2]-2, checkexist=TRUE, removeFRfail=TRUE, ...){
     # number of lists
@@ -2212,11 +2209,7 @@ checkident.2 = function(x, xcap, zmods) {
 #' \emph{Statistics and Computing}, \strong{34(44)},
 #' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
 #'
-#'@examples
-#'z=assemble_bic(Korea)
-#'bootstrapcal(z, nboot=2, checkexist=TRUE, saveinterval=50, savefile="Koreabootresults.Rdata")
-#'
-#'@export
+#' @keywords internal
 bootstrapcal <- function(z,
                            nboot = 1000,
                            iseed = 1234,
@@ -2287,12 +2280,7 @@ bootstrapcal <- function(z,
 #' \emph{Statistics and Computing}, \strong{34(44)},
 #' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
 #'
-#' @examples
-#' data(Korea)
-#' z=assemble_bic(Korea)
-#' jackknifecal(z,checkexist=TRUE)
-#'
-#' @export
+#' @keywords internal
 jackknifecal <- function(z, checkexist = TRUE) {
 
   zdat = tidy_lists(z$xdata, includezerocounts = TRUE)

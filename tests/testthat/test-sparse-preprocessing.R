@@ -18,22 +18,25 @@ test_that("tidy_lists aggregates duplicate histories and inserts zero cells", {
   )
 })
 
-test_that("remove_noninformative_lists removes empty and universal lists", {
+test_that("tidy_lists removes empty and universal lists when requested", {
   x <- cbind(
-    empty = c(0, 0),
-    universal = c(1, 1),
-    informative = c(1, 0),
-    count = c(3, 4)
+    empty = c(0, 0, 0),
+    universal = c(1, 1, 1),
+    A = c(1, 1, 0),
+    B = c(0, 1, 1),
+    count = c(3, 2, 4)
   )
 
-  out <- remove_noninformative_lists(x)
+  out <- tidy_lists(
+    x,
+    remove_noninformative = TRUE
+  )
 
-  expect_equal(ncol(out), 2)
-  expect_equal(colnames(out), c("informative", "count"))
-  expect_equal(out[, "count"], c(3, 4))
+  expect_equal(colnames(out), c("A", "B", "count"))
+  expect_equal(out$count, c(3, 4, 2))
 })
 
-test_that("remove_noninformative_lists removes duplicate list columns", {
+test_that("tidy_lists removes duplicate list columns when requested", {
   x <- cbind(
     A = c(1, 0, 1),
     Adup = c(1, 0, 1),
@@ -41,10 +44,13 @@ test_that("remove_noninformative_lists removes duplicate list columns", {
     count = c(2, 3, 4)
   )
 
-  out <- remove_noninformative_lists(x)
+  out <- tidy_lists(
+    x,
+    remove_noninformative = TRUE
+  )
 
   expect_equal(ncol(out), 3)
-  expect_equal(out[, "count"], c(2, 3, 4))
+  expect_equal(out$count, c(2, 3, 4))
 })
 
 test_that("ingest_data identifies zero-descendant parameters", {
@@ -142,17 +148,21 @@ test_that("jackknife NAs occur only in zero-count capture histories", {
   }
 })
 
-test_that("remove_noninformative_lists never removes the count column", {
+test_that("tidy_lists never removes the count column", {
   x <- cbind(
     A = c(1, 0, 1),
+    Adup = c(1, 0, 1),
     B = c(0, 1, 1),
-    count = c(1, 0, 1)
+    count = c(1, 2, 3)
   )
 
-  out <- remove_noninformative_lists(x)
+  out <- tidy_lists(
+    x,
+    remove_noninformative = TRUE
+  )
 
   expect_equal(colnames(out)[ncol(out)], "count")
-  expect_equal(out[, "count"], x[, "count"])
+  expect_equal(sum(out$count), sum(x[, "count"]))
 })
 
 test_that("bootstrap replicates retain at least one finite model score", {

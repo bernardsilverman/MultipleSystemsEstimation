@@ -115,12 +115,6 @@ inference obtained using larger values, the calculation provides
 empirical evidence about how much computational economy can be gained
 without materially changing the resulting confidence intervals.
 }
-\examples{
-data(UKdat_5)
-vary_ntop_bca(UKdat_5, maxorder = 2, ntopmax = 5, degree = 1,
-              nboot = 20, iseed = 1234)
-
-}
 \references{
 \itemize{
   \item Silverman, B. W., Chan, L. and Vincent, K. (2024).
@@ -134,3 +128,4 @@ vary_ntop_bca(UKdat_5, maxorder = 2, ntopmax = 5, degree = 1,
   \emph{Statistical Science}, \strong{1}, 54--75.
 }
 }
+\keyword{internal}
