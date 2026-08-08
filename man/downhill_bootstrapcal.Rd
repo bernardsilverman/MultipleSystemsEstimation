@@ -32,10 +32,6 @@ Point estimates of total population sizes from each bootstrap sample.
 \description{
 Construct bootstrap replications and use the downhill fit method to obtain point estimates of total population sizes from each bootstrap sample.
 }
-\examples{
-data(Korea)
-downhill_bootstrapcal(Korea, nboot = 2)
-}
 \references{
 Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 Bootstrapping Multiple Systems Estimates to Account for Model Selection

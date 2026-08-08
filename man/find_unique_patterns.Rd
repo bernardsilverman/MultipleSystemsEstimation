@@ -19,13 +19,6 @@ The original data \code{x} with the additional components {\describe{
 Given a matrix (for example of bootstrap replications) construct the matrix of unique patterns of non-zeroes,
 together with a vector of pointers back to that matrix.
 }
-\examples{
-data(Korea)
-z=assemble_bic(Korea)
-z=bootstrapcal(z, nboot=2)
-find_unique_patterns(z$bootreplications)
-
-}
 \references{
 Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 Bootstrapping Multiple Systems Estimates to Account for Model Selection

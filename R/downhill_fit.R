@@ -24,12 +24,6 @@
 #' \emph{Statistics and Computing}, \strong{34(44)},
 #' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
 #'
-#' @examples
-#' data(Korea)
-#' xdata=Korea
-#' counts = xdata[,dim(xdata)[2]]
-#' desmat = xdata[,1:(dim(xdata)[2]-1)]
-#' downhill_fit(counts, desmat)
 #' @importFrom stats setNames
 downhill_fit = function(counts, desmat, maxorder=dim(desmat)[2]-1, checkid=TRUE, niter=20,verbose=FALSE) {
   # initialise
@@ -113,9 +107,6 @@ downhill_fit = function(counts, desmat, maxorder=dim(desmat)[2]-1, checkid=TRUE,
 #' \emph{Statistics and Computing}, \strong{34(44)},
 #' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
 #'
-#' @examples
-#' data(Korea)
-#' downhill_bootstrapcal(Korea, nboot = 2)
 downhill_bootstrapcal <- function(xdata, nboot = 1000, iseed = 1234,
       checkid = TRUE, verbose=FALSE, maxorder=dim(xdata)[2]-2) {
   set.seed(iseed)
@@ -148,10 +139,6 @@ downhill_bootstrapcal <- function(xdata, nboot = 1000, iseed = 1234,
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
 #' \emph{Statistics and Computing}, \strong{34(44)},
 #' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
-#'
-#' @examples
-#' data(Korea)
-#' downhill_jackknifecal(Korea)
 #'
 downhill_jackknifecal <- function(xdata,checkid = TRUE, maxorder=dim(xdata)[2]-2) {
   xdata = tidy_lists(xdata, includezerocounts=FALSE)

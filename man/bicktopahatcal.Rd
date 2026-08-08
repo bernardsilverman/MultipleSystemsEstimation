@@ -17,16 +17,6 @@ the estimated acceleration factor
 \description{
 Returns acceleration factors for each value of ntop for given modelorder
 }
-\examples{
-data(Korea)
-z=assemble_bic(Korea, checkexist=TRUE)
-z=jackknifecal(z, checkexist=TRUE)
-nmods= dim(z$jackabund)[1]
-modscores = (1:nmods)
-modelorder= order(modscores)
-bicktopahatcal(z,modelorder)
-
-}
 \references{
 Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 Bootstrapping Multiple Systems Estimates to Account for Model Selection

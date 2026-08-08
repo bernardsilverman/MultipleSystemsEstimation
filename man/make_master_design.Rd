@@ -17,13 +17,6 @@ in other words if \eqn{j} is an ancestor of \eqn{i}.
 This is the master design matrix which maps parameters to observations.
 Rows correspond to observations and columns to parameters.
 }
-\examples{
-#Create master design matrix with 5 lists
-make_master_design(5)
-#Create master design matrix with 3 lists
-make_master_design(3)
-
-}
 \references{
 Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 Bootstrapping Multiple Systems Estimates to Account for Model Selection

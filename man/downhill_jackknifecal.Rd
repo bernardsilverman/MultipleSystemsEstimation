@@ -20,11 +20,6 @@ the estimated acceleration factor
 It uses the downhill approach to calculate the jackknife abundance and returns the estimated
 acceleration factor
 }
-\examples{
-data(Korea)
-downhill_jackknifecal(Korea)
-
-}
 \references{
 Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 Bootstrapping Multiple Systems Estimates to Account for Model Selection

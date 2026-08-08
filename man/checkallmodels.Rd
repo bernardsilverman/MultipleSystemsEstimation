@@ -39,13 +39,6 @@ If the extended maximum likelihood estimator exists for a particular model, then
 
 2. For each top-level model, if the estimate exists there is no need to consider that model further.  If the estimate does not exist, then a branch search is carried out over the tree structure obtained by successively leaving out overlapping pairs.
 }
-\examples{
-data(Artificial_3)
-data(Western)
-checkallmodels(Artificial_3)
-checkallmodels(Western)
-
-}
 \references{
 Chan, L., Silverman, B. W., and Vincent, K. (2021).
  Multiple Systems Estimation for Sparse Capture Data: Inferential Challenges when there are Non-Overlapping Lists.

@@ -23,14 +23,6 @@ Suppose we have a collection of different data outcomes on the same set of captu
 Typically the data outcomes will be bootstrap replications. This routine finds the unique support patterns among the data
 and hence economises the task of finding which model/data combinations satisfy the Fienberg-Rinaldo condition
 }
-\examples{
-data(Korea)
-z=assemble_bic(Korea)
-z=bootstrapcal(z, nboot=2)
-n2=dim(z$xdata)[2]
-checkident.2(z$bootreplications, z$xdata[,-n2], dimnames(z$res)[[1]])
-
-}
 \references{
 Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 Bootstrapping Multiple Systems Estimates to Account for Model Selection

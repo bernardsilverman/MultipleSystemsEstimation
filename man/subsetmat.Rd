@@ -40,14 +40,3 @@ based on specified parameters \code{ntopmodels} and \code{maxorder}. It returns 
 original data matrix with capture histories and counts and the new actual value of \code{maxorder} (reducing it
 from the input value if necessary or if the default input value of \eqn{\infty} is used).
 }
-\examples{
-data(Korea)
-
-z <- assemble_bic(Korea)
-subsetmat(z, ntopmodels = 5, maxorder = 2)
-
-z <- jackknifecal(z)
-z <- bootstrapcal(z, nboot = 2)
-subsetmat(z, ntopmodels = 5, maxorder = 2)
-
-}

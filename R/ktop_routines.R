@@ -21,6 +21,8 @@
 #' z=jackknifecal(z)
 #' BICmatrix_prop= find_bic_rank_matrix(z)
 #' BICmatrix_break = BICrank_tiebreak(BICmatrix_prop, 2)
+#'
+#' @export
 BICrank_tiebreak <- function(BICmatrix_prop, k){
   BICmatrix_break <- BICmatrix_prop[,1:k]
   BICmatrix_break <- BICmatrix_break[do.call(order, rev(asplit(BICmatrix_break, 2))),]
@@ -160,6 +162,8 @@ ktopBCa = function(z,BICmatrix_break,alpha=c(0.025, 0.05, 0.1, 0.16,0.2, 0.5, 0.
 #' data(Korea)
 #' zsortbic=assemble_bic(Korea, checkexist=TRUE)
 #' find_bic_rank_matrix(zsortbic, nbicranks=5)
+#'
+#' @export
 find_bic_rank_matrix= function(zsortbic,  nbicranks=5){
   #  set things up; this could be done directly through arguments to the
   # original function call

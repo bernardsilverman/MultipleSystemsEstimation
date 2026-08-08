@@ -21,6 +21,7 @@ Find BIC rank matrix up to a specified number of bic ranks for a given data set
 data(Korea)
 zsortbic=assemble_bic(Korea, checkexist=TRUE)
 find_bic_rank_matrix(zsortbic, nbicranks=5)
+
 }
 \references{
 Silverman, B. W., Chan, L. and  Vincent, K., (2024).

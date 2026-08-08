@@ -21,10 +21,3 @@ The routine counts the number of subsets of size three of lists such that every 
 lists in the triple overlaps. If the number is zero, then the model with all two-list effects
 is unidentifiable.
 }
-\examples{
-data(Western)
-data(Artificial_3)
-count_triples(Western)
-count_triples(Artificial_3)
-
-}

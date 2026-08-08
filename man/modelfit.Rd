@@ -39,8 +39,3 @@ A list with components as below
 This routine fits a specified model to multiple systems estimation data, taking account of the possibility of empty overlaps between
  pairs of observed lists.
 }
-\examples{
-data(NewOrl)
-modelfit(NewOrl,mX= c(1,3), check=TRUE)
-
-}

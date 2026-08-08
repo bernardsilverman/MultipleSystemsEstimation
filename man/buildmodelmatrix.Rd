@@ -34,8 +34,3 @@ This routine builds a model matrix as required by the linear program check \code
  In addition, for each individual list, and for each pair of lists included in the model,
   it returns the total count of individuals appearing on the specific list or lists whether or not in combination with other lists.
 }
-\examples{
-data(NewOrl)
-buildmodelmatrix(NewOrl, mX=NULL)
-
-}

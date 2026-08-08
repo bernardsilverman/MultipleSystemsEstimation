@@ -18,13 +18,6 @@ fit_hier_model(xdatin, hiermod, bicRcap = TRUE, checkid = FALSE)
 \description{
 Fit a hierarchical model taking account of possible sparsity
 }
-\examples{
-data(Korea)
-xdatin = ingest_data(Korea)
-fit_hier_model(xdatin,"[12,23]")
-fit_hier_model(xdatin,"[12,3]")
-
-}
 \references{
 Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 Bootstrapping Multiple Systems Estimates to Account for Model Selection

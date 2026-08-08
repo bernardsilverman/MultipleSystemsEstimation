@@ -39,13 +39,6 @@ A list with the following components
 \description{
 Find a local optimum by downhill search among hierarchical models
 }
-\examples{
-data(Korea)
-xdata=Korea
-counts = xdata[,dim(xdata)[2]]
-desmat = xdata[,1:(dim(xdata)[2]-1)]
-downhill_fit(counts, desmat)
-}
 \references{
 Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 Bootstrapping Multiple Systems Estimates to Account for Model Selection

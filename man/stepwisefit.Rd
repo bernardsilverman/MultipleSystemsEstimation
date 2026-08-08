@@ -39,8 +39,3 @@ whether or not they are on any other lists) is calculated.
 On the null hypothesis that the effect is not included in the model, this statistic has a Poisson
 distribution whose mean depends on the parameters within the model.    The one-sided Poisson p-value of the observed statistic is calculated.
 }
-\examples{
-data(NewOrl)
-stepwisefit(NewOrl, pthresh=0.02)
-
-}

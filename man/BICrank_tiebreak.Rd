@@ -25,6 +25,7 @@ z=assemble_bic(Korea)
 z=jackknifecal(z)
 BICmatrix_prop= find_bic_rank_matrix(z)
 BICmatrix_break = BICrank_tiebreak(BICmatrix_prop, 2)
+
 }
 \references{
 Silverman, B. W., Chan, L. and  Vincent, K., (2024).

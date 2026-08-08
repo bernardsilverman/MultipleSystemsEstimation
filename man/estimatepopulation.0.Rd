@@ -46,13 +46,6 @@ It also returns the details of the fitted model.  The user can choose whether to
 to fit a particular model containing specified two-list parameters, or
 to choose the model using the stepwise approach described by Chan, Silverman and Vincent (2021).
 }
-\examples{
-data(NewOrl)
-data(NewOrl_5)
-estimatepopulation.0(NewOrl, method="stepwise", quantiles=c(0.025,0.975))
-estimatepopulation.0(NewOrl_5, method="main", quantiles=c(0.01, 0.05,0.95, 0.99))
-
-}
 \references{
 Chan, L., Silverman, B. W., and Vincent, K. (2021).
  Multiple Systems Estimation for Sparse Capture Data: Inferential Challenges when there are Non-Overlapping Lists.

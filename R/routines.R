@@ -41,16 +41,6 @@ utils::globalVariables("hiermodels")
 #' \emph{Journal of American Statistcal Association}, \strong{116(535)}, 1297-1306,
 #' Available from \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2019.1708748}.
 #'
-#' @examples
-#' data(NewOrl)
-#' buildmodel(NewOrl, mX=NULL)
-#' #Build a matrix that contains all two-list effects
-#' m=dim(NewOrl)[2]-1
-#' mX = t(expand.grid(1:m, 1:m)); mX = mX[ , mX[1,]<mX[2,]]
-#' # With one two-list effect
-#' buildmodel(NewOrl, mX=mX[,1])
-#' #With three two-list effects
-#' buildmodel(NewOrl, mX=mX[,1:3])
 #'
 #' @importFrom stats as.formula
 #'
@@ -183,10 +173,6 @@ tidy_lists <- function(zdat, includezerocounts = FALSE) {
 #'
 #' \code{rankdef} The column rank deficiency of the matrix \code{modmat}. If \code{rankdef = 0}, the matrix has full column rank.
 #'
-#'
-#'@examples
-#' data(NewOrl)
-#' buildmodelmatrix(NewOrl, mX=NULL)
 #'
 
 buildmodelmatrix <- function(zdat, mX=NULL) {
@@ -358,12 +344,6 @@ check_identifiability <- function(zdat, mX=0, verbose=FALSE)
 #' \emph{Journal of American Statistcal Association}, \strong{116(535)}, 1297-1306,
 #' Available from \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2019.1708748}.
 #'
-#' @examples
-#' data(NewOrl)
-#' data(NewOrl_5)
-#' estimatepopulation.0(NewOrl, method="stepwise", quantiles=c(0.025,0.975))
-#' estimatepopulation.0(NewOrl_5, method="main", quantiles=c(0.01, 0.05,0.95, 0.99))
-#'
 #' @importFrom stats qnorm
 #'
 estimatepopulation.0 <-function(zdat,method="stepwise", quantiles=c(0.025,0.975),mX=NULL, pthresh=0.02){
@@ -426,11 +406,8 @@ estimatepopulation.0 <-function(zdat,method="stepwise", quantiles=c(0.025,0.975)
 #'
 #' \code{poisspempty} the Poisson p-values of the parameters corresponding to non-overlapping pairs.
 #'
-#' @examples
-#' data(NewOrl)
-#' modelfit(NewOrl,mX= c(1,3), check=TRUE)
 #'
-#' @importFrom stats glm poisson
+#' @importFrom stats glm poisson predict ppois
 #'
 
 modelfit = function (zdat, mX = NULL, check = TRUE){
@@ -504,14 +481,8 @@ modelfit = function (zdat, mX = NULL, check = TRUE){
 #'
 #' \code{poisspempty} the Poisson p-values of the parameters corresponding to non-overlapping pairs.
 #'
-#'@examples
-#'data(NewOrl)
-#'stepwisefit(NewOrl, pthresh=0.02)
+#'@importFrom stats predict ppois
 #'
-#'@importFrom stats ppois predict
-#'
-#'
-
 stepwisefit<- function(zdat, pthresh=0.02) {
   m = dim(zdat)[2] - 1
   ierrfullmodel=NA
@@ -707,13 +678,6 @@ investigateAIC <- function(nsim=10000, Nsamp= 1000, seed = 1001) {
 #' Fienberg, S. E. and Rinaldo, A. (2012). Maximum likelihood estimation in log-linear
 #' models. \emph{Ann. Statist.} \strong{40}, 996-1023.  Supplementary material: Technical report, Carnegie Mellon University. Available from \url{http://www.stat.cmu.edu/~arinaldo/Fienberg_Rinaldo_Supplementary_Material.pdf}.
 #'
-#' @examples
-#'data(Artificial_3)
-#'data(Western)
-#'checkallmodels(Artificial_3)
-#'checkallmodels(Western)
-#'
-
 checkallmodels <-function (zdat, nreport= 1024) {
   m = dim(zdat)[2] - 1
   if (count_triples(zdat) ==0) cat("The model including all two-list parameters is not identifiable. \n")
@@ -909,14 +873,6 @@ checkthetasubset <- function(zset, amat, tvec, nlists) {
 #' Available from \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2019.1708748}.
 #'
 #'
-#' @examples
-#' #UK 5 list data
-#' data(UKdat_5)
-#' # Obtain matrix with capture histories only
-#' UKdat_5_cap <- UKdat_5[, 1:dim(UKdat_5)[2]-1]
-#' ordercaptures(UKdat_5_cap)
-#
-
 ordercaptures <- function(zmat){
   #  Given a matrix of capture histories order them first by the number of 1s and then lexicographically by columns
   zz = paste(rep(LETTERS[1:26], each=26), rep(LETTERS[1:26], times=26), sep="")
@@ -944,11 +900,6 @@ ordercaptures <- function(zmat){
 #'
 #' @return a count of subsets of size three of lists such that every pair of lists in the triple overlaps.
 #'
-#' @examples
-#' data(Western)
-#' data(Artificial_3)
-#' count_triples(Western)
-#' count_triples(Artificial_3)
 #'
 count_triples <- function(zdat) {
 
@@ -1238,7 +1189,7 @@ bcaconfvalues<-function(bootreps, popest, ahat, alpha=c(0.025, 0.05, 0.1, 0.16, 
 #' Rivest, L-P. and Baillargeon, S. (2014) Rcapture. CRAN package. Available from Available from \url{https://CRAN.R-project.org/package=Rcapture}.
 #'
 #'
-#'@importFrom stats pnorm quantile rbinom rmultinom
+#'@importFrom stats pnorm quantile rbinom rmultinom predict ppois
 #'
 #'@examples
 #'zdat=UKdat_5
@@ -1506,11 +1457,6 @@ child_captures = function(k, nlists) {
 #' \emph{Statistics and Computing}, \strong{34(44)},
 #' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
 #'
-#' @examples
-#' #Create master design matrix with 5 lists
-#' make_master_design(5)
-#' #Create master design matrix with 3 lists
-#' make_master_design(3)
 #'
 make_master_design = function(nlists) {
   # make design matrix where rows correspond to observations
@@ -1857,15 +1803,6 @@ ntopBCa = function(z,alpha=c(0.025, 0.05, 0.1, 0.16,0.2, 0.5, 0.8, 0.84, 0.9, 0.
 #' \emph{Statistics and Computing}, \strong{34(44)},
 #' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
 #'
-#' @examples
-#' data(Korea)
-#' z=assemble_bic(Korea, checkexist=TRUE)
-#' z=jackknifecal(z, checkexist=TRUE)
-#' nmods= dim(z$jackabund)[1]
-#' modscores = (1:nmods)
-#' modelorder= order(modscores)
-#' bicktopahatcal(z,modelorder)
-#'
 bicktopahatcal = function(z, modelorder) {
   # set up
   nmods=length(modelorder)
@@ -1948,16 +1885,6 @@ bicktopahatcal = function(z, modelorder) {
 #'   } If the input only has the output from \code{assemble_bic}, the last five items of the list
 #'   do not appear.
 #'
-#' @examples
-#' data(Korea)
-#'
-#' z <- assemble_bic(Korea)
-#' subsetmat(z, ntopmodels = 5, maxorder = 2)
-#'
-#' z <- jackknifecal(z)
-#' z <- bootstrapcal(z, nboot = 2)
-#' subsetmat(z, ntopmodels = 5, maxorder = 2)
-#'
 subsetmat <- function(z,
                       ntopmodels = Inf,
                       maxorder = Inf) {
@@ -2002,13 +1929,6 @@ subsetmat <- function(z,
 #' \emph{Statistics and Computing}, \strong{34(44)},
 #' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
 #'
-#'@examples
-#'x="[1,2,3,4,5]"
-#'modelorder(x)
-#'y="[12,24,25,35,45]"
-#'modelorder(y)
-#'
-
 modelorder = function(x) {
   return(max(nchar(unlist(
     strsplit(gsub("\\[|\\]", "", x), ",")
@@ -2070,11 +1990,6 @@ get_hierarchical_models=function(nlists, maxorder=nlists-1, modelvec=hiermodels)
 #' Fienberg, S. E. and Rinaldo, A. (2012). Maximum likelihood estimation in log-linear
 #' models. \emph{Ann. Statist.} \strong{40}, 996-1023.  Supplementary material: Technical report, Carnegie Mellon University. Available from \url{http://www.stat.cmu.edu/~arinaldo/Fienberg_Rinaldo_Supplementary_Material.pdf}.
 #'
-#' @examples
-#' data(Korea)
-#' datlist = ingest_data(Korea)
-#' parset ="[0,0,1]"
-#' checkident.1(parset,datlist)
 #'
 checkident.1= function(parset, datlist) {
   if (is.character(parset)) parset = convert_from_hierarchy(parset)
@@ -2124,6 +2039,7 @@ checkident.1= function(parset, datlist) {
 #'data(Korea)
 #'assemble_bic(Korea, checkexist=TRUE)
 #'
+#'@export
 assemble_bic <-
   function(xdata,maxorder=dim(xdata)[2]-2, checkexist=TRUE, removeFRfail=TRUE, ...){
     # number of lists
@@ -2190,12 +2106,6 @@ assemble_bic <-
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
 #' \emph{Statistics and Computing}, \strong{34(44)},
 #' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
-#'
-#' @examples
-#' data(Korea)
-#' xdatin = ingest_data(Korea)
-#' fit_hier_model(xdatin,"[12,23]")
-#' fit_hier_model(xdatin,"[12,3]")
 #'
 #' @importFrom stats glm.fit na.omit splinefun
 fit_hier_model= function(xdatin, hiermod, bicRcap=TRUE, checkid=FALSE) {
@@ -2360,12 +2270,6 @@ convert_to_hierarchy = function(kcap, nlists) {
 #' \emph{Statistics and Computing}, \strong{34(44)},
 #' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
 #'
-#' @examples
-#'modelstr = "[12,23]"
-#'nlists=4
-#'zhierroots = convert_from_hierarchy(modelstr, FALSE)
-#'zhier = unique(ancestors(zhierroots, nlists))
-#'boundary_captures(zhier,nlists)
 #'
 boundary_captures = function(kcap, nlists) {
   #  Here kcap is a vector of captures.  Find the captures which are not in kcap but
@@ -2401,12 +2305,6 @@ boundary_captures = function(kcap, nlists) {
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
 #' \emph{Statistics and Computing}, \strong{34(44)},
 #' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
-#'
-#'@examples
-#'data(Korea)
-#'z=assemble_bic(Korea)
-#'z=bootstrapcal(z, nboot=2)
-#'find_unique_patterns(z$bootreplications)
 #'
 find_unique_patterns = function(x) {
   # find non-zeroes and convert resulting matrix to numeric
@@ -2445,12 +2343,6 @@ find_unique_patterns = function(x) {
 #' \emph{Statistics and Computing}, \strong{34(44)},
 #' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
 #'
-#' @examples
-#' data(Korea)
-#' z=assemble_bic(Korea)
-#' z=bootstrapcal(z, nboot=2)
-#' n2=dim(z$xdata)[2]
-#' checkident.2(z$bootreplications, z$xdata[,-n2], dimnames(z$res)[[1]])
 #'
 checkident.2 = function(x, xcap, zmods) {
   # set up the unique patterns within x and initialise
@@ -2516,6 +2408,7 @@ checkident.2 = function(x, xcap, zmods) {
 #'z=assemble_bic(Korea)
 #'bootstrapcal(z, nboot=2, checkexist=TRUE, saveinterval=50, savefile="Koreabootresults.Rdata")
 #'
+#'@export
 bootstrapcal <- function(z,
                            nboot = 1000,
                            iseed = 1234,
@@ -2591,6 +2484,7 @@ bootstrapcal <- function(z,
 #' z=assemble_bic(Korea)
 #' jackknifecal(z,checkexist=TRUE)
 #'
+#' @export
 jackknifecal <- function(z, checkexist = TRUE) {
 
   zdat = tidy_lists(z$xdata, includezerocounts = TRUE)

@@ -18,13 +18,6 @@ The value of the linear program. The parameter estimates within the extended ML 
 This routine performs the Fienberg-Rinaldo linear program check in the framework of extended maximum likelihood estimates,
 the parameters estimates exist if and only if the return value of the check is nonzero
 }
-\examples{
-data(Korea)
-datlist = ingest_data(Korea)
-parset ="[0,0,1]"
-checkident.1(parset,datlist)
-
-}
 \references{
 Silverman, B. W., Chan, L. and  Vincent, K., (2022).
 Bootstrapping Multiple Systems Estimates to Account for Model Selection
