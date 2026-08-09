@@ -1,0 +1,440 @@
+---
+title: "A User Guide to MultipleSystemsEstimation"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{A User Guide to MultipleSystemsEstimation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(MultipleSystemsEstimation)
+```
+
+# Introduction
+
+Multiple systems estimation uses several incomplete lists of observed individuals to estimate the size of a population, including the number of individuals who appear on none of the lists. The `MultipleSystemsEstimation` package implements Poisson log-linear methods for this problem, with particular attention to two important practical issues:
+
+* sparse capture data, including combinations of lists with no observed overlap; and
+* uncertainty introduced by choosing a log-linear model from the observed data.
+
+For most analyses the recommended starting point is the high-level function
+
+```r
+estimate_population(zdat)
+```
+
+whose default `method = "auto"` chooses an estimation method according to the number of lists. For data with up to five lists it uses BIC model selection; for six or more lists it uses the stepwise procedure. The individual methods can also be selected explicitly.
+
+The BIC/bootstrap approach follows Silverman, Chan and Vincent (2024). The stepwise procedure and the treatment of sparse-data existence and identifiability issues build on Chan, Silverman and Vincent (2021).
+
+This vignette is intended as a guide to analysing data with the package. Separate vignettes describe how to reproduce specific results from the two papers.
+
+# Data format
+
+Suppose there are \(t\) lists. Each observed individual has a *capture history* specifying the lists on which that individual occurs.
+
+Data supplied to the package have \(t+1\) columns. The first \(t\) columns contain zeros and ones indicating membership of the lists, and the final column contains the number of individuals observed with that capture history. Observable capture histories omitted from the data are treated as having count zero.
+
+The all-zero capture history is fundamentally different. It represents individuals who occur on none of the lists and therefore cannot be observed directly. Estimating the size of this unobserved group, often called the *dark figure*, is the central objective of multiple systems estimation.
+
+The package includes several example datasets. The three-list `Korea` data provide a compact illustration:
+
+```{r korea-data}
+data(Korea)
+Korea
+```
+
+The number of lists and the total number of observed individuals can be obtained directly:
+
+```{r korea-summary}
+nlists <- ncol(Korea) - 1
+nobserved <- sum(Korea[, ncol(Korea)])
+
+nlists
+nobserved
+```
+
+For more specialised data manipulation, `tidy_lists()` can be used to add explicitly the observable capture histories whose counts are zero.
+
+# Start with `estimate_population()`
+
+For routine use, begin with the default call:
+
+```{r auto-fit}
+fit <- estimate_population(Korea)
+fit$popest
+attr(fit, "method")
+attr(fit, "nlists")
+```
+
+Because `Korea` has three lists, `method = "auto"` selects the BIC method. The returned `popest` is the estimated total population, including both the individuals observed on at least one list and the estimated dark figure.
+
+The automatic rule is:
+
+| Number of lists | Method selected by `method = "auto"` |
+|----------------:|:---------------------------------------|
+| 2--5            | BIC                                    |
+| 6               | Stepwise                               |
+| More than 6     | Stepwise                               |
+
+For six-list data the BIC method remains available by specifying `method = "bic"`, but exhaustive BIC enumeration is computationally burdensome. BIC enumeration is not available for more than six lists.
+
+The rest of this vignette explains the available methods and the common inferential ideas behind them.
+
+# BIC model selection
+
+The BIC approach is the method used automatically for data with up to five lists. It is based on the methodology of Silverman, Chan and Vincent (2024).
+
+A hierarchical Poisson log-linear model is fitted to the capture-history counts. Different hierarchical models correspond to different sets of interactions among the lists. The candidate models are ranked by Bayesian information criterion (BIC), and the model with the smallest BIC gives the point estimate for the original data.
+
+The BIC method can be requested explicitly:
+
+```{r bic-point}
+fit_bic <- estimate_population(
+  Korea,
+  method = "bic"
+)
+
+fit_bic$popest
+fit_bic$model
+fit_bic$BIC
+```
+
+The `bic_results` component contains the full BIC enumeration for the original data:
+
+```{r bic-results}
+head(fit_bic$bic_results$res)
+```
+
+## Which models are considered?
+
+The argument `maxorder` controls the maximum order of interactions considered. If it is left at its default `NULL`, the package chooses:
+
+| Number of lists | Automatic `maxorder` |
+|----------------:|---------------------:|
+| 2               | 1 |
+| 3               | 2 |
+| 4--5            | 3 |
+| 6               | 2 |
+
+For up to five lists the package contains the required catalogue of hierarchical models. For six lists the catalogue is restricted to interactions of order at most two: even this requires fitting 32,768 hierarchical models. This computational burden is why `method = "auto"` switches to stepwise fitting for six-list data.
+
+Users can specify `maxorder` explicitly when there is a substantive reason to restrict the interaction order.
+
+# Bootstrap inference after BIC selection
+
+Choosing the best model and then calculating a confidence interval as though that model had been fixed in advance ignores uncertainty arising from the model-selection step. The bootstrap approach of Silverman, Chan and Vincent (2024) addresses this by repeating BIC model selection within bootstrap samples.
+
+Bootstrap inference is requested through `nboot`:
+
+```{r bic-bootstrap, eval=FALSE}
+fit_bic_boot <- estimate_population(
+  Korea,
+  method = "bic",
+  nboot = 1000
+)
+
+fit_bic_boot$BCaquantiles
+```
+
+A small value of `nboot` is useful for checking code, but substantive inference should use substantially more bootstrap replications.
+
+## Restricting model selection within the bootstrap
+
+Repeating an exhaustive model search for every bootstrap sample can be expensive. The 2024 methodology therefore ranks models by their BIC on the original data and allows bootstrap model selection to be restricted to the best-ranked models.
+
+With `ntopmodels = NULL`, the current defaults are:
+
+| Number of lists | Models retained for bootstrap inference |
+|----------------:|:-----------------------------------------|
+| 2--3            | All available models                     |
+| 4               | Top 20 by original-data BIC              |
+| 5--6            | Top 100 by original-data BIC             |
+
+These defaults affect bootstrap and jackknife calculations only. The original-data point estimate is always based on the minimum-BIC model from the full candidate set allowed by `maxorder`.
+
+The number retained can be specified directly, for example:
+
+```{r bic-ntop, eval=FALSE}
+fit_bic_50 <- estimate_population(
+  Korea,
+  method = "bic",
+  nboot = 1000,
+  ntopmodels = 50
+)
+```
+
+For each retained set, the package calculates bias-corrected and accelerated (BCa) confidence limits. The rows of `BCaquantiles` correspond to nested sets of the models ranked by original-data BIC. Row 1 allows only the best-BIC model; row 2 allows selection between the best two; and so on. The final row therefore shows the inference obtained when selection is allowed among all models retained for the bootstrap calculation.
+
+This makes it possible not only to obtain a confidence interval but also to see whether the inference has stabilised as additional candidate models are admitted.
+
+# Sparse capture data
+
+The log-linear model can be written, for an observable capture history \(\omega\), as
+
+\[
+N_\omega \sim \operatorname{Poisson}(\mu_\omega),
+\qquad
+\log \mu_\omega = \sum_{\theta \subseteq \omega} \alpha_\theta.
+\]
+
+The intercept parameter determines the expected count for the unobserved all-zero capture history. The population estimate is the observed population plus the fitted value for that unobserved group.
+
+Sparse capture data require particular care. Most importantly, two lists may have no observed individuals in common. If the interaction corresponding to such a pair is included in a fitted model, its extended maximum likelihood estimate can be \(-\infty\). This is a boundary estimate, not merely a numerical convergence failure: it corresponds to fitted mean zero for capture histories containing that combination of lists.
+
+The treatment of extended maximum likelihood estimates and the existence of estimates in sparse log-linear models builds on the general results of Fienberg and Rinaldo (2012), specialised to the multiple-systems setting by Chan, Silverman and Vincent (2021).
+
+The package handles such boundary estimates explicitly.
+
+Two further problems can occur:
+
+1. the maximum likelihood estimate may fail to exist, even allowing extended boundary values; and
+2. the model parameters may fail to be identifiable.
+
+These are distinct issues. The package fitting routines check for them so that invalid model fits are not allowed to contaminate model selection or population estimation.
+
+The artificial three-list dataset supplied with the package was constructed to illustrate these possibilities:
+
+```{r artificial}
+data(Artificial_3)
+Artificial_3
+```
+
+Advanced users can check a particular pairwise model directly with `check_identifiability()`. For example, the model containing all three pairwise effects is not identifiable for these data:
+
+```{r identifiability}
+m <- ncol(Artificial_3) - 1
+mX <- t(expand.grid(1:m, 1:m))
+mX <- mX[, mX[1, ] < mX[2, ], drop = FALSE]
+
+check_identifiability(
+  Artificial_3,
+  mX = mX,
+  verbose = TRUE
+)
+```
+
+Ordinary users do not normally need to call this function themselves: the relevant checks are incorporated into the package's model-fitting procedures.
+
+# The stepwise method
+
+The second principal model-selection method is the forward stepwise procedure of Chan, Silverman and Vincent (2021). It can be requested explicitly for any supported number of lists and is selected automatically when there are six or more lists.
+
+The procedure starts with a main-effects model. At each stage it considers candidate two-list interactions not yet included in the model, subject to the existence and identifiability checks described above. The interaction with the smallest p-value is added if that p-value does not exceed the threshold `pthresh`; otherwise the procedure stops.
+
+The default is `pthresh = 0.02`, following the simulation study reported by Chan, Silverman and Vincent (2021).
+
+For example:
+
+```{r stepwise-point}
+fit_step <- estimate_population(
+  Korea,
+  method = "stepwise"
+)
+
+fit_step$popest
+fit_step$MSEfit
+```
+
+The threshold can be varied explicitly:
+
+```{r stepwise-threshold}
+fit_step_01 <- estimate_population(
+  Korea,
+  method = "stepwise",
+  pthresh = 0.01
+)
+
+fit_step_01$popest
+```
+
+The stepwise method is not merely a computational fallback. It can be chosen deliberately when the 2021 model-selection procedure is scientifically preferred or when sensitivity to the threshold is of interest.
+
+# Bootstrap inference after stepwise selection
+
+As with the BIC approach, bootstrap inference repeats the complete model-selection procedure for every bootstrap sample rather than conditioning on the model selected from the original data.
+
+```{r stepwise-bootstrap, eval=FALSE}
+fit_step_boot <- estimate_population(
+  Korea,
+  method = "stepwise",
+  nboot = 1000
+)
+
+fit_step_boot$BCaquantiles
+```
+
+The bootstrap samples are generated by multinomial resampling of the observed capture-history counts. A delete-one jackknife calculation supplies the acceleration term for the BCa confidence limits.
+
+The result also contains the bootstrap population estimates and the estimated acceleration parameter:
+
+```{r stepwise-bootstrap-parts, eval=FALSE}
+fit_step_boot$bootreps
+fit_step_boot$ahat
+```
+
+# Fitting a specified model
+
+Sometimes the log-linear model has been chosen independently of either automatic model-selection procedure. In that case use `method = "fixed"`.
+
+For example:
+
+```{r fixed-point}
+fit_fixed <- estimate_population(
+  Korea,
+  method = "fixed",
+  hiermod = "[12,23]"
+)
+
+fit_fixed$popest
+fit_fixed$hiermod
+```
+
+Hierarchy notation specifies a model through its maximal interactions. For example:
+
+```text
+[1,2,3]    main effects only
+[12,3]     interaction 12, with main effect 3
+[12,23]    interactions 12 and 23
+[123,4]    a three-list interaction 123, with main effect 4
+```
+
+All lower-order terms implied by hierarchy are included automatically.
+
+For pairwise models the older `mX` representation can also be used. For example, `mX = c(2, 3)` specifies the interaction between lists 2 and 3.
+
+Bootstrap inference for a fixed model is requested in the same way:
+
+```{r fixed-bootstrap, eval=FALSE}
+fit_fixed_boot <- estimate_population(
+  Korea,
+  method = "fixed",
+  hiermod = "[12,23]",
+  nboot = 1000
+)
+
+fit_fixed_boot$BCaquantiles
+```
+
+Here the distinction from BIC and stepwise inference is important: the same specified model is fitted to every bootstrap and jackknife sample. There is no model-selection step inside the resampling procedure.
+
+# Bootstrap and BCa inference: a common view
+
+All three routes can be used for point estimation with `nboot = 0`, which is the default.
+
+When `nboot > 0`:
+
+* **BIC:** model selection is repeated within each bootstrap sample, over the retained top-BIC candidate set;
+* **Stepwise:** the complete stepwise selection procedure is repeated within each bootstrap sample;
+* **Fixed:** the same specified model is fitted to every bootstrap sample.
+
+In all cases the package uses a delete-one jackknife calculation to estimate the acceleration term required for BCa inference. The `iseed` argument controls the random-number seed and can be set to make bootstrap results reproducible.
+
+By default, confidence limits are returned at cumulative probability levels
+
+```r
+c(0.025, 0.1, 0.9, 0.975)
+```
+
+corresponding to the endpoints of 95% and 80% intervals. Other probabilities can be supplied through `alpha`.
+
+# Which method should I use?
+
+For most users the answer is simple: begin with
+
+```r
+estimate_population(zdat)
+```
+
+and therefore allow `method = "auto"` to select the route.
+
+There are, however, reasons to choose explicitly:
+
+* use `method = "bic"` when BIC model selection is specifically wanted and the number of lists makes exhaustive enumeration feasible;
+* use `method = "stepwise"` when the Chan--Silverman--Vincent stepwise procedure is preferred, when sensitivity to `pthresh` is of interest, or for larger numbers of lists where BIC enumeration is unavailable or unattractive;
+* use `method = "fixed"` when the model has been specified independently of these data-driven selection procedures.
+
+For six lists, `auto` deliberately chooses stepwise fitting. Explicit BIC fitting is possible, but requires enumeration of 32,768 pairwise hierarchical models and may therefore take considerable time. For more than six lists, the BIC enumeration method is not available.
+
+# Looking inside the result
+
+The exact components returned depend on the method selected.
+
+For BIC fitting:
+
+```{r names-bic}
+names(fit_bic)
+```
+
+The most important components are:
+
+* `popest`: estimated total population;
+* `model`: minimum-BIC hierarchical model;
+* `BIC`: BIC of that model;
+* `bic_results`: full original-data BIC enumeration;
+* `BCaquantiles`: bootstrap BCa inference when requested.
+
+For stepwise fitting:
+
+```{r names-step}
+names(fit_step)
+```
+
+`MSEfit` contains the selected fitted model, while `bootreps`, `ahat` and `BCaquantiles` contain the resampling results when bootstrap inference has been requested.
+
+For fixed fitting:
+
+```{r names-fixed}
+names(fit_fixed)
+```
+
+`hiermod` records the model that was fitted and `MSEfit` contains the detailed fitted object.
+
+The individual help pages give the complete definitions of returned components:
+
+```r
+?estimate_population
+?estimate_population_bic
+?estimate_population_stepwise
+?estimate_population_fixed
+```
+
+# Lower-level tools
+
+The high-level interface is sufficient for most analyses, but the package also exposes tools for inspecting and constructing the model-fitting machinery. Among these are:
+
+```r
+check_identifiability()
+get_hierarchical_models()
+find_neighbour_hierarchies()
+encode_capture()
+decode_capture()
+ancestors()
+descendants()
+```
+
+These functions are useful when models need to be constructed or inspected directly, but they are not required for a standard population estimate.
+
+# Where next?
+
+This vignette has described the package as a tool for current analysis. Two companion vignettes provide paper-specific workflows:
+
+* *Reproducing Silverman, Chan and Vincent (2024)*, covering the BIC/bootstrap methodology and selected published results; and
+* *Reproducing Chan, Silverman and Vincent (2021)*, covering the sparse-data and stepwise methodology and selected published results.
+
+These reproducibility vignettes may use lower-level or historically oriented functions that are not part of the normal user workflow.
+
+# References
+
+Chan, L., Silverman, B. W. and Vincent, K. (2021). Multiple Systems Estimation for Sparse Capture Data: Inferential Challenges When There Are Nonoverlapping Lists. *Journal of the American Statistical Association*, **116**(535), 1297--1306. doi:10.1080/01621459.2019.1708748.
+
+DiCiccio, T. J. and Efron, B. (1996). Bootstrap Confidence Intervals. *Statistical Science*, **11**(3), 189--228.
+
+Fienberg, S. E. and Rinaldo, A. (2012). Maximum Likelihood Estimation in Log-Linear Models. *The Annals of Statistics*, **40**, 996--1023.
+
+Silverman, B. W., Chan, L. and Vincent, K. (2024). Bootstrapping Multiple Systems Estimates to Account for Model Selection. *Statistics and Computing*, **34**, 44. doi:10.1007/s11222-023-10346-9.
