@@ -1,0 +1,722 @@
+---
+title: "Reproducing Silverman, Chan and Vincent (2024)"
+author: "Bernard Silverman"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Reproducing Silverman, Chan and Vincent (2024)}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+
+library(MultipleSystemsEstimation)
+```
+
+# Introduction
+
+This vignette gives reproducibility code for the numerical results in
+
+Silverman, B. W., Chan, L. and Vincent, K. (2024).
+*Bootstrapping multiple systems estimates to account for model selection*,
+*Statistics and Computing* **34**, 44.
+
+The calculations use the current `MultipleSystemsEstimation` interface.
+
+The general rule in this vignette is:
+
+* calculations for finite values of `ntop` are carried out directly;
+* the paper's value `nboot = 1000` is used for the substantive calculations;
+* exhaustive five-list bootstrap calculations over all candidate models are
+  not run during an ordinary vignette build, because they are much more
+  expensive;
+* where an exhaustive result is needed only as a benchmark, the published
+  value is inserted explicitly and identified as such;
+* code for carrying out the exhaustive calculation is nevertheless shown.
+
+Table 1 of the paper is not reproduced.  It illustrates the issue of
+existence of the extended maximum likelihood estimate rather than providing a
+numerical application.  The package function `check_identifiability()` provides
+the corresponding diagnostic.
+
+# Helper functions
+
+```{r helpers}
+pick_ntop <- function(x, values) {
+  out <- x$inference[x$inference$ntop %in% values, , drop = FALSE]
+  out[match(values, out$ntop), , drop = FALSE]
+}
+
+ci_text <- function(lo, hi, rounding = 1) {
+  lo <- round(lo / rounding) * rounding
+  hi <- round(hi / rounding) * rounding
+  paste0("[", lo, ", ", hi, "]")
+}
+
+plot_ntop_set <- function(x, at, col, lwd = 1) {
+  z <- x[x$ntop %in% at, , drop = FALSE]
+  z <- z[match(at, z$ntop), , drop = FALSE]
+  xx <- seq_along(at)
+
+  lines(xx, z[["0.025"]], lty = 1, col = col, lwd = lwd)
+  lines(xx, z[["0.975"]], lty = 1, col = col, lwd = lwd)
+
+  if (all(c("0.1", "0.9") %in% names(z))) {
+    lines(xx, z[["0.1"]], lty = 2, col = col, lwd = lwd)
+    lines(xx, z[["0.9"]], lty = 2, col = col, lwd = lwd)
+  }
+}
+
+plot_two_ntop_bands <- function(x2, est2, x4, est4, at, main,
+                                lwd2 = 1, lwd4 = 1) {
+  z2 <- x2[x2$ntop %in% at, , drop = FALSE]
+  z2 <- z2[match(at, z2$ntop), , drop = FALSE]
+
+  z4 <- x4[x4$ntop %in% at, , drop = FALSE]
+  z4 <- z4[match(at, z4$ntop), , drop = FALSE]
+
+  ylim <- range(
+    z2[["0.025"]], z2[["0.975"]], est2,
+    z4[["0.025"]], z4[["0.975"]], est4,
+    finite = TRUE
+  )
+
+  xx <- seq_along(at)
+
+  plot(
+    xx, rep(NA_real_, length(xx)),
+    type = "n", xaxt = "n",
+    xlab = "ntop", ylab = "Population estimate",
+    ylim = ylim, main = main
+  )
+  axis(1, at = xx, labels = at)
+
+  plot_ntop_set(x2, at, "blue", lwd = lwd2)
+  plot_ntop_set(x4, at, "red", lwd = lwd4)
+  abline(h = est2, lty = 4, col = "blue", lwd = lwd2)
+  abline(h = est4, lty = 4, col = "red", lwd = lwd4)
+
+  legend(
+    "topright",
+    legend = c(
+      "maximum order 2", "maximum order 4",
+      "95% limits", "80% limits", "point estimate"
+    ),
+    col = c("blue", "red", "black", "black", "black"),
+    lty = c(1, 1, 1, 2, 4),
+    bty = "n"
+  )
+}
+```
+
+# Table 2: Kosovo
+
+Kosovo has only 113 admissible candidate models, so the exhaustive calculation
+is manageable and is carried out directly.
+
+```{r table2-calc}
+data(Kosovo)
+
+kos <- vary_ntop_bca(
+  Kosovo,
+  maxorder = ncol(Kosovo) - 2,
+  ntopmax = Inf,
+  degree = 1,
+  nboot = 1000,
+  iseed = 1234,
+  alpha = c(0.025, 0.1, 0.9, 0.975)
+)
+
+kos_last <- max(kos$inference$ntop)
+
+kos_tab <- pick_ntop(kos, c(1, 5, 10, kos_last))
+
+table2 <- data.frame(
+  ntop = c("1", "5", "10", paste0(kos_last, " (Inf)")),
+  `80% CI` = ci_text(kos_tab[["0.1"]], kos_tab[["0.9"]], 100),
+  `95% CI` = ci_text(kos_tab[["0.025"]], kos_tab[["0.975"]], 100),
+  check.names = FALSE
+)
+
+knitr::kable(table2)
+```
+
+The published table, rounded to the nearest 100, is:
+
+```{r table2-published}
+table2_published <- data.frame(
+  ntop = c("1", "5", "10", "113 (Inf)"),
+  `80% CI` = c(
+    "[9500, 11300]",
+    "[8500, 11500]",
+    "[7400, 12200]",
+    "[7400, 12200]"
+  ),
+  `95% CI` = c(
+    "[9100, 12000]",
+    "[8500, 17000]",
+    "[6900, 18000]",
+    "[6900, 18000]"
+  ),
+  check.names = FALSE
+)
+
+knitr::kable(table2_published)
+```
+
+# Table 3: Korea
+
+There are only six admissible models after the existence check, so the
+exhaustive calculation is again run directly.
+
+```{r table3-calc}
+data(Korea)
+
+kor <- vary_ntop_bca(
+  Korea,
+  maxorder = 2,
+  ntopmax = Inf,
+  degree = 1,
+  nboot = 1000,
+  iseed = 1234,
+  alpha = c(0.025, 0.1, 0.9, 0.975)
+)
+
+kor_last <- max(kor$inference$ntop)
+
+kor_tab <- pick_ntop(kor, c(1, 2, kor_last))
+
+table3 <- data.frame(
+  ntop = c("1", "2", paste0(kor_last, " (Inf)")),
+  `80% CI` = ci_text(kor_tab[["0.1"]], kor_tab[["0.9"]]),
+  `95% CI` = ci_text(kor_tab[["0.025"]], kor_tab[["0.975"]]),
+  check.names = FALSE
+)
+
+knitr::kable(table3)
+```
+
+The published intervals are:
+
+```{r table3-published}
+table3_published <- data.frame(
+  ntop = c("1", "2", "6 (Inf)"),
+  `80% CI` = c("[136, 198]", "[135, 286]", "[135, 288]"),
+  `95% CI` = c("[131, 248]", "[130, 348]", "[128, 349]"),
+  check.names = FALSE
+)
+
+knitr::kable(table3_published)
+```
+
+# Figure 1: five-list UK data
+
+The finite-`ntop` calculations are performed in the vignette.  We calculate
+through `ntop = 60`, which is also sufficient for the finite part of Figure 3.
+
+```{r fig1-calc}
+data(UKdat_5)
+
+uk2 <- vary_ntop_bca(
+  UKdat_5,
+  maxorder = 2,
+  ntopmax = 60,
+  degree = 1,
+  nboot = 1000,
+  iseed = 1234,
+  alpha = c(0.025, 0.1, 0.9, 0.975)
+)
+
+uk4 <- vary_ntop_bca(
+  UKdat_5,
+  maxorder = 4,
+  ntopmax = 60,
+  degree = 1,
+  nboot = 1000,
+  iseed = 1234,
+  alpha = c(0.025, 0.1, 0.9, 0.975)
+)
+```
+
+The paper also shows the exhaustive result at `ntop = Inf`.  Repeating an
+exhaustive bootstrap search over all five-list models is deliberately omitted
+from an ordinary vignette build.  The finite part of the figure is therefore
+drawn directly from the calculations above.
+
+```{r fig1}
+at1 <- c(1, 2, 5, 10, 20, 50)
+
+plot_two_ntop_bands(
+  pick_ntop(uk2, at1), uk2$estimate,
+  pick_ntop(uk4, at1), uk4$estimate,
+  at = at1,
+  main = "Five-list UK data"
+)
+```
+
+The published exhaustive 95% intervals, from Table 6 of the paper, are
+`[11456, 43894]` for maximum order 2 and `[11168, 56052]` for maximum order 4.
+Those values may be added as an `Inf` benchmark if an exact visual reproduction
+of the published figure is desired.
+
+A fully fresh exhaustive calculation can be requested by replacing
+`ntopmax = 60` with `ntopmax = Inf`, but it is substantially more expensive.
+
+# Figure 2: five-list New Orleans data
+
+Again the finite calculations are performed directly, through `ntop = 60`.
+
+```{r fig2-calc}
+data(NewOrl_5)
+
+no2 <- vary_ntop_bca(
+  NewOrl_5,
+  maxorder = 2,
+  ntopmax = 60,
+  degree = 1,
+  nboot = 1000,
+  iseed = 1234,
+  alpha = c(0.025, 0.1, 0.9, 0.975)
+)
+
+no4 <- vary_ntop_bca(
+  NewOrl_5,
+  maxorder = 4,
+  ntopmax = 60,
+  degree = 1,
+  nboot = 1000,
+  iseed = 1234,
+  alpha = c(0.025, 0.1, 0.9, 0.975)
+)
+```
+
+The two sets of curves are essentially coincident for the finite values shown.
+
+```{r fig2}
+at2 <- c(1, 2, 5, 10, 20, 50)
+
+plot_two_ntop_bands(
+  pick_ntop(no2, at2), no2$estimate,
+  pick_ntop(no4, at2), no4$estimate,
+  at = at2,
+  main = "Five-list New Orleans data",
+  lwd2 = 3,
+  lwd4 = 1
+)
+```
+
+For `ntop = Inf`, the paper reports upper 97.5% limits of 1544 for maximum
+order 2 and 1547 for maximum order 4.  The exhaustive calculation is again
+not performed in an ordinary vignette build.
+
+# Table 4: location of the bootstrap BIC minimum
+
+Table 4 asks, for each bootstrap sample, where the globally optimal bootstrap
+model lies in the original-data BIC ranking.  Thus it intrinsically requires
+an exhaustive bootstrap search.
+
+The calculation is therefore shown but not evaluated in an ordinary vignette
+build.
+
+```{r table4-code, eval=FALSE}
+bootstrap_optimal_ranks <- function(zdat, maxorder,
+                                    nboot = 1000, iseed = 1234) {
+  z <- MultipleSystemsEstimation:::assemble_bic(
+    zdat, maxorder = maxorder
+  )
+
+  z <- MultipleSystemsEstimation:::bootstrapcal(
+    z, nboot = nboot, iseed = iseed
+  )
+
+  original_order <- order(z$res[, "BIC"])
+
+  vapply(seq_len(nboot), function(b) {
+    v <- z$bootbic[, b]
+    ok <- which(is.finite(v))
+    if (!length(ok)) return(NA_integer_)
+
+    best <- ok[which.min(v[ok])]
+    match(best, original_order)
+  }, integer(1))
+}
+
+rank_counts <- function(r, ntop = c(1, 5, 10, 50, 100)) {
+  vapply(
+    ntop,
+    function(k) sum(r <= k, na.rm = TRUE),
+    integer(1)
+  )
+}
+```
+
+The published counts, out of 1000 bootstrap samples, are:
+
+```{r table4}
+table4 <- data.frame(
+  dataset = c(
+    "Kosovo",
+    "UK (maxorder 2)",
+    "UK (maxorder 4)",
+    "New Orleans (maxorder 2)",
+    "New Orleans (maxorder 4)"
+  ),
+  `1` = c(375, 216, 156, 357, 357),
+  `5` = c(929, 583, 622, 622, 621),
+  `10` = c(997, 739, 732, 698, 697),
+  `50` = c(1000, 930, 898, 915, 913),
+  `100` = c(1000, 954, 943, 958, 956),
+  check.names = FALSE
+)
+
+knitr::kable(table4)
+```
+
+# Table 5: degree-2 ranking for Kosovo
+
+The ordinary BIC ordering is `degree = 1`; the neighbourhood-based ordering
+from Section 5.1 of the paper is `degree = 2`.
+
+Kosovo is small enough for both orderings to be calculated exhaustively.
+
+```{r table5-calc}
+kos_d2 <- vary_ntop_bca(
+  Kosovo,
+  maxorder = ncol(Kosovo) - 2,
+  ntopmax = Inf,
+  degree = 2,
+  nboot = 1000,
+  iseed = 1234,
+  alpha = c(0.025, 0.975)
+)
+
+kos1_95 <- pick_ntop(kos, c(1, 5, 10, max(kos$inference$ntop)))
+kos2_95 <- pick_ntop(kos_d2, c(1, 5, 10, max(kos_d2$inference$ntop)))
+
+table5 <- data.frame(
+  ntop = c("1", "5", "5", "10", "10",
+           paste0(max(kos$inference$ntop), " (Inf)")),
+  degree = c("1, 2", "1", "2", "1", "2", "1, 2"),
+  `95% CI` = c(
+    ci_text(kos1_95[1, "0.025"], kos1_95[1, "0.975"], 100),
+    ci_text(kos1_95[2, "0.025"], kos1_95[2, "0.975"], 100),
+    ci_text(kos2_95[2, "0.025"], kos2_95[2, "0.975"], 100),
+    ci_text(kos1_95[3, "0.025"], kos1_95[3, "0.975"], 100),
+    ci_text(kos2_95[3, "0.025"], kos2_95[3, "0.975"], 100),
+    ci_text(kos1_95[4, "0.025"], kos1_95[4, "0.975"], 100)
+  ),
+  check.names = FALSE
+)
+
+knitr::kable(table5)
+```
+
+The published values are:
+
+```{r table5-published}
+table5_published <- data.frame(
+  ntop = c("1", "5", "5", "10", "10", "113 (Inf)"),
+  degree = c("1, 2", "1", "2", "1", "2", "1, 2"),
+  `95% CI` = c(
+    "[9100, 12000]",
+    "[7900, 17400]",
+    "[8000, 13500]",
+    "[6900, 18000]",
+    "[8000, 17700]",
+    "[6900, 18000]"
+  ),
+  check.names = FALSE
+)
+
+knitr::kable(table5_published)
+```
+
+# Figure 3: ordinary and degree-2 rankings
+
+Figure 3 compares degree 1 and degree 2 for the five-list UK and New Orleans
+data, allowing interactions through order 4.
+
+The degree-1 finite calculations have already been obtained for Figures 1 and
+2.  Only the degree-2 finite calculations are new.
+
+```{r fig3-calc}
+uk4_d2 <- vary_ntop_bca(
+  UKdat_5,
+  maxorder = 4,
+  ntopmax = 60,
+  degree = 2,
+  nboot = 1000,
+  iseed = 1234,
+  alpha = c(0.025, 0.975)
+)
+
+no4_d2 <- vary_ntop_bca(
+  NewOrl_5,
+  maxorder = 4,
+  ntopmax = 60,
+  degree = 2,
+  nboot = 1000,
+  iseed = 1234,
+  alpha = c(0.025, 0.975)
+)
+```
+
+The two orderings necessarily give the same result at `ntop = Inf`.  The
+published exhaustive 95% intervals are therefore used only as benchmark
+endpoints in the description below.
+
+```{r fig3, fig.height=8}
+plot_degree_comparison <- function(d1, d2, at, main) {
+  z1 <- pick_ntop(d1, at)
+  z2 <- pick_ntop(d2, at)
+
+  xx <- seq_along(at)
+
+  ylim <- range(
+    z1[["0.025"]], z1[["0.975"]],
+    z2[["0.025"]], z2[["0.975"]],
+    d1$estimate, finite = TRUE
+  )
+
+  plot(
+    xx, rep(NA_real_, length(xx)),
+    type = "n", xaxt = "n",
+    xlab = "ntop", ylab = "Population estimate",
+    ylim = ylim, main = main
+  )
+  axis(1, at = xx, labels = at)
+
+  lines(xx, z1[["0.025"]], lty = 1)
+  lines(xx, z1[["0.975"]], lty = 1)
+
+  lines(xx, z2[["0.025"]], lty = 3, col = "red")
+  lines(xx, z2[["0.975"]], lty = 3, col = "red")
+
+  abline(h = d1$estimate, lty = 2)
+
+  legend(
+    "topright",
+    legend = c("degree 1", "degree 2", "point estimate"),
+    col = c("black", "red", "black"),
+    lty = c(1, 3, 2),
+    bty = "n"
+  )
+}
+
+at3 <- c(1, 2, 5, 10, 20, 50, 60)
+
+oldpar <- par(no.readonly = TRUE)
+par(mfrow = c(2, 1))
+
+plot_degree_comparison(
+  uk4, uk4_d2, at3,
+  main = "Five-list UK data"
+)
+
+plot_degree_comparison(
+  no4, no4_d2, at3,
+  main = "Five-list New Orleans data"
+)
+
+par(oldpar)
+```
+
+The paper's main conclusion is reproduced by these finite calculations: the
+degree-2 ordering requires a larger `ntop` for the UK data, whereas for New
+Orleans the two approaches are very similar.  At `ntop = Inf`, the two
+orderings coincide.
+
+The published exhaustive 95% intervals are `[11168, 56052]` for the five-list
+UK data and `[397, 1511]` for the five-list New Orleans data.
+
+# Figure 4: rank of the bootstrap-optimal model
+
+Figure 4 is intrinsically based on an exhaustive bootstrap search.  For every
+bootstrap replication, the globally optimal model is first found among all
+candidate models, and then its rank under the two original-data orderings is
+recorded.
+
+This is therefore another calculation which is deliberately not evaluated in
+an ordinary vignette build.
+
+The corrected current-package code is:
+
+```{r fig4-code, eval=FALSE}
+bootstrap_rank_pair <- function(zdat, maxorder,
+                                nboot = 1000, iseed = 1234) {
+  z <- MultipleSystemsEstimation:::assemble_bic(
+    zdat, maxorder = maxorder
+  )
+
+  z <- MultipleSystemsEstimation:::bootstrapcal(
+    z, nboot = nboot, iseed = iseed
+  )
+
+  r1_order <- order(z$res[, "BIC"])
+
+  r2_order <- MultipleSystemsEstimation:::.degree2_order(
+    rownames(z$res),
+    nlists = ncol(z$xdata) - 1,
+    maxorder = z$maxorder
+  )
+
+  r1 <- rep(NA_integer_, nboot)
+  r2 <- rep(NA_integer_, nboot)
+
+  for (b in seq_len(nboot)) {
+    v <- z$bootbic[, b]
+    ok <- which(is.finite(v))
+    if (!length(ok)) next
+
+    best <- ok[which.min(v[ok])]
+    r1[b] <- match(best, r1_order)
+    r2[b] <- match(best, r2_order)
+  }
+
+  keep <- is.finite(r1) & is.finite(r2) & r1 > 1
+
+  data.frame(
+    ordinary = r1[keep],
+    degree2 = r2[keep]
+  )
+}
+
+kos_rank <- bootstrap_rank_pair(
+  Kosovo,
+  maxorder = ncol(Kosovo) - 2
+)
+
+no2_rank <- bootstrap_rank_pair(NewOrl_5, maxorder = 2)
+no4_rank <- bootstrap_rank_pair(NewOrl_5, maxorder = 4)
+uk2_rank <- bootstrap_rank_pair(UKdat_5, maxorder = 2)
+uk4_rank <- bootstrap_rank_pair(UKdat_5, maxorder = 4)
+
+rank_sets <- list(
+  Kos = kos_rank,
+  NO2 = no2_rank,
+  NO4 = no4_rank,
+  UK2 = uk2_rank,
+  UK4 = uk4_rank
+)
+
+oldpar <- par(no.readonly = TRUE)
+par(mfrow = c(1, 5), mar = c(6, 3, 2, 1))
+
+for (nm in names(rank_sets)) {
+  x <- rank_sets[[nm]]
+
+  boxplot(
+    list(BIC = x$ordinary, degree2 = x$degree2),
+    log = "y",
+    main = nm,
+    las = 2,
+    ylab = if (nm == "Kos") "BIC ranks" else ""
+  )
+}
+
+par(oldpar)
+```
+
+The published Figure 4 shows that the ordinary BIC ranking tends to place the
+bootstrap-optimal models substantially lower than the degree-2 ordering.  This
+supports the paper's conclusion that the degree-2 neighbourhood construction
+does not improve the computational approximation.
+
+# Table 6: downhill search
+
+Section 5.2 compares a greedy downhill search with exhaustive model
+enumeration.
+
+For datasets for which the downhill calculation is reasonably fast, it can be
+run directly.  For example:
+
+```{r table6-korea}
+downhill_korea <- downhill_funs(
+  Korea,
+  maxorder = 2,
+  nboot = 1000,
+  iseed = 1234
+)
+
+downhill_korea
+```
+
+The published Table 6 is:
+
+```{r table6}
+table6 <- data.frame(
+  dataset = c(
+    "UK5 all models",
+    "UK5 maxorder 2",
+    "UK all models",
+    "UK maxorder 2",
+    "NewOrl5 all models",
+    "NewOrl5 maxorder 2",
+    "NewOrl all models",
+    "NewOrl maxorder 2",
+    "Kosovo all lists",
+    "Kosovo maxorder 2",
+    "Korea"
+  ),
+  `downhill estimate` = c(
+    12262, 12262, 12350, 12350, 981, 981,
+    1110, 1110, 10357, 14342, 157
+  ),
+  `downhill 95% CI` = c(
+    "[9330, 32115]",
+    "[9332, 28954]",
+    "[9622, 27889]",
+    "[9643, 25508]",
+    "[397, 1564]",
+    "[397, 1564]",
+    "[586, 1512]",
+    "[586, 1512]",
+    "[7133, 18681]",
+    "[12525, 16477]",
+    "[128, 349]"
+  ),
+  `all-model estimate` = c(
+    "25311", "22991", "six lists", "", "981", "981",
+    "eight lists", "", "10357", "14342", "157"
+  ),
+  `all-model 95% CI` = c(
+    "[11168, 56052]",
+    "[11456, 43894]",
+    "",
+    "",
+    "[397, 1511]",
+    "[397, 1505]",
+    "",
+    "",
+    "[6947, 18010]",
+    "[12451, 16273]",
+    "[128, 349]"
+  ),
+  check.names = FALSE
+)
+
+knitr::kable(table6)
+```
+
+The special five-list UK downhill result in the paper used several additional
+order-2 starting models because the main-effects start can converge to a
+secondary local minimum.  The published values are retained here rather than
+embedding that specialised multiple-start reproduction machinery in the main
+vignette.
+
+# Summary
+
+The main computational message of the paper is visible directly from the
+finite-`ntop` calculations: confidence intervals widen substantially when model
+selection is incorporated, but relatively small values of `ntop` generally
+give results close to the exhaustive calculation.
+
+The current package therefore makes it possible to reproduce the substantive
+finite-`ntop` calculations directly while keeping exhaustive five-list
+bootstrap searches out of ordinary vignette builds.
