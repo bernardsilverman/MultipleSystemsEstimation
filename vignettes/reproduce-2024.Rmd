@@ -10,6 +10,27 @@ vignette: >
 
 ```{r setup, include=FALSE}
 library(MultipleSystemsEstimation)
+
+vary_ntop_bca <- getFromNamespace(
+  "vary_ntop_bca",
+  "MultipleSystemsEstimation"
+)
+
+downhill_fit <- getFromNamespace(
+  "downhill_fit",
+  "MultipleSystemsEstimation"
+)
+
+downhill_bootstrapcal <- getFromNamespace(
+  "downhill_bootstrapcal",
+  "MultipleSystemsEstimation"
+)
+
+downhill_jackknifecal <- getFromNamespace(
+  "downhill_jackknifecal",
+  "MultipleSystemsEstimation"
+)
+
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 
 # Keep the installed vignette quick enough for an ordinary package build.
