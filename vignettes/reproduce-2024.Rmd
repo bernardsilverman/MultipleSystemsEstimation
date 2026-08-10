@@ -37,7 +37,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 # Set this to TRUE for the fuller finite-ntop calculations used in the paper.
 full_reproduction <- FALSE
 
-nboot_vignette <- if (full_reproduction) 1000L else 20L
+nboot_vignette <- if (full_reproduction) 1000L else 10L
 ntop_vignette <- if (full_reproduction) 60L else 20L
 ntop_degree2_vignette <- if (full_reproduction) 60L else 10L
 ```
@@ -50,7 +50,7 @@ Silverman, B. W., Chan, L. and Vincent, K. (2024). *Bootstrapping multiple syste
 
 The calculations use the current `MultipleSystemsEstimation` interface.
 
-There are two intended ways to use the vignette.  In the version built with the package, `full_reproduction` is `FALSE`.  This uses `nboot = 20` and restricts the more expensive five-list finite searches to modest values of `ntop`.  These settings are enough to exercise the current code, produce the figures and tables in reduced-precision form, and keep an ordinary package or CRAN vignette build reasonably quick.  They are not intended to reproduce the published Monte Carlo values exactly.
+There are two intended ways to use the vignette.  In the version built with the package, `full_reproduction` is `FALSE`.  This uses `nboot = 10` and restricts the more expensive five-list finite searches to modest values of `ntop`.  These settings are enough to exercise the current code, produce the figures and tables in reduced-precision form, and keep an ordinary package or CRAN vignette build reasonably quick.  They are not intended to reproduce the published Monte Carlo values exactly.
 
 For a closer numerical reproduction of the paper, change
 
@@ -81,13 +81,16 @@ finite_at <- function(max_ntop) {
   z[z <= max_ntop]
 }
 
-plot_ntop_set <- function(x, at, col, lwd = 1) {
+plot_ntop_set <- function(x, at, col, pch, lwd = 1.6) {
   z <- x[x$ntop %in% at, , drop = FALSE]
   z <- z[match(at, z$ntop), , drop = FALSE]
   xx <- seq_along(at)
 
   lines(xx, z[["0.025"]], lty = 1, col = col, lwd = lwd)
   lines(xx, z[["0.975"]], lty = 1, col = col, lwd = lwd)
+
+  points(xx, z[["0.025"]], col = col, pch = pch, cex = 0.75)
+  points(xx, z[["0.975"]], col = col, pch = pch, cex = 0.75)
 
   if (all(c("0.1", "0.9") %in% names(z))) {
     lines(xx, z[["0.1"]], lty = 2, col = col, lwd = lwd)
@@ -96,7 +99,7 @@ plot_ntop_set <- function(x, at, col, lwd = 1) {
 }
 
 plot_two_ntop_bands <- function(x2, est2, x4, est4, at, main,
-                                lwd2 = 1, lwd4 = 1) {
+                                lwd2 = 1.6, lwd4 = 1.6) {
   z2 <- x2[x2$ntop %in% at, , drop = FALSE]
   z2 <- z2[match(at, z2$ntop), , drop = FALSE]
 
@@ -113,17 +116,24 @@ plot_two_ntop_bands <- function(x2, est2, x4, est4, at, main,
 
   plot(
     xx, rep(NA_real_, length(xx)),
-    type = "n", xaxt = "n",
-    xlab = "ntop", ylab = "Population estimate",
-    ylim = ylim, main = main
+    type = "n",
+    xaxt = "n",
+    xlab = expression(n[top]),
+    ylab = "Population estimate",
+    ylim = ylim,
+    main = main,
+    cex.main = 1.05,
+    cex.lab = 1.05
   )
+
   axis(1, at = xx, labels = at)
+  grid(nx = NA, ny = NULL, lty = 3, col = "grey90")
 
-  plot_ntop_set(x2, at, "blue", lwd = lwd2)
-  plot_ntop_set(x4, at, "red", lwd = lwd4)
-  abline(h = est2, lty = 4, col = "blue", lwd = lwd2)
-  abline(h = est4, lty = 4, col = "red", lwd = lwd4)
+  plot_ntop_set(x2, at, "steelblue4", 16, lwd = lwd2)
+  plot_ntop_set(x4, at, "darkorange3", 17, lwd = lwd4)
 
+  abline(h = est2, lty = 4, col = "steelblue4", lwd = lwd2)
+  abline(h = est4, lty = 4, col = "darkorange3", lwd = lwd4)
 }
 
 legend_two_ntop_bands <- function() {
@@ -134,8 +144,13 @@ legend_two_ntop_bands <- function() {
       "maximum order 2", "maximum order 4",
       "95% limits", "80% limits", "point estimate"
     ),
-    col = c("blue", "red", "black", "black", "black"),
+    col = c(
+      "steelblue4", "darkorange3",
+      "black", "black", "black"
+    ),
     lty = c(1, 1, 1, 2, 4),
+    pch = c(16, 17, NA, NA, NA),
+    lwd = c(1.6, 1.6, 1.6, 1.6, 1.6),
     ncol = 2,
     cex = 0.9,
     bty = "n"
@@ -145,7 +160,7 @@ legend_two_ntop_bands <- function() {
 
 # Table 2: Kosovo
 
-Kosovo has only 113 admissible candidate models, so the exhaustive calculation over candidate models is manageable and is carried out directly.  With the ordinary vignette settings the bootstrap uses only 20 replications; set `full_reproduction <- TRUE` to use the paper's `nboot = 1000`.
+Kosovo has only 113 admissible candidate models, so the exhaustive calculation over candidate models is manageable and is carried out directly.  With the ordinary vignette settings the bootstrap uses only 10 replications; set `full_reproduction <- TRUE` to use the paper's `nboot = 1000`.
 
 ```{r table2-kosovo}
 data(Kosovo)
@@ -267,9 +282,9 @@ uk4 <- vary_ntop_bca(
 )
 ```
 
-The paper also shows the exhaustive result at `ntop = Inf`. Repeating an exhaustive bootstrap search over all five-list models is deliberately omitted from an ordinary vignette build.  The legend is placed in a separate strip below the plotting region so that it does not obscure the confidence-limit curves.
+The paper also shows the exhaustive result at `ntop = Inf`. Repeating an exhaustive bootstrap search over all five-list models is deliberately omitted from an ordinary vignette build. The legend is placed in a separate strip below the plotting region so that it does not obscure the confidence-limit curves.
 
-```{r fig1, fig.height=5.5}
+```{r fig1, fig.width=7, fig.height=6}
 at1 <- finite_at(ntop_vignette)
 
 oldpar <- par(no.readonly = TRUE)
@@ -324,7 +339,7 @@ no4 <- vary_ntop_bca(
 
 The two sets of curves are essentially coincident for the finite values shown.
 
-```{r fig2, fig.height=5.5}
+```{r fig2, fig.width=7, fig.height=6}
 at2 <- finite_at(ntop_vignette)
 
 oldpar <- par(no.readonly = TRUE)
@@ -425,7 +440,7 @@ knitr::kable(table4)
 
 The ordinary BIC ordering is `degree = 1`; the neighbourhood-based ordering from Section 5.1 of the paper is `degree = 2`.
 
-Kosovo is small enough for both orderings to be calculated exhaustively.  The ordinary vignette uses 20 bootstrap replications; `full_reproduction <- TRUE` uses 1000.
+Kosovo is small enough for both orderings to be calculated exhaustively.  The ordinary vignette uses 10 bootstrap replications; `full_reproduction <- TRUE` uses 1000.
 
 ```{r table5-kosovo}
 kos_d2 <- vary_ntop_bca(
@@ -483,7 +498,7 @@ knitr::kable(table5_published)
 
 Figure 3 compares degree 1 and degree 2 for the five-list UK and New Orleans data, allowing interactions through order 4.  The degree-1 calculations have already been obtained for Figures 1 and 2. Only the degree-2 calculations are new.
 
-The degree-2 ordering is noticeably more expensive.  The ordinary vignette therefore calculates it only through `ntop = 10`, with 20 bootstrap replications.  Setting `full_reproduction <- TRUE` changes this to `ntop = 60` and `nboot = 1000` for a closer reproduction of the finite part of Figure 3.
+The degree-2 ordering is noticeably more expensive.  The ordinary vignette therefore calculates it only through `ntop = 10`, with 10 bootstrap replications.  Setting `full_reproduction <- TRUE` changes this to `ntop = 60` and `nboot = 1000` for a closer reproduction of the finite part of Figure 3.
 
 ```{r fig3-calc}
 uk4_d2 <- vary_ntop_bca(
@@ -509,34 +524,69 @@ no4_d2 <- vary_ntop_bca(
 
 The two orderings necessarily give the same result at `ntop = Inf`. The published exhaustive 95% intervals are therefore used only as benchmark endpoints in the description below.
 
-```{r fig3, fig.height=8}
+```{r fig3, fig.width=7, fig.height=8}
 plot_degree_comparison <- function(d1, d2, at, main) {
   z1 <- pick_ntop(d1, at)
   z2 <- pick_ntop(d2, at)
-
   xx <- seq_along(at)
 
   ylim <- range(
     z1[["0.025"]], z1[["0.975"]],
     z2[["0.025"]], z2[["0.975"]],
-    d1$estimate, finite = TRUE
+    d1$estimate,
+    finite = TRUE
   )
 
   plot(
     xx, rep(NA_real_, length(xx)),
-    type = "n", xaxt = "n",
-    xlab = "ntop", ylab = "Population estimate",
-    ylim = ylim, main = main
+    type = "n",
+    xaxt = "n",
+    xlab = expression(n[top]),
+    ylab = "Population estimate",
+    ylim = ylim,
+    main = main,
+    cex.main = 1.05,
+    cex.lab = 1.05
   )
+
   axis(1, at = xx, labels = at)
+  grid(nx = NA, ny = NULL, lty = 3, col = "grey90")
 
-  lines(xx, z1[["0.025"]], lty = 1)
-  lines(xx, z1[["0.975"]], lty = 1)
+  lines(
+    xx, z1[["0.025"]],
+    col = "steelblue4", lty = 1, lwd = 1.8
+  )
+  lines(
+    xx, z1[["0.975"]],
+    col = "steelblue4", lty = 1, lwd = 1.8
+  )
+  points(
+    xx, z1[["0.025"]],
+    col = "steelblue4", pch = 16, cex = 0.75
+  )
+  points(
+    xx, z1[["0.975"]],
+    col = "steelblue4", pch = 16, cex = 0.75
+  )
 
-  lines(xx, z2[["0.025"]], lty = 3, col = "red")
-  lines(xx, z2[["0.975"]], lty = 3, col = "red")
+  lines(
+    xx, z2[["0.025"]],
+    col = "darkorange3", lty = 2, lwd = 1.8
+  )
+  lines(
+    xx, z2[["0.975"]],
+    col = "darkorange3", lty = 2, lwd = 1.8
+  )
+  points(
+    xx, z2[["0.025"]],
+    col = "darkorange3", pch = 17, cex = 0.8
+  )
+  points(
+    xx, z2[["0.975"]],
+    col = "darkorange3", pch = 17, cex = 0.8
+  )
 
-  abline(h = d1$estimate, lty = 2)
+  abline(h = d1$estimate, lty = 3, lwd = 1.5)
 }
 
 legend_degree_comparison <- function() {
@@ -544,29 +594,28 @@ legend_degree_comparison <- function() {
   legend(
     "center",
     legend = c("degree 1", "degree 2", "point estimate"),
-    col = c("black", "red", "black"),
-    lty = c(1, 3, 2),
-    ncol = 1,
-    cex = 0.9,
-    bty = "n"
+    col = c("steelblue4", "darkorange3", "black"),
+    lty = c(1, 2, 3),
+    pch = c(16, 17, NA),
+    lwd = c(1.8, 1.8, 1.5),
+    horiz = TRUE,
+    bty = "n",
+    cex = 0.9
   )
 }
 
 at3 <- finite_at(ntop_degree2_vignette)
 
 oldpar <- par(no.readonly = TRUE)
-layout(
-  matrix(c(1, 2, 3), nrow = 3),
-  heights = c(1, 1, 0.45)
-)
+layout(matrix(c(1, 2, 3), nrow = 3), heights = c(5, 5, 1.3))
 
-par(mar = c(4.5, 4.5, 3, 1) + 0.1)
+par(mar = c(4.2, 4.4, 2.7, 1.2))
 plot_degree_comparison(
   uk4, uk4_d2, at3,
   main = "Five-list UK data"
 )
 
-par(mar = c(4.5, 4.5, 3, 1) + 0.1)
+par(mar = c(4.2, 4.4, 2.7, 1.2))
 plot_degree_comparison(
   no4, no4_d2, at3,
   main = "Five-list New Orleans data"
@@ -671,7 +720,7 @@ The published Figure 4 shows that the ordinary BIC ranking tends to place the bo
 
 Section 5.2 compares a greedy downhill search with exhaustive model enumeration.
 
-For datasets for which the downhill calculation is reasonably fast, it can be run directly. For example, the Korea calculation can be carried out with the current separate downhill routines as follows.  The ordinary vignette uses 20 bootstrap replications; setting `full_reproduction <- TRUE` uses 1000.
+For datasets for which the downhill calculation is reasonably fast, it can be run directly. For example, the Korea calculation can be carried out with the current separate downhill routines as follows.  The ordinary vignette uses 10 bootstrap replications; setting `full_reproduction <- TRUE` uses 1000.
 
 ```{r table6-korea}
 downhill_korea <- list(
