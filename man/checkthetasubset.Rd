@@ -27,6 +27,6 @@ problem to check whether the extended maximum likelihood estimates of the parame
 \references{
 Chan, L., Silverman, B. W., and Vincent, K. (2021).
  Multiple Systems Estimation for Sparse Capture Data: Inferential Challenges when there are Non-Overlapping Lists.
-\emph{Journal of American Statistcal Association}, \strong{116(535)}, 1297-1306,
+\emph{Journal of the American Statistical Association}, \strong{116(535)}, 1297-1306,
 Available from \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2019.1708748}.
 }

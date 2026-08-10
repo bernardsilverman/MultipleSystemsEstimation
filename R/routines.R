@@ -38,7 +38,7 @@ utils::globalVariables("hiermodels")
 #' @references
 #' Chan, L., Silverman, B. W., and Vincent, K. (2021).
 #'  Multiple Systems Estimation for Sparse Capture Data: Inferential Challenges when there are Non-Overlapping Lists.
-#' \emph{Journal of American Statistcal Association}, \strong{116(535)}, 1297-1306,
+#' \emph{Journal of the American Statistical Association}, \strong{116(535)}, 1297-1306,
 #' Available from \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2019.1708748}.
 #'
 #'
@@ -315,7 +315,7 @@ buildmodelmatrix <- function(zdat, mX=NULL) {
 #' @references
 #'Chan, L., Silverman, B. W., and Vincent, K. (2021).
 #'  Multiple Systems Estimation for Sparse Capture Data: Inferential Challenges when there are Non-Overlapping Lists.
-#' \emph{Journal of American Statistcal Association}, \strong{116(535)}, 1297-1306,
+#' \emph{Journal of the American Statistical Association}, \strong{116(535)}, 1297-1306,
 #' Available from \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2019.1708748}.
 #'
 #' Fienberg, S. E. and Rinaldo, A. (2012). Maximum likelihood estimation in log-linear
@@ -399,7 +399,7 @@ check_identifiability <- function(zdat, mX=0, verbose=FALSE)
 #'@references
 #'Chan, L., Silverman, B. W., and Vincent, K. (2021).
 #'  Multiple Systems Estimation for Sparse Capture Data: Inferential Challenges when there are Non-Overlapping Lists.
-#' \emph{Journal of American Statistcal Association}, \strong{116(535)}, 1297-1306,
+#' \emph{Journal of the American Statistical Association}, \strong{116(535)}, 1297-1306,
 #' Available from \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2019.1708748}.
 #'
 #' @importFrom stats qnorm
@@ -639,7 +639,7 @@ stepwisefit<- function(zdat, pthresh=0.02) {
 #' @references
 #'Chan, L., Silverman, B. W., and Vincent, K. (2021).
 #'  Multiple Systems Estimation for Sparse Capture Data: Inferential Challenges when there are Non-Overlapping Lists.
-#' \emph{Journal of American Statistcal Association}, \strong{116(535)}, 1297-1306,
+#' \emph{Journal of the American Statistical Association}, \strong{116(535)}, 1297-1306,
 #' Available from \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2019.1708748}.
 #'
 #'@importFrom stats qchisq rpois ppoints
@@ -730,7 +730,7 @@ investigateAIC <- function(nsim=10000, Nsamp= 1000, seed = 1001) {
 #'@references
 #'Chan, L., Silverman, B. W., and Vincent, K. (2021).
 #'  Multiple Systems Estimation for Sparse Capture Data: Inferential Challenges when there are Non-Overlapping Lists.
-#' \emph{Journal of American Statistcal Association}, \strong{116(535)}, 1297-1306,
+#' \emph{Journal of the American Statistical Association}, \strong{116(535)}, 1297-1306,
 #' Available from \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2019.1708748}.
 #'
 #' Fienberg, S. E. and Rinaldo, A. (2012). Maximum likelihood estimation in log-linear
@@ -840,7 +840,7 @@ checkallmodels <-function (zdat, nreport= 1024) {
 #'@references
 #'Chan, L., Silverman, B. W., and Vincent, K. (2021).
 #'  Multiple Systems Estimation for Sparse Capture Data: Inferential Challenges when there are Non-Overlapping Lists.
-#' \emph{Journal of American Statistcal Association}, \strong{116(535)}, 1297-1306,
+#' \emph{Journal of the American Statistical Association}, \strong{116(535)}, 1297-1306,
 #' Available from \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2019.1708748}.
 #'
 subsetsearch <- function(n, checkfun, testnull = TRUE, ...) {
@@ -890,7 +890,7 @@ subsetsearch <- function(n, checkfun, testnull = TRUE, ...) {
 #' @references
 #'Chan, L., Silverman, B. W., and Vincent, K. (2021).
 #'  Multiple Systems Estimation for Sparse Capture Data: Inferential Challenges when there are Non-Overlapping Lists.
-#' \emph{Journal of American Statistcal Association}, \strong{116(535)}, 1297-1306,
+#' \emph{Journal of the American Statistical Association}, \strong{116(535)}, 1297-1306,
 #' Available from \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2019.1708748}.
 #'
 checkthetasubset <- function(zset, amat, tvec, nlists) {
@@ -927,7 +927,7 @@ checkthetasubset <- function(zset, amat, tvec, nlists) {
 #' @references
 #'Chan, L., Silverman, B. W., and Vincent, K. (2021).
 #'  Multiple Systems Estimation for Sparse Capture Data: Inferential Challenges when there are Non-Overlapping Lists.
-#' \emph{Journal of American Statistcal Association}, \strong{116(535)}, 1297-1306,
+#' \emph{Journal of the American Statistical Association}, \strong{116(535)}, 1297-1306,
 #' Available from \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2019.1708748}.
 #'
 #'
@@ -1164,7 +1164,7 @@ estimatepopulation <- function(...) {
 #'@references
 #' Chan, L., Silverman, B. W., and Vincent, K. (2021).
 #'  Multiple Systems Estimation for Sparse Capture Data: Inferential Challenges when there are Non-Overlapping Lists.
-#' \emph{Journal of American Statistcal Association}, \strong{116(535)}, 1297-1306,
+#' \emph{Journal of the American Statistical Association}, \strong{116(535)}, 1297-1306,
 #' Available from \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2019.1708748}.
 #'
 #' DiCiccio, T. J. and Efron, B. (1996). Bootstrap Confidence Intervals. \emph{Statistical Science}, \strong{40(3)}, 189-228.
@@ -1239,7 +1239,7 @@ bcaconfvalues<-function(bootreps, popest, ahat, alpha=c(0.025, 0.05, 0.1, 0.16, 
 #'@references
 #'Chan, L., Silverman, B. W., and Vincent, K. (2021).
 #'  Multiple Systems Estimation for Sparse Capture Data: Inferential Challenges when there are Non-Overlapping Lists.
-#' \emph{Journal of American Statistcal Association}, \strong{116(535)}, 1297-1306,
+#' \emph{Journal of the American Statistical Association}, \strong{116(535)}, 1297-1306,
 #' Available from \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2019.1708748}.
 #'
 #' DiCiccio, T. J. and Efron, B. (1996). Bootstrap Confidence Intervals. \emph{Statistical Science}, \strong{40(3)}, 189-228.
