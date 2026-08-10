@@ -1,23 +1,37 @@
 Package: MultipleSystemsEstimation
 Title: Multiple Systems Estimation with Sparse Capture Data
 Version: 1.0.0
-Authors@R:
+Authors@R: c(
     person("Bernard", "Silverman",
            email = "bernard.silverman@stats.ox.ac.uk",
-           role = c("aut", "cre"))
+           role = c("aut", "cre")),
+    person("Lax", "Chan",
+           role = "ctb"),
+    person("Kyle", "Vincent",
+           role = "ctb")
+    )
 Description: Methods for multiple systems estimation using Poisson log-linear
     models, with particular attention to sparse capture data and uncertainty
-    arising from model selection.
+    arising from model selection. The methodology includes that of Chan,
+    Silverman and Vincent (2021) <doi:10.1080/01621459.2019.1708748> and
+    Silverman, Chan and Vincent (2024)
+    <doi:10.1007/s11222-023-10346-9>.
 URL: https://bernardsilverman.co.uk/contact,
-     https://doi.org/10.1080/01621459.2019.1708748,
-     https://doi.org/10.1007/s11222-023-10346-9
-Depends: R (>= 4.2.0)
+    https://doi.org/10.1080/01621459.2019.1708748,
+    https://doi.org/10.1007/s11222-023-10346-9
+Depends:
+    R (>= 4.2.0)
 License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3
-Suggests:Rcapture,knitr,rmarkdown,testthat (>= 3.0.0)
-Imports:lpSolve
+Suggests:
+    Rcapture,
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+Imports:
+    lpSolve
 VignetteBuilder: knitr
 Config/testthat/edition: 3
-
+NeedsCompilation: no
