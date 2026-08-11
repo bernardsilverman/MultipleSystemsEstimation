@@ -1334,7 +1334,7 @@ BICandbootstrapsim <- function(zdat, nsims=1000,nboot=100,pthresh=0.02, iseed=12
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
 #' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
+#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
 #'
 #' @examples
 #' decode_capture(2,5)
@@ -1358,7 +1358,7 @@ decode_capture = function(k, nlists) {
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
 #' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
+#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
 #'
 #' @examples
 #' descendants(2,5)
@@ -1391,7 +1391,7 @@ descendants = function(k,nlists, omitk = FALSE) {
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
 #' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
+#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
 #'
 #' @examples
 #' ancestors(2,10)
@@ -1422,7 +1422,7 @@ ancestors = function(k,nlists=10) {
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
 #' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
+#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
 #'
 #' @keywords internal
 parent_captures = function(k, nlists=10) {
@@ -1442,7 +1442,7 @@ parent_captures = function(k, nlists=10) {
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
 #' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
+#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
 #'
 #' @keywords internal
 child_captures = function(k, nlists) {
@@ -1464,7 +1464,7 @@ child_captures = function(k, nlists) {
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
 #' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
+#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
 #'
 #'
 make_master_design = function(nlists) {
@@ -1500,7 +1500,7 @@ make_master_design = function(nlists) {
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
 #' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
+#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
 #'
 #' @keywords internal
 ingest_data = function(xdat)  {
@@ -1535,7 +1535,7 @@ ingest_data = function(xdat)  {
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
 #' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
+#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
 #'
 #'@examples
 #'modelstr = "[12,23]"
@@ -1736,7 +1736,7 @@ subsetmat <- function(z,
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
 #' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
+#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
 #'
 modelorder = function(x) {
   return(max(nchar(unlist(
@@ -1758,7 +1758,7 @@ modelorder = function(x) {
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
 #' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
+#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
 #'
 #' @examples
 #' data(hiermodels)
@@ -1910,7 +1910,7 @@ assemble_bic <-
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
 #' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
+#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
 #'
 #' @importFrom stats glm.fit na.omit splinefun
 fit_hier_model= function(xdatin, hiermod, bicRcap=TRUE, checkid=FALSE) {
@@ -1979,7 +1979,7 @@ fit_hier_model= function(xdatin, hiermod, bicRcap=TRUE, checkid=FALSE) {
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
 #' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
+#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
 #'
 #' @examples
 #' modelstr = "[12,23]"
@@ -2026,7 +2026,7 @@ find_neighbour_hierarchies = function(modelstr, nlists=NA, keepmaineffects=TRUE,
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
 #' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
+#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
 #'
 #' @examples
 #' kcap=c(1,2,3,5,4)
@@ -2073,7 +2073,7 @@ convert_to_hierarchy = function(kcap, nlists) {
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
 #' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
+#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
 #'
 #'
 boundary_captures = function(kcap, nlists) {
@@ -2109,7 +2109,7 @@ boundary_captures = function(kcap, nlists) {
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
 #' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
+#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
 #'
 find_unique_patterns = function(x) {
   # find non-zeroes and convert resulting matrix to numeric
@@ -2146,7 +2146,7 @@ find_unique_patterns = function(x) {
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
 #' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
+#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
 #'
 #'
 checkident.2 = function(x, xcap, zmods) {
@@ -2207,7 +2207,7 @@ checkident.2 = function(x, xcap, zmods) {
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
 #' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
+#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
 #'
 #' @keywords internal
 bootstrapcal <- function(z,
@@ -2278,7 +2278,7 @@ bootstrapcal <- function(z,
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
 #' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
+#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
 #'
 #' @keywords internal
 jackknifecal <- function(z, checkexist = TRUE) {

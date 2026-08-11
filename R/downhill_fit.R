@@ -22,7 +22,7 @@
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
 #' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
+#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
 #'
 #' @importFrom stats setNames
 downhill_fit = function(counts, desmat, maxorder=dim(desmat)[2]-1, checkid=TRUE, niter=20,verbose=FALSE) {
@@ -105,7 +105,7 @@ downhill_fit = function(counts, desmat, maxorder=dim(desmat)[2]-1, checkid=TRUE,
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
 #' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
+#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
 #'
 downhill_bootstrapcal <- function(xdata, nboot = 1000, iseed = 1234,
       checkid = TRUE, verbose=FALSE, maxorder=dim(xdata)[2]-2) {
@@ -138,7 +138,7 @@ downhill_bootstrapcal <- function(xdata, nboot = 1000, iseed = 1234,
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
 #' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{https://doi.org/10.1007/s11222-023-10346-9}.
+#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
 #'
 downhill_jackknifecal <- function(xdata,checkid = TRUE, maxorder=dim(xdata)[2]-2) {
   xdata = tidy_lists(xdata, includezerocounts=FALSE)

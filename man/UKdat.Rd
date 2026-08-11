@@ -14,7 +14,7 @@ UKdat
 Data from the UK 2013 strategic assessment
 }
 \details{
-This is a table of six lists used in the research \href{https://tinyurl.com/ydegfjaw}{published by the Home Office} as part of the strategy leading
+This is a table of six lists used in the research published by the Home Office as part of the strategy leading
  to the Modern Slavery Act 2015. The data are considered in six lists, labelled as follows:  LA--Local authorities; NG--Non-government organisations;
 PF--Police forces; GO--Government organisations; GP--General public; NCA--National Crime Agency.  Each of the first six columns in the data frame
  corresponds to one of these lists.
