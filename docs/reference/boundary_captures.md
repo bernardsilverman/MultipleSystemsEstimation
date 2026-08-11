@@ -1,0 +1,34 @@
+# Given a vector of captures, find those which are not in the vector but all of whose parents are
+
+Call the resulting set the "boundary". Supposing that the current set of
+captures is a hierarchical model, that property will be preserved if a
+capture in the boundary is added to it. The routine is called internally
+by `find_neighbour_hierarchies`.
+
+## Usage
+
+``` r
+boundary_captures(kcap, nlists)
+```
+
+## Arguments
+
+- kcap:
+
+  An encoded capture history that corresponds to the row number of the
+  capture history data set
+
+- nlists:
+
+  The total number of lists
+
+## Value
+
+a vector giving the encoded versions of the descendants
+
+## References
+
+Silverman, B. W., Chan, L. and Vincent, K., (2024). Bootstrapping
+Multiple Systems Estimates to Account for Model Selection *Statistics
+and Computing*, **34(44)**, Available from
+<https://doi.org/10.1007/s11222-023-10346-9>.

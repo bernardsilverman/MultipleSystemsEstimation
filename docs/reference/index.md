@@ -1,0 +1,61 @@
+# Package index
+
+## Main user functions
+
+- [`estimate_population()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population.md)
+  : Estimate population size
+- [`estimate_population_bic()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_bic.md)
+  : Population estimation using BIC model selection
+- [`estimate_population_fixed()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_fixed.md)
+  : Population estimation using a fixed hierarchical model
+- [`estimate_population_stepwise()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_stepwise.md)
+  : Population estimation using stepwise model selection
+- [`tidy_lists()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/tidy_lists.md)
+  : Produce a data matrix with a unique row for each capture history
+- [`check_identifiability()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/check_identifiability.md)
+  : Check a model for the existence and identifiability of the maximum
+  likelihood estimate
+
+## Capture-pattern utilities
+
+- [`ancestors()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/ancestors.md)
+  : Find the "ancestors" of a given capture history
+- [`descendants()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/descendants.md)
+  : Find the "descendants" of a given capture history
+- [`encode_capture()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/encode_capture.md)
+  : Encode capture history
+- [`decode_capture()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/decode_capture.md)
+  : Decode capture history
+- [`convert_to_hierarchy()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/convert_to_hierarchy.md)
+  : Find hierarchical representation of a vector of captures
+- [`convert_from_hierarchy()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/convert_from_hierarchy.md)
+  : Find the vector of captures corresponding to a given hierarchical
+  model
+- [`find_neighbour_hierarchies()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/find_neighbour_hierarchies.md)
+  : Find all neighbouring hierarchical model to a given one
+- [`get_hierarchical_models()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/get_hierarchical_models.md)
+  : Get a list of all hierarchical models for given number of lists and
+  maximum order
+
+## Data
+
+- [`Artificial_3`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/Artificial_3.md)
+  : Artificial data set to demonstrate possible instabilities
+- [`Korea`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/Korea.md)
+  : Korea data
+- [`Kosovo`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/Kosovo.md)
+  : Kosovo data
+- [`Ned`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/Ned.md)
+  : The Netherlands data
+- [`Ned_5`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/Ned_5.md)
+  : Netherlands data five list version
+- [`NewOrl`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/NewOrl.md)
+  : New Orleans data
+- [`NewOrl_5`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/NewOrl_5.md)
+  : New Orleans data five list version
+- [`UKdat`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/UKdat.md)
+  : UK data
+- [`UKdat_5`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/UKdat_5.md)
+  : UK data five list version
+- [`Western`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/Western.md)
+  : Victims related to sex trafficking in a U.S. Western site
