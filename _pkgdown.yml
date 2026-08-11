@@ -1,0 +1,71 @@
+template:
+  bootstrap: 5
+
+url: https://bernardsilverman.github.io/MultipleSystemsEstimation/
+articles:
+  - title: "Articles"
+    navbar: ~
+    contents:
+      - user-guide
+      - reproduce-2021
+      - reproduce-2024
+reference:
+  - title: "Main user functions"
+    contents:
+      - estimate_population
+      - estimate_population_bic
+      - estimate_population_fixed
+      - estimate_population_stepwise
+      - tidy_lists
+      - check_identifiability
+
+  - title: "Capture-pattern utilities"
+    contents:
+      - ancestors
+      - descendants
+      - encode_capture
+      - decode_capture
+      - convert_to_hierarchy
+      - convert_from_hierarchy
+      - find_neighbour_hierarchies
+      - get_hierarchical_models
+
+  - title: "Data"
+    contents:
+      - Artificial_3
+      - Korea
+      - Kosovo
+      - Ned
+      - Ned_5
+      - NewOrl
+      - NewOrl_5
+      - UKdat
+      - UKdat_5
+      - Western
+  - title: internal
+    contents:
+      - bcaconfvalues
+      - boundary_captures
+      - buildmodel
+      - buildmodelmatrix
+      - checkallmodels
+      - checkident.1
+      - checkident.2
+      - checkthetasubset
+      - count_triples
+      - downhill_bootstrapcal
+      - downhill_fit
+      - downhill_jackknifecal
+      - estimatepopulation.0
+      - estimatepopulation
+      - find_unique_patterns
+      - fit_hier_model
+      - hiermodels
+      - make_master_design
+      - modelfit
+      - modelorder
+      - ordercaptures
+      - parent_captures
+      - stepwisefit
+      - subsetmat
+      - subsetsearch

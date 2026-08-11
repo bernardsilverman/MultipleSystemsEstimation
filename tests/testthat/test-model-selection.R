@@ -222,6 +222,33 @@ test_that("downhill bootstrap is reproducible and well formed", {
   )
 })
 
+test_that("downhill bootstrap is invariant to input row order", {
+  data("Korea", package = "MultipleSystemsEstimation")
+
+  set.seed(2468)
+  Korea_permuted <- Korea[sample(seq_len(nrow(Korea))), , drop = FALSE]
+
+  boot_original <- downhill_bootstrapcal(
+    xdata = Korea,
+    nboot = 5,
+    iseed = 1234,
+    checkid = TRUE,
+    verbose = FALSE,
+    maxorder = 1
+  )
+
+  boot_permuted <- downhill_bootstrapcal(
+    xdata = Korea_permuted,
+    nboot = 5,
+    iseed = 1234,
+    checkid = TRUE,
+    verbose = FALSE,
+    maxorder = 1
+  )
+
+  expect_identical(boot_original, boot_permuted)
+})
+
 test_that("downhill bootstrap is reproducible with model selection", {
   data("Korea", package = "MultipleSystemsEstimation")
 

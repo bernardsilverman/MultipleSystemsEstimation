@@ -3,3 +3,5 @@
 ^MultipleSystemsEstimation\.Rproj$
 ^doc$
 ^Meta$
+^docs$
+^_pkgdown\.yml$

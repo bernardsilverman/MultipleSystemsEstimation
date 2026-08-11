@@ -1,6 +1,6 @@
 ---
 title: "Reproducing Silverman, Chan and Vincent (2024)"
-author: "Bernard Silverman"
+author: "Bernard W.Silverman"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Reproducing Silverman, Chan and Vincent (2024)}
@@ -50,7 +50,8 @@ Silverman, B. W., Chan, L. and Vincent, K. (2024). *Bootstrapping multiple syste
 
 The calculations use the current `MultipleSystemsEstimation` interface.
 
-There are two intended ways to use the vignette.  In the version built with the package, `full_reproduction` is `FALSE`.  This uses `nboot = 10` and restricts the more expensive five-list finite searches to modest values of `ntop`.  These settings are enough to exercise the current code, produce the figures and tables in reduced-precision form, and keep an ordinary package or CRAN vignette build reasonably quick.  They are not intended to reproduce the published Monte Carlo values exactly.
+There are two intended ways to use the vignette. In the version built with the package, `full_reproduction` is `FALSE`. This uses `nboot = 10` and restricts the more expensive five-list finite searches to modest values of `ntop`: 20 for the ordinary ranking and 10 for the degree-2 ranking. These settings are enough to exercise the current code, produce the figures and tables in reduced-precision form, and keep an ordinary package or CRAN vignette build reasonably quick. They are not intended to reproduce the published Monte Carlo values exactly.
+
 
 For a closer numerical reproduction of the paper, change
 
@@ -494,143 +495,58 @@ table5_published <- data.frame(
 knitr::kable(table5_published)
 ```
 
-# Figure 3: ordinary and degree-2 rankings
+### Figure 3: degree-1 and degree-2 rankings
 
-Figure 3 compares degree 1 and degree 2 for the five-list UK and New Orleans data, allowing interactions through order 4.  The degree-1 calculations have already been obtained for Figures 1 and 2. Only the degree-2 calculations are new.
+The degree-2 calculation underlying Figure 3 is substantially more
+computationally expensive than the other calculations in this vignette.
+To keep routine package builds and CRAN checks reasonably fast, the
+published Figure 3 is reproduced directly below. The code required to
+recompute it from scratch using the current `MultipleSystemsEstimation`
+functions is given afterwards but is not evaluated during an ordinary
+vignette build.
 
-The degree-2 ordering is noticeably more expensive.  The ordinary vignette therefore calculates it only through `ntop = 10`, with 10 bootstrap replications.  Setting `full_reproduction <- TRUE` changes this to `ntop = 60` and `nboot = 1000` for a closer reproduction of the finite part of Figure 3.
+```{r fig3-published, echo=FALSE, out.width="90%", fig.align="center"}
+knitr::include_graphics("figures/figure3-published.png")
+```
 
-```{r fig3-calc}
-uk4_d2 <- vary_ntop_bca(
-  UKdat_5,
-  maxorder = 4,
-  ntopmax = ntop_degree2_vignette,
-  degree = 2,
-  nboot = nboot_vignette,
-  iseed = 1234,
+*Figure 3. Estimate and 95% confidence intervals for values 
+of *$n_{\mathrm{top}}$ *up to 60 and* $n_{\mathrm{top}}=\infty$,
+*allowing models up to order 4. Black solid lines show the degree-1
+(BIC-only) ranking; red dotted lines show the degree-2 neighbourhood
+ranking; the dashed horizontal line is the point estimate. Top: five-list
+UK data; bottom: five-list New Orleans data. Reproduced from Silverman,
+Chan and Vincent (2024), Statistics and Computing 34:44, under CC BY 4.0.*
+
+The corresponding calculation from scratch is:
+
+```{r fig3-reproduction-code, eval=FALSE}
+uk_d1 <- vary_ntop_bca(
+  UKdat_5, maxorder = 4, ntopmax = Inf,
+  degree = 1, nboot = nboot_paper, iseed = 1234,
   alpha = c(0.025, 0.975)
 )
 
-no4_d2 <- vary_ntop_bca(
-  NewOrl_5,
-  maxorder = 4,
-  ntopmax = ntop_degree2_vignette,
-  degree = 2,
-  nboot = nboot_vignette,
-  iseed = 1234,
+uk_d2 <- vary_ntop_bca(
+  UKdat_5, maxorder = 4, ntopmax = Inf,
+  degree = 2, nboot = nboot_paper, iseed = 1234,
   alpha = c(0.025, 0.975)
 )
-```
 
-The two orderings necessarily give the same result at `ntop = Inf`. The published exhaustive 95% intervals are therefore used only as benchmark endpoints in the description below.
-
-```{r fig3, fig.width=7, fig.height=8}
-plot_degree_comparison <- function(d1, d2, at, main) {
-  z1 <- pick_ntop(d1, at)
-  z2 <- pick_ntop(d2, at)
-  xx <- seq_along(at)
-
-  ylim <- range(
-    z1[["0.025"]], z1[["0.975"]],
-    z2[["0.025"]], z2[["0.975"]],
-    d1$estimate,
-    finite = TRUE
-  )
-
-  plot(
-    xx, rep(NA_real_, length(xx)),
-    type = "n",
-    xaxt = "n",
-    xlab = expression(n[top]),
-    ylab = "Population estimate",
-    ylim = ylim,
-    main = main,
-    cex.main = 1.05,
-    cex.lab = 1.05
-  )
-
-  axis(1, at = xx, labels = at)
-  grid(nx = NA, ny = NULL, lty = 3, col = "grey90")
-
-  lines(
-    xx, z1[["0.025"]],
-    col = "steelblue4", lty = 1, lwd = 1.8
-  )
-  lines(
-    xx, z1[["0.975"]],
-    col = "steelblue4", lty = 1, lwd = 1.8
-  )
-  points(
-    xx, z1[["0.025"]],
-    col = "steelblue4", pch = 16, cex = 0.75
-  )
-  points(
-    xx, z1[["0.975"]],
-    col = "steelblue4", pch = 16, cex = 0.75
-  )
-
-  lines(
-    xx, z2[["0.025"]],
-    col = "darkorange3", lty = 2, lwd = 1.8
-  )
-  lines(
-    xx, z2[["0.975"]],
-    col = "darkorange3", lty = 2, lwd = 1.8
-  )
-  points(
-    xx, z2[["0.025"]],
-    col = "darkorange3", pch = 17, cex = 0.8
-  )
-  points(
-    xx, z2[["0.975"]],
-    col = "darkorange3", pch = 17, cex = 0.8
-  )
-
-  abline(h = d1$estimate, lty = 3, lwd = 1.5)
-}
-
-legend_degree_comparison <- function() {
-  plot.new()
-  legend(
-    "center",
-    legend = c("degree 1", "degree 2", "point estimate"),
-    col = c("steelblue4", "darkorange3", "black"),
-    lty = c(1, 2, 3),
-    pch = c(16, 17, NA),
-    lwd = c(1.8, 1.8, 1.5),
-    horiz = TRUE,
-    bty = "n",
-    cex = 0.9
-  )
-}
-
-at3 <- finite_at(ntop_degree2_vignette)
-
-oldpar <- par(no.readonly = TRUE)
-layout(matrix(c(1, 2, 3), nrow = 3), heights = c(5, 5, 1.3))
-
-par(mar = c(4.2, 4.4, 2.7, 1.2))
-plot_degree_comparison(
-  uk4, uk4_d2, at3,
-  main = "Five-list UK data"
+no_d1 <- vary_ntop_bca(
+  NewOrl_5, maxorder = 4, ntopmax = Inf,
+  degree = 1, nboot = nboot_paper, iseed = 1234,
+  alpha = c(0.025, 0.975)
 )
 
-par(mar = c(4.2, 4.4, 2.7, 1.2))
-plot_degree_comparison(
-  no4, no4_d2, at3,
-  main = "Five-list New Orleans data"
+no_d2 <- vary_ntop_bca(
+  NewOrl_5, maxorder = 4, ntopmax = Inf,
+  degree = 2, nboot = nboot_paper, iseed = 1234,
+  alpha = c(0.025, 0.975)
 )
 
-par(mar = c(0, 0, 0, 0))
-legend_degree_comparison()
-
-layout(1)
-par(oldpar)
+## Plot ntop = 1,...,60 from the two inference data frames.
+## The final row of each exhaustive result supplies ntop = Inf.
 ```
-
-The paper's main conclusion is reproduced by these finite calculations: the degree-2 ordering requires a larger `ntop` for the UK data, whereas for New Orleans the two approaches are very similar. At `ntop = Inf`, the two orderings coincide.
-
-The published exhaustive 95% intervals are `[11168, 56052]` for the five-list UK data and `[397, 1511]` for the five-list New Orleans data.
 
 # Figure 4: rank of the bootstrap-optimal model
 
