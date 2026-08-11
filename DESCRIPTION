@@ -1,5 +1,5 @@
 Package: MultipleSystemsEstimation
-Title: Multiple Systems Estimation with Sparse Capture Data
+Title: Methods for Multiple Systems Estimation
 Version: 1.0.0
 Authors@R: c(
     person(
