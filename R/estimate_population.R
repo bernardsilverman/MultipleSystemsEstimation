@@ -13,7 +13,9 @@
 #' method for six-list data and issues an informational message.
 #'
 #' The estimation method can be selected explicitly using
-#' \code{method = "bic"}, \code{"stepwise"}, or \code{"fixed"}.
+#' \code{method = "bic"}, \code{"stepwise"}, \code{"bayesthresh"}, or
+#' \code{"fixed"}. The \code{"bayesthresh"} method requires the suggested
+#' package \pkg{MCMCpack}.
 #'
 #' Method-specific arguments are passed through \code{...} to the selected
 #' estimation function. See the documentation for the individual methods
@@ -23,26 +25,30 @@
 #'   membership and the final column contains the observed counts.
 #'
 #' @param method Estimation method. One of \code{"auto"}, \code{"bic"},
-#'   \code{"stepwise"}, or \code{"fixed"}. The individual methods and their
-#'   available arguments are documented in
+#'   \code{"stepwise"}, \code{"bayesthresh"}, or \code{"fixed"}. The
+#'   individual methods and their available arguments are documented in
 #'   \code{\link{estimate_population_bic}},
-#'   \code{\link{estimate_population_stepwise}}, and
+#'   \code{\link{estimate_population_stepwise}},
+#'   \code{\link{estimate_population_bayesthresh}}, and
 #'   \code{\link{estimate_population_fixed}}.
 #'
 #' @param ... Additional arguments passed to the selected estimation
 #'   function. See \code{\link{estimate_population_bic}},
-#'   \code{\link{estimate_population_stepwise}}, and
+#'   \code{\link{estimate_population_stepwise}},
+#'   \code{\link{estimate_population_bayesthresh}}, and
 #'   \code{\link{estimate_population_fixed}} for the arguments available
 #'   for each method.
 #'
 #' @return The object returned by
 #'   \code{\link{estimate_population_bic}},
-#'   \code{\link{estimate_population_stepwise}}, or
+#'   \code{\link{estimate_population_stepwise}},
+#'   \code{\link{estimate_population_bayesthresh}}, or
 #'   \code{\link{estimate_population_fixed}}.
 #'
 #' @seealso
 #' \code{\link{estimate_population_bic}},
 #' \code{\link{estimate_population_stepwise}},
+#' \code{\link{estimate_population_bayesthresh}},
 #' \code{\link{estimate_population_fixed}}
 #'
 #' @examples
@@ -65,6 +71,16 @@
 #'   pthresh = 0.02
 #' )
 #'
+#' # The bayesthresh method requires the suggested MCMCpack package.
+#' if (requireNamespace("MCMCpack", quietly = TRUE)) {
+#'   estimate_population(
+#'     Western,
+#'     method = "bayesthresh",
+#'     burnin = 100,
+#'     mcmc = 1000
+#'   )
+#' }
+#'
 #' # Pass a fixed-model specification through ...
 #' estimate_population(
 #'   Korea,
@@ -75,7 +91,7 @@
 #' @export
 estimate_population <- function(
     zdat,
-    method = c("auto", "bic", "stepwise", "fixed"),
+    method = c("auto", "bic", "stepwise", "fixed", "bayesthresh")
     ...
 ) {
   method <- match.arg(method)
@@ -131,6 +147,13 @@ estimate_population <- function(
 
     result <- estimate_population_stepwise(
       zdat = zdat,
+      ...
+    )
+
+  }  else if (method == "bayesthresh") {
+
+    result <- estimate_population_bayesthresh(
+      zdat=zdat,
       ...
     )
 

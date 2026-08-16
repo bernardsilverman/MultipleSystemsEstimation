@@ -4,29 +4,36 @@
 \alias{estimate_population}
 \title{Estimate population size}
 \usage{
-estimate_population(zdat, method = c("auto", "bic", "stepwise", "fixed"), ...)
+estimate_population(
+  zdat,
+  method = c("auto", "bic", "stepwise", "fixed", "bayesthresh"),
+  ...
+)
 }
 \arguments{
 \item{zdat}{Capture-pattern data. The first columns identify list
 membership and the final column contains the observed counts.}
 
 \item{method}{Estimation method. One of \code{"auto"}, \code{"bic"},
-\code{"stepwise"}, or \code{"fixed"}. The individual methods and their
-available arguments are documented in
+\code{"stepwise"}, \code{"bayesthresh"}, or \code{"fixed"}. The
+individual methods and their available arguments are documented in
 \code{\link{estimate_population_bic}},
-\code{\link{estimate_population_stepwise}}, and
+\code{\link{estimate_population_stepwise}},
+\code{\link{estimate_population_bayesthresh}}, and
 \code{\link{estimate_population_fixed}}.}
 
 \item{...}{Additional arguments passed to the selected estimation
 function. See \code{\link{estimate_population_bic}},
-\code{\link{estimate_population_stepwise}}, and
+\code{\link{estimate_population_stepwise}},
+\code{\link{estimate_population_bayesthresh}}, and
 \code{\link{estimate_population_fixed}} for the arguments available
 for each method.}
 }
 \value{
 The object returned by
   \code{\link{estimate_population_bic}},
-  \code{\link{estimate_population_stepwise}}, or
+  \code{\link{estimate_population_stepwise}},
+  \code{\link{estimate_population_bayesthresh}}, or
   \code{\link{estimate_population_fixed}}.
 }
 \description{
@@ -44,7 +51,9 @@ burdensome. Accordingly, \code{method = "auto"} selects the stepwise
 method for six-list data and issues an informational message.
 
 The estimation method can be selected explicitly using
-\code{method = "bic"}, \code{"stepwise"}, or \code{"fixed"}.
+\code{method = "bic"}, \code{"stepwise"}, \code{"bayesthresh"}, or
+\code{"fixed"}. The \code{"bayesthresh"} method requires the suggested
+package \pkg{MCMCpack}.
 
 Method-specific arguments are passed through \code{...} to the selected
 estimation function. See the documentation for the individual methods
@@ -70,6 +79,16 @@ estimate_population(
   pthresh = 0.02
 )
 
+# The bayesthresh method requires the suggested MCMCpack package.
+if (requireNamespace("MCMCpack", quietly = TRUE)) {
+  estimate_population(
+    Western,
+    method = "bayesthresh",
+    burnin = 100,
+    mcmc = 1000
+  )
+}
+
 # Pass a fixed-model specification through ...
 estimate_population(
   Korea,
@@ -81,5 +100,6 @@ estimate_population(
 \seealso{
 \code{\link{estimate_population_bic}},
 \code{\link{estimate_population_stepwise}},
+\code{\link{estimate_population_bayesthresh}},
 \code{\link{estimate_population_fixed}}
 }

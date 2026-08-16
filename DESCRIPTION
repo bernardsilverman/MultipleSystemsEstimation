@@ -1,6 +1,6 @@
 Package: MultipleSystemsEstimation
 Title: Methods for Multiple Systems Estimation
-Version: 1.0.0
+Version: 1.1.0
 Authors@R: c(
     person(
   given = c("Bernard", "W."),
@@ -23,19 +23,18 @@ URL: https://bernardsilverman.github.io/MultipleSystemsEstimation/,
         https://bernardsilverman.co.uk/contact,
         https://doi.org/10.1080/01621459.2019.1708748,
         https://doi.org/10.1007/s11222-023-10346-9
-Depends:
-    R (>= 4.2.0)
+Depends: R (>= 4.2.0)
 License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3
-Suggests:
-    Rcapture,
-    knitr,
-    rmarkdown,
-    testthat (>= 3.0.0)
-Imports:
-    lpSolve
+Suggests: MCMCpack, Rcapture, knitr, rmarkdown, testthat (>= 3.0.0)
+Imports: lpSolve
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 NeedsCompilation: no
+Packaged: 2026-08-11 16:21:07 UTC; berna
+Author: Bernard W. Silverman [aut, cre],
+  Lax Chan [ctb],
+  Kyle Vincent [ctb]
+Maintainer: Bernard W. Silverman <bernard.silverman@stats.ox.ac.uk>
