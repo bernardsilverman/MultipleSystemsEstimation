@@ -7,6 +7,7 @@ articles:
     navbar: ~
     contents:
       - user-guide
+      - bayesian-threshold
       - reproduce-2021
       - reproduce-2024
 reference:
@@ -14,6 +15,7 @@ reference:
     contents:
       - estimate_population
       - estimate_population_bic
+      - estimate_population_bayesthresh
       - estimate_population_fixed
       - estimate_population_stepwise
       - tidy_lists

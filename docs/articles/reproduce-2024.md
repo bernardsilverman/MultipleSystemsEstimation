@@ -866,3 +866,9 @@ checking rather than Monte Carlo accuracy. Setting
 finite `ntop` ranges used for the paper. The few calculations that
 require exhaustive five-list bootstrap searches are shown separately and
 are not run automatically.
+
+## References
+
+Silverman, B. W., Chan, L. and Vincent, K. (2024). Bootstrapping
+Multiple Systems Estimates to Account for Model Selection. *Statistics
+and Computing*, **34**, 44. <doi:10.1007/s11222-023-10346-9>.

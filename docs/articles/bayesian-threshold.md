@@ -1,0 +1,387 @@
+# Bayesian-thresholding multiple systems estimation
+
+## Introduction
+
+This vignette describes the Bayesian-threshold approach to multiple
+systems estimation developed in Silverman (2020), together with its
+implementation in
+[`estimate_population_bayesthresh()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_bayesthresh.md).
+
+Only the aspects specific to Bayesian thresholding are considered here.
+General background on multiple systems estimation and Poisson log-linear
+models is given elsewhere in the `MultipleSystemsEstimation` package.
+
+The basic Bayesian-threshold procedure described here follows Silverman
+(2020). The extension to three-list interactions, and the use of the
+Fienberg-Rinaldo existence check within this Bayesian-threshold
+implementation, were not part of the original paper and are additions in
+the present implementation.
+
+## The Bayesian-threshold procedure
+
+### Bayesian thresholding
+
+In multiple systems estimation, the choice of interaction terms in the
+log-linear model can have a substantial effect on the estimate of the
+unobserved population. Bayesian thresholding provides a way of selecting
+these interactions using a posterior distribution rather than repeated
+significance testing or some other model selection approach.
+
+Initially, consider models which only have main effects and two-list
+interactions. The approach begins with a model containing all possible
+interactions, fits that model using MCMC, and then removes interactions
+for which the posterior evidence of a non-zero effect is weak. The
+reduced model is then fitted again to obtain the final population
+estimate and selected posterior quantiles.
+
+The intercept and main effects are given independent improper flat
+priors. The interaction parameters are independent of these and of one
+another. By default, each interaction parameter has a Gaussian prior
+centred at zero with variance `prior_variance`; setting
+`prior = "improper"` instead gives the interaction parameters improper
+flat priors on $`(-\infty,\infty)`$.
+
+For each interaction parameter, the strength of evidence that it differs
+from zero is measured by
+
+``` math
+\frac{|\operatorname{E}(\beta_{ij}\mid\text{data})|}
+     {\operatorname{sd}(\beta_{ij}\mid\text{data})}.
+```
+
+Interactions for which this quantity is below the specified threshold
+are removed, and the model is then fitted again using the retained
+interactions.
+
+The default threshold is 2. Thus the procedure retains interactions for
+which the absolute posterior mean is at least two posterior standard
+deviations from zero.
+
+The method can also be extended to allow three-list interactions while
+preserving the hierarchical structure of the log-linear model. The
+two-list interactions are thresholded first, as described above. A
+three-list interaction is then eligible for consideration only if all
+three of its constituent two-list interactions have been retained. The
+model containing the retained two-list interactions together with all
+eligible three-list interactions is fitted, and the three-list
+interactions are thresholded using the same posterior mean to posterior
+standard deviation ratio. The resulting hierarchical model is then
+fitted once more to obtain the final population estimate and selected
+posterior quantiles.
+
+For example, a three-list interaction $`ijk`$ is eligible for inclusion
+only if the interactions $`ij`$, $`ik`$, and $`jk`$ have all been
+retained at the first stage. At the second stage, only the eligible
+three-list terms are thresholded; the two-list terms that survived the
+initial thresholding are kept regardless of their new posterior means.
+This ensures that the selected model remains hierarchical.
+
+### MCMC estimation
+
+Posterior sampling is carried out using
+[`MCMCpack::MCMCpoisson()`](https://rdrr.io/pkg/MCMCpack/man/MCMCpoisson.html),
+which applies Markov chain Monte Carlo to the Poisson log-linear model.
+The MCMC run produces posterior draws for the intercept, the main
+effects, and the interaction parameters in the model. These draws are
+used both for the thresholding step described above and, after the
+selected model has been refitted, for inference about population size.
+
+In the log-linear formulation, the intercept determines the fitted mean
+of the unobserved cell, corresponding to individuals appearing on none
+of the lists. For each posterior draw of the intercept $`\mu`$, the
+corresponding size of the unobserved cell is $`\exp(\mu).`$
+
+Adding this quantity to the observed population gives a posterior draw
+for the total population size. The resulting collection of draws
+therefore gives the posterior distribution of the total population. By
+default,
+[`estimate_population_bayesthresh()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_bayesthresh.md)
+reports the posterior median as the population estimate, together with
+selected posterior quantiles. The full set of posterior draws can also
+be returned if required.
+
+The thresholding step approximates a Bayesian model with a mixed prior
+for the parameters of an atom of probability at zero and some other
+symmetric density, hence modelling a parsimonious interaction structure;
+see Silverman (2020) for further discussion.
+
+## A basic analysis
+
+The Kosovo data provide a useful illustration because allowing
+three-list interactions leads to a genuinely different selected model.
+
+We first fit the Bayesian-threshold procedure using only two-list
+interactions.
+
+``` r
+
+estimate_population_bayesthresh(
+    Kosovo,
+    maxorder = 2
+)
+#> $call
+#> estimate_population_bayesthresh(zdat = Kosovo, maxorder = 2)
+#> 
+#> $popest
+#> [1] 13971.48
+#> 
+#> $quantiles
+#>     2.5%      10%      50%      90%    97.5% 
+#> 12236.22 12796.88 13971.48 15475.37 16389.40 
+#> 
+#> $retained_interactions
+#> [1] "EXH:ABA"  "EXH:OSCE" "ABA:OSCE" "EXH:HRW"  "OSCE:HRW"
+#> 
+#> $threshold_statistics
+#>   EXH:ABA  EXH:OSCE  ABA:OSCE   EXH:HRW   ABA:HRW  OSCE:HRW 
+#>  8.464526  9.162971 12.540216  6.929278  0.196996 10.605549
+```
+
+With the default proper prior for the interaction parameters, the
+retained two-list interactions are
+
+EXH:ABA, EXH:OSCE, ABA:OSCE, EXH:HRW, and OSCE:HRW.
+
+The posterior median estimate of the total population is about 14,000.
+The 2.5% and 97.5% posterior quantiles are about 12,200 and 16,400
+respectively.
+
+We can now allow three-list interactions by setting `maxorder = 3`. For
+this example we use a threshold of 2.5, rather than the default value of
+2, in order to illustrate the thresholding of eligible three-list
+interactions.
+
+``` r
+
+
+estimate_population_bayesthresh(
+    Kosovo,
+    maxorder = 3,
+    threshold = 2.5
+)
+#> $call
+#> estimate_population_bayesthresh(zdat = Kosovo, threshold = 2.5, 
+#>     maxorder = 3)
+#> 
+#> $popest
+#> [1] 10313.86
+#> 
+#> $quantiles
+#>      2.5%       10%       50%       90%     97.5% 
+#>  9031.819  9370.497 10313.857 11420.954 12094.699 
+#> 
+#> $retained_interactions
+#> [1] "EXH:ABA"  "EXH:OSCE" "ABA:OSCE" "EXH:HRW"  "OSCE:HRW"
+#> 
+#> $eligible_triples
+#> [1] "EXH:ABA:OSCE" "EXH:OSCE:HRW"
+#> 
+#> $retained_triples
+#> [1] "EXH:ABA:OSCE"
+#> 
+#> $threshold_statistics
+#>   EXH:ABA  EXH:OSCE  ABA:OSCE   EXH:HRW   ABA:HRW  OSCE:HRW 
+#>  8.464526  9.162971 12.540216  6.929278  0.196996 10.605549 
+#> 
+#> $triple_threshold_statistics
+#> EXH:ABA:OSCE EXH:OSCE:HRW 
+#>     4.263698     2.451189
+```
+
+The same five two-list interactions are retained. Two three-list
+interactions are eligible for consideration:
+
+EXH:ABA:OSCE and EXH:OSCE:HRW.
+
+Their threshold statistics are about 4.26 and 2.45 respectively. At a
+threshold of 2.5, `EXH:ABA:OSCE` is retained while `EXH:OSCE:HRW` is
+thresholded out. The threshold was only used to illustrate how some of
+the three-list interactions can be retained and others thresholded. The
+default threshold of 2 retains both eligible three-list interactions and
+yields an estimate of 11,800; the 2.5% and 97.5% posterior quantiles are
+about 10,000 and 14,600, still substantially different from the two-list
+result.
+
+#### Improper priors
+
+The preceding analysis used proper normal priors for the interaction
+parameters. The same thresholding procedure can instead be used with
+improper flat priors for the interaction parameters.
+
+Some additional care is needed because an interaction whose sufficient
+statistic is zero has its posterior distribution concentrated at minus
+infinity. Such terms are accounted for before the MCMC fit is carried
+out. Effects whose posterior distribution is concentrated at minus
+infinity are identified automatically and reported in the
+`minus_infinite_estimated_effects` component of the returned object. The
+effects are still retained in the model, but are not included in
+`retained_interactions`, which reports only retained interaction effects
+estimated by MCMC. For example, with the five-list UK data:
+
+``` r
+
+
+estimate_population_bayesthresh(
+  UKdat_5,
+  prior = "improper"
+)
+#> $call
+#> estimate_population_bayesthresh(zdat = UKdat_5, prior = "improper")
+#> 
+#> $popest
+#> [1] 12188.27
+#> 
+#> $quantiles
+#>     2.5%      10%      50%      90%    97.5% 
+#> 10652.41 11127.74 12188.27 13284.99 13946.75 
+#> 
+#> $retained_interactions
+#> [1] "LA:NG"    "LA:PFNCA" "NG:GP"    "PFNCA:GP" "GO:GP"   
+#> 
+#> $threshold_statistics
+#>      LA:NG   LA:PFNCA   NG:PFNCA      LA:GO      NG:GO   PFNCA:GO      NG:GP 
+#> 3.43586815 2.00326932 0.01839113 0.65612309 1.59135231 0.35586023 3.33634055 
+#>   PFNCA:GP      GO:GP 
+#> 2.72748176 2.62723073 
+#> 
+#> $minus_infinite_estimated_effects
+#> [1] "LA:GP"
+```
+
+Here `LA:GP` is retained in the model with its effect estimated as minus
+infinity, and is therefore reported in
+`minus_infinite_estimated_effects` rather than in
+`retained_interactions`.
+
+#### Checking existence of the fitted model
+
+For some datasets, there are log-linear models for which there is no
+maximum likelihood solution even after allowing some parameters to take
+the value $`-\infty`$. This can be checked for any particular model
+using the criterion of Fienberg and Rinaldo (2012).
+
+Although the method is Bayesian, the Fienberg-Rinaldo existence
+condition is still relevant because the prior specification used here is
+not fully proper in all components of the model. If the condition fails,
+the resulting posterior distribution need not be well defined, and the
+MCMC output cannot be relied upon. The package therefore checks the
+existence condition before carrying out the relevant thresholding step.
+
+- **Initial two-list fit.** If the model with all two-list interactions
+  fails the Fienberg-Rinaldo check, the initial model fit will fail and
+  it will not be possible to threshold the two-list interactions. The
+  package returns an error message because a different approach
+  altogether is needed.
+
+- **Three-list extension.** In the `maxorder = 3` procedure, it is
+  possible for the initial thresholding to work successfully, but for
+  the model with the retained two-list interactions and all eligible
+  three-list interactions to fail the check. In that case, the completed
+  two-list analysis is returned instead of proceeding with the proposed
+  three-list extension.
+
+#### Examples of failure of the existence check
+
+The two possible failures can be illustrated with the `Korea` and
+`Western` datasets.
+
+For `Korea`, the model containing all two-list interactions fails the
+Fienberg-Rinaldo check. The procedure therefore stops before the
+two-list interactions can be thresholded.
+
+``` r
+
+
+estimate_population_bayesthresh(
+  Korea
+)
+#> Error:
+#> ! Bayesian thresholding cannot be applied: the full pairwise model fails the Fienberg-Rinaldo existence criterion.
+```
+
+The second possibility is illustrated by `Western`. To make the issue
+visible in a simple example, we deliberately use the unusually low value
+`threshold = 0.2`. The initial two-list fit and thresholding are then
+completed successfully, but the resulting model containing the retained
+two-list interactions and all eligible three-list interactions fails the
+Fienberg-Rinaldo check.
+
+``` r
+
+
+estimate_population_bayesthresh(
+  Western,
+  maxorder = 3,
+  threshold = 0.2
+)
+#> Warning: The maximal three-list extension fails the Fienberg-Rinaldo existence
+#> criterion; reverting to maxorder = 2.
+#> $call
+#> estimate_population_bayesthresh(zdat = Western, threshold = 0.2, 
+#>     maxorder = 3)
+#> 
+#> $popest
+#> [1] 2591.47
+#> 
+#> $quantiles
+#>     2.5%      10%      50%      90%    97.5% 
+#> 1360.629 1755.467 2591.470 3623.173 4744.008 
+#> 
+#> $retained_interactions
+#> [1] "A:B" "A:C" "B:C" "C:D" "A:E" "B:E" "C:E" "D:E"
+#> 
+#> $eligible_triples
+#> [1] "A:B:C" "A:B:E" "A:C:E" "B:C:E" "C:D:E"
+#> 
+#> $threshold_statistics
+#>        A:B        A:C        B:C        A:D        B:D        C:D        A:E 
+#> 1.53276116 0.74048153 0.59465891 0.02154729 0.07132579 0.89124256 2.85281336 
+#>        B:E        C:E        D:E 
+#> 0.99744074 0.58680854 1.45457342
+```
+
+In this case, the procedure does not attempt the three-list extension
+and returns the completed two-list analysis, together with the eligible
+triples in the proposed three-list extension.
+
+## MCMC settings and posterior output
+
+The principal MCMC settings can be controlled through arguments passed
+to
+[`MCMCpack::MCMCpoisson()`](https://rdrr.io/pkg/MCMCpack/man/MCMCpoisson.html),
+including `burnin`, `mcmc`, `thin`, `tune`, and `seed`. The defaults are
+intended to be suitable for routine use, although longer runs may be
+appropriate for a substantive final analysis.
+[`MCMCpack::MCMCpoisson()`](https://rdrr.io/pkg/MCMCpack/man/MCMCpoisson.html)
+uses a reproducible default seed when `seed` is not specified. A
+different seed can be supplied through `...` if a different MCMC run is
+required.
+
+By default, the full posterior sample of total population size is not
+returned. It can be retained, when required, by setting
+`return_posterior = TRUE`.
+
+## Summary
+
+Bayesian thresholding provides a parsimonious way to select interaction
+effects using posterior evidence. The implementation allows either
+proper or improper priors for interaction effects, can extend the
+thresholding procedure hierarchically to three-list interactions, and
+checks the relevant models against the Fienberg-Rinaldo existence
+criterion. The returned object reports the selected interaction
+structure and posterior inference for total population size, with the
+full posterior sample available optionally.
+
+## References
+
+Silverman, B. W. (2020). *Multiple-systems analysis for the
+quantification of modern slavery: classical and Bayesian approaches*.
+*Journal of the Royal Statistical Society: Series A (Statistics in
+Society)*, **183**(3), 691–736. <doi:10.1111/rssa.12505>.
+
+Fienberg, S. E. and Rinaldo, A. (2012). *Maximum likelihood estimation
+in log-linear models*. *The Annals of Statistics*, **40**, 996–1023.
+
+Martin, A. D., Quinn, K. M. and Park, J. H. (2011). *MCMCpack: Markov
+Chain Monte Carlo in R*. *Journal of Statistical Software*, **42**(9),
+1–21.

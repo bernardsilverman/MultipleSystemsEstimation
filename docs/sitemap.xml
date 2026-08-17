@@ -1,5 +1,6 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/404.html</loc></url>
+<url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/bayesian-threshold.html</loc></url>
 <url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/index.html</loc></url>
 <url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/reproduce-2021.html</loc></url>
 <url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/reproduce-2024.html</loc></url>
@@ -33,6 +34,7 @@
 <url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimatepopulation.0.html</loc></url>
 <url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimatepopulation.html</loc></url>
 <url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population.html</loc></url>
+<url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_bayesthresh.html</loc></url>
 <url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_bic.html</loc></url>
 <url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_fixed.html</loc></url>
 <url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_stepwise.html</loc></url>

@@ -1,4 +1,4 @@
-# Internal helpers for Bayesian-threshold multiple-systems estimation
+# Internal helpers for Bayesian-thresholding multiple systems estimation
 
 
 .bayesthresh_all_effects <- function(nlists, effect_order) {

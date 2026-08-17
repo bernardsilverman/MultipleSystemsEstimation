@@ -91,7 +91,7 @@
 #' @export
 estimate_population <- function(
     zdat,
-    method = c("auto", "bic", "stepwise", "fixed", "bayesthresh")
+    method = c("auto", "bic", "stepwise", "fixed", "bayesthresh"),
     ...
 ) {
   method <- match.arg(method)

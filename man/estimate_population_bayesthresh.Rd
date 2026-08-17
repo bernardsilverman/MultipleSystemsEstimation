@@ -2,7 +2,7 @@
 % Please edit documentation in R/estimate_population_bayesthresh.R
 \name{estimate_population_bayesthresh}
 \alias{estimate_population_bayesthresh}
-\title{Bayesian-threshold multiple-systems estimation}
+\title{Bayesian-thresholding multiple systems estimation}
 \usage{
 estimate_population_bayesthresh(
   zdat,
@@ -15,16 +15,17 @@ estimate_population_bayesthresh(
 )
 }
 \arguments{
-\item{zdat}{Multiple-systems data in the usual
+\item{zdat}{Multiple systems data in the usual
 MultipleSystemsEstimation format.}
 
-\item{prior}{Either \code{"proper"} (the default) or \code{"improper"}.}
+\item{prior}{Either \code{"proper"} (the default) or \code{"improper"},
+specifying the prior for the interaction parameters.}
 
-\item{prior_variance}{Prior variance for interaction terms when a proper
-prior is used.}
+\item{prior_variance}{Prior variance for interaction parameters when a
+proper prior is used.}
 
 \item{threshold}{Threshold applied to the absolute posterior mean to
-standard deviation ratio for interaction parameters.}
+posterior standard deviation ratio for interaction parameters.}
 
 \item{maxorder}{Maximum interaction order, either 2 or 3.}
 
@@ -60,33 +61,33 @@ A list with the following components:
       Posterior quantiles of the total population size.
     }
     \item{\code{retained_interactions}}{
-      Pairwise interaction effects retained by the thresholding procedure
-      and estimated by MCMC.
+      Two-list interactions retained by the thresholding procedure and
+      estimated by MCMC.
     }
     \item{\code{threshold_statistics}}{
       Absolute posterior mean to posterior standard deviation ratios for
-      the pairwise interaction effects considered in the initial
-      thresholding step.
+      the two-list interactions considered in the initial thresholding
+      step.
     }
     \item{\code{eligible_triples}}{
-      If \code{maxorder = 3}, the three-way interactions eligible for
-      consideration because all three constituent pairwise interactions
-      have been retained.
+      If \code{maxorder = 3}, the eligible three-list interactions: those
+      for which all three constituent two-list interactions have been
+      retained.
     }
     \item{\code{retained_triples}}{
-      If the third-order thresholding step is carried out, the eligible
-      three-way interactions retained by that thresholding step.
+      If the three-list thresholding step is carried out, the eligible
+      three-list interactions retained by that thresholding step.
     }
     \item{\code{triple_threshold_statistics}}{
-      If the third-order thresholding step is carried out, the threshold
-      statistics for the eligible three-way interactions.
+      If the three-list thresholding step is carried out, the threshold
+      statistics for the eligible three-list interactions.
     }
     \item{\code{minus_infinite_estimated_effects}}{
       With an improper prior, interaction effects whose posterior
       distribution is concentrated at minus infinity. This component is
       present only if such effects occur. These effects are retained in
-      the fitted model but are reported separately from
-      \code{retained_interactions}.
+      the fitted model but are reported separately from interaction
+      effects estimated by MCMC.
     }
     \item{\code{posterior}}{
       If \code{return_posterior = TRUE}, the full posterior sample of the
@@ -95,66 +96,67 @@ A list with the following components:
   }
 }
 \description{
-Fits the Bayesian threshold estimator of Silverman (2020), based on a
+Fits the Bayesian-threshold estimator of Silverman (2020), based on a
 Poisson log-linear model for the capture-pattern counts.
-A Bayesian/thresholding approach is adopted, with priors placed on the parameters
-in the log-linear model. Improper priors are used for the intercept and
-main effects.
-For the Bayesian parts of the procedure, inference is carried out by Markov chain
-Monte Carlo, calling \code{MCMCpack::MCMCpoisson()}.
 
-The method begins by including all pairwise interactions. The interactions are
-then thresholded, by discarding all those whose posterior mean to standard
-deviation ratio has absolute value below \code{threshold}. The model
-containing the retained interactions is then re-estimated, and the posterior
-distribution of the total population is obtained by adding the observed
-population to the posterior estimate of the unobserved cell.
+The intercept and main effects have independent improper flat priors.
+For the interaction parameters, a proper normal prior is used by default;
+an improper flat prior can instead be specified. For the Bayesian parts of
+the procedure, inference is carried out by Markov chain Monte Carlo, calling
+\code{MCMCpack::MCMCpoisson()}.
+
+The method begins by including all two-list interactions. The interactions
+are then thresholded by discarding those whose posterior mean to posterior
+standard deviation ratio has absolute value below \code{threshold}. The
+model containing the retained interactions is then re-estimated, and the
+posterior distribution of the total population is obtained by adding the
+observed population to the posterior estimate of the unobserved cell.
 }
 \details{
-Improper priors are used for the intercept and main effects.
-By default, proper normal priors are used for the interaction parameters.
-Because \code{MCMCpack::MCMCpoisson()} does not in practice handle this
-mixture of improper and proper priors satisfactorily, the improper priors
-on the intercept and main effects are implemented internally using proper
-normal priors with very large variance.
+By default, independent zero-centred normal priors are used for the
+interaction parameters, with variance specified by \code{prior_variance}.
+Setting \code{prior = "improper"} instead uses independent improper flat
+priors for the interaction parameters. In that case, interactions having
+zero sufficient statistic have posterior distribution concentrated at
+minus infinity. Such effects are retained in the model but are accounted
+for separately before carrying out the actual MCMC, as set out in
+Silverman (2020).
 
-Setting \code{prior = "improper"} uses improper flat priors for all
-parameters, which can be handled directly by
-\code{MCMCpack::MCMCpoisson()}. In that case, interactions having zero
-sufficient statistic have posterior distribution concentrated at minus
-infinity.
-Such effects are retained
-in the model but are accounted for separately before carrying out the
-actual MCMC, as set out in Silverman (2020).
+If \code{maxorder = 3}, three-list interactions are also considered.
+Two-list interactions are thresholded first. A three-list interaction is
+eligible for consideration only if all three of its constituent two-list
+interactions have been retained. The model containing the retained
+two-list interactions and all eligible three-list interactions is then
+fitted, the three-list interactions are thresholded in the same way, and
+the resulting hierarchical model is refitted.
 
-If \code{maxorder = 3}, three-way interactions are also considered.
-Pairwise interactions are thresholded first. A
-three-way interaction is then eligible for consideration only if all three of
-its constituent pairwise interactions have been retained. The model
-containing the retained pairs and all eligible three-way interactions is
-then fitted, the three-way interactions are thresholded in the same way,
-and the resulting hierarchical model is refitted.
+In all cases, the model containing all two-list interactions is checked for
+identifiability and for the Fienberg-Rinaldo existence criterion before
+thresholding begins. If it fails, the procedure stops. With
+\code{maxorder = 3}, if the model containing the retained two-list
+interactions and all eligible three-list interactions fails the
+Fienberg-Rinaldo criterion, the proposed three-list extension is not
+carried out and the completed two-list analysis is returned, together
+with the eligible triples.
 
-In all cases, the full pairwise model is checked for identifiability and
-for the Fienberg-Rinaldo existence criterion before thresholding begins. If
-it fails, the procedure stops. With \code{maxorder = 3}, if the model
-containing all eligible three-way interactions fails the Fienberg-Rinaldo
-criterion, the third-order fit is not carried out and the completed order-2
-analysis is returned, together with the eligible three-way interactions.
+When proper priors are used for the interaction parameters, the improper
+priors on the intercept and main effects are approximated internally by
+independent zero-centred normal priors with very large variance. This is
+an implementation device arising from the way \code{MCMCpack::MCMCpoisson()}
+specifies its prior distribution, rather than a change to the underlying
+prior specification.
 }
 \examples{
 data(Western, package = "MultipleSystemsEstimation")
 
-if (requireNamespace("MCMCpack", quietly = TRUE)) {
-  fit <- estimate_population_bayesthresh(
-      Western,
-      burnin = 100,
-      mcmc = 1000,
-      seed = 1234
-  )
-  fit$popest
-  fit$retained_interactions
-}
+fit <- estimate_population_bayesthresh(
+    Western,
+    burnin = 100,
+    mcmc = 1000,
+    seed = 1234
+)
+fit$popest
+fit$retained_interactions
 
 }
 \references{

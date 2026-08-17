@@ -29,7 +29,9 @@ individual methods can also be selected explicitly.
 
 The BIC/bootstrap approach follows Silverman, Chan and Vincent (2024).
 The stepwise procedure and the treatment of sparse-data existence and
-identifiability issues build on Chan, Silverman and Vincent (2021).
+identifiability issues build on Chan, Silverman and Vincent (2021). The
+package also implements the Bayesian thresholding approach of Section 6
+of Silverman (2020).
 
 This vignette is intended as a guide to analysing data with the package.
 Separate vignettes describe how to reproduce specific results from the
@@ -280,7 +282,7 @@ lists.
 
 The treatment of extended maximum likelihood estimates and the existence
 of estimates in sparse log-linear models builds on the general results
-of Fienberg and Rinaldo (2012), specialised to the multiple-systems
+of Fienberg and Rinaldo (2012), specialised to the multiple systems
 setting by Chan, Silverman and Vincent (2021).
 
 The package handles such boundary estimates explicitly.
@@ -309,9 +311,9 @@ Artificial_3
 #> 4 1 1 0  6
 ```
 
-Advanced users can check a particular pairwise model directly with
+Advanced users can check a particular two-list model directly with
 [`check_identifiability()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/check_identifiability.md).
-For example, the model containing all three pairwise effects is not
+For example, the model containing all three two-list interactions is not
 identifiable for these data:
 
 ``` r
@@ -436,6 +438,87 @@ fit_step_boot$bootreps
 fit_step_boot$ahat
 ```
 
+## The Bayesian thresholding method
+
+The package also provides the Bayesian thresholding method of Silverman
+(2020, Section 6). This is selected explicitly by setting
+`method = "bayesthresh"`; it is not selected by `method = "auto"`.
+
+The procedure starts by fitting the log-linear model containing all
+two-list interactions, using Markov chain Monte Carlo. Each interaction
+is then assessed by the absolute value of its posterior mean divided by
+its posterior standard deviation. Interactions whose value is below
+`threshold` are discarded, and the model containing the retained
+interactions is refitted.
+
+Improper priors are used for the intercept and main effects. By default,
+proper normal priors are used for the interaction parameters, although
+improper priors can also be specified. The method requires the suggested
+package `MCMCpack`, but only when `bayesthresh` is actually used.
+
+For example:
+
+``` r
+
+estimate_population(
+  Kosovo,
+  method = "bayesthresh",
+  maxorder = 3
+)
+#> $call
+#> estimate_population_bayesthresh(zdat = zdat, maxorder = 3)
+#> 
+#> $popest
+#> [1] 11814.25
+#> 
+#> $quantiles
+#>     2.5%      10%      50%      90%    97.5% 
+#> 10015.00 10430.24 11814.25 13439.14 14567.56 
+#> 
+#> $retained_interactions
+#> [1] "EXH:ABA"  "EXH:OSCE" "ABA:OSCE" "EXH:HRW"  "OSCE:HRW"
+#> 
+#> $eligible_triples
+#> [1] "EXH:ABA:OSCE" "EXH:OSCE:HRW"
+#> 
+#> $retained_triples
+#> [1] "EXH:ABA:OSCE" "EXH:OSCE:HRW"
+#> 
+#> $threshold_statistics
+#>   EXH:ABA  EXH:OSCE  ABA:OSCE   EXH:HRW   ABA:HRW  OSCE:HRW 
+#>  8.464526  9.162971 12.540216  6.929278  0.196996 10.605549 
+#> 
+#> $triple_threshold_statistics
+#> EXH:ABA:OSCE EXH:OSCE:HRW 
+#>     4.263698     2.451189 
+#> 
+#> attr(,"method")
+#> [1] "bayesthresh"
+#> attr(,"nlists")
+#> [1] 4
+```
+
+By default `maxorder = 2`, so only two-list interactions are considered.
+Setting `maxorder = 3` allows three-list interactions as well. A
+three-list interaction is eligible for consideration only when all three
+of its constituent two-list interactions have survived the first
+thresholding step. The eligible three-list interactions are then fitted
+and thresholded in the same way.
+
+As with the other fitting procedures, models are checked for
+identifiability and for the Fienberg–Rinaldo existence criterion. If the
+initial full two-list model fails these checks, the procedure stops. If
+a proposed three-list extension fails the existence criterion, the
+completed two-list analysis is returned instead.
+
+The returned `quantiles` are posterior quantiles of the total
+population, so no separate bootstrap calculation is required for
+uncertainty assessment.
+
+For a fuller account of the method, including prior specification,
+three-list interactions, and the treatment of sparse-data edge cases,
+see the vignette *Bayesian-thresholding multiple systems estimation*.
+
 ## Fitting a specified model
 
 Sometimes the log-linear model has been chosen independently of either
@@ -470,7 +553,7 @@ For example:
 
 All lower-order terms implied by hierarchy are included automatically.
 
-For pairwise models the older `mX` representation can also be used. For
+For two-list models the older `mX` representation can also be used. For
 example, `mX = c(2, 3)` specifies the interaction between lists 2 and 3.
 
 Bootstrap inference for a fixed model is requested in the same way:
@@ -491,10 +574,10 @@ Here the distinction from BIC and stepwise inference is important: the
 same specified model is fitted to every bootstrap and jackknife sample.
 There is no model-selection step inside the resampling procedure.
 
-## Bootstrap and BCa inference: a common view
+## Bootstrap and BCa inference for likelihood based methods: a common view
 
-All three routes can be used for point estimation with `nboot = 0`,
-which is the default.
+The BIC, stepwise and fixed routes can be used for point estimation with
+`nboot = 0`, which is the default.
 
 When `nboot > 0`:
 
@@ -540,11 +623,13 @@ There are, however, reasons to choose explicitly:
   procedure is preferred, when sensitivity to `pthresh` is of interest,
   or for larger numbers of lists where BIC enumeration is unavailable or
   unattractive;
+- use `method = "bayesthresh"` if you prefer the Bayesian/thresholding
+  approach, including when three-list interactions are to be considered;
 - use `method = "fixed"` when the model has been specified independently
   of these data-driven selection procedures.
 
 For six lists, `auto` deliberately chooses stepwise fitting. Explicit
-BIC fitting is possible, but requires enumeration of 32,768 pairwise
+BIC fitting is possible, but requires enumeration of 32,768 two-list
 hierarchical models and may therefore take considerable time. For more
 than six lists, the BIC enumeration method is not available.
 
@@ -580,6 +665,10 @@ names(fit_step)
 and `BCaquantiles` contain the resampling results when bootstrap
 inference has been requested.
 
+For `bayesthresh` the components returned depend on the options chosen
+and on the result of the analysis. See the individual documentation for
+details.
+
 For fixed fitting:
 
 ``` r
@@ -601,6 +690,7 @@ components:
 ?estimate_population_bic
 ?estimate_population_stepwise
 ?estimate_population_fixed
+?estimate_population_bayesthresh
 ```
 
 ## Lower-level tools
@@ -627,12 +717,16 @@ estimate.
 ## Where next?
 
 This vignette has described the package as a tool for current analysis.
-Two companion vignettes provide paper-specific workflows:
+Three companion vignettes give further details and, in some cases,
+paper-specific workflows:
 
-- *Reproducing Silverman, Chan and Vincent (2024)*, covering the
-  BIC/bootstrap methodology and selected published results; and
-- *Reproducing Chan, Silverman and Vincent (2021)*, covering the
-  sparse-data and stepwise methodology and selected published results.
+- *Reproducing Silverman, Chan and Vincent (2024)*: the BIC/bootstrap
+  methodology and selected published results;
+- *Reproducing Chan, Silverman and Vincent (2021)*: the sparse-data and
+  stepwise methodology and selected published results; and
+- *Bayesian-thresholding multiple systems estimation*: the Bayesian
+  thresholding method, prior specification, three-list interactions, and
+  sparse-data edge cases.
 
 These reproducibility vignettes may use lower-level or historically
 oriented functions that are not part of the normal user workflow.
@@ -650,6 +744,11 @@ DiCiccio, T. J. and Efron, B. (1996). Bootstrap Confidence Intervals.
 
 Fienberg, S. E. and Rinaldo, A. (2012). Maximum Likelihood Estimation in
 Log-Linear Models. *The Annals of Statistics*, **40**, 996–1023.
+
+Silverman, B. W. (2020). Multiple-systems analysis for the
+quantification of modern slavery: classical and Bayesian approaches.
+*Journal of the Royal Statistical Society: Series A (Statistics in
+Society)*, **183**(3), 691–736. <doi:10.1111/rssa.12505>.
 
 Silverman, B. W., Chan, L. and Vincent, K. (2024). Bootstrapping
 Multiple Systems Estimates to Account for Model Selection. *Statistics

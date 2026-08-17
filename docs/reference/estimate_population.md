@@ -6,7 +6,11 @@ methods in MultipleSystemsEstimation.
 ## Usage
 
 ``` r
-estimate_population(zdat, method = c("auto", "bic", "stepwise", "fixed"), ...)
+estimate_population(
+  zdat,
+  method = c("auto", "bic", "stepwise", "fixed", "bayesthresh"),
+  ...
+)
 ```
 
 ## Arguments
@@ -18,11 +22,12 @@ estimate_population(zdat, method = c("auto", "bic", "stepwise", "fixed"), ...)
 
 - method:
 
-  Estimation method. One of `"auto"`, `"bic"`, `"stepwise"`, or
-  `"fixed"`. The individual methods and their available arguments are
-  documented in
+  Estimation method. One of `"auto"`, `"bic"`, `"stepwise"`,
+  `"bayesthresh"`, or `"fixed"`. The individual methods and their
+  available arguments are documented in
   [`estimate_population_bic`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_bic.md),
   [`estimate_population_stepwise`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_stepwise.md),
+  [`estimate_population_bayesthresh`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_bayesthresh.md),
   and
   [`estimate_population_fixed`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_fixed.md).
 
@@ -31,6 +36,7 @@ estimate_population(zdat, method = c("auto", "bic", "stepwise", "fixed"), ...)
   Additional arguments passed to the selected estimation function. See
   [`estimate_population_bic`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_bic.md),
   [`estimate_population_stepwise`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_stepwise.md),
+  [`estimate_population_bayesthresh`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_bayesthresh.md),
   and
   [`estimate_population_fixed`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_fixed.md)
   for the arguments available for each method.
@@ -40,6 +46,7 @@ estimate_population(zdat, method = c("auto", "bic", "stepwise", "fixed"), ...)
 The object returned by
 [`estimate_population_bic`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_bic.md),
 [`estimate_population_stepwise`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_stepwise.md),
+[`estimate_population_bayesthresh`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_bayesthresh.md),
 or
 [`estimate_population_fixed`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_fixed.md).
 
@@ -55,7 +62,8 @@ burdensome. Accordingly, `method = "auto"` selects the stepwise method
 for six-list data and issues an informational message.
 
 The estimation method can be selected explicitly using `method = "bic"`,
-`"stepwise"`, or `"fixed"`.
+`"stepwise"`, `"bayesthresh"`, or `"fixed"`. The `"bayesthresh"` method
+requires the suggested package MCMCpack.
 
 Method-specific arguments are passed through `...` to the selected
 estimation function. See the documentation for the individual methods
@@ -65,6 +73,7 @@ for details of the available arguments and their defaults.
 
 [`estimate_population_bic`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_bic.md),
 [`estimate_population_stepwise`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_stepwise.md),
+[`estimate_population_bayesthresh`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_bayesthresh.md),
 [`estimate_population_fixed`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_fixed.md)
 
 ## Examples
@@ -213,6 +222,39 @@ estimate_population(
 #> [1] "stepwise"
 #> attr(,"nlists")
 #> [1] 3
+
+# The bayesthresh method requires the suggested MCMCpack package.
+if (requireNamespace("MCMCpack", quietly = TRUE)) {
+  estimate_population(
+    Western,
+    method = "bayesthresh",
+    burnin = 100,
+    mcmc = 1000
+  )
+}
+#> $call
+#> estimate_population_bayesthresh(zdat = zdat, burnin = 100, mcmc = 1000)
+#> 
+#> $popest
+#> [1] 2552.763
+#> 
+#> $quantiles
+#>     2.5%      10%      50%      90%    97.5% 
+#> 1676.599 1855.708 2552.763 3302.839 3729.523 
+#> 
+#> $retained_interactions
+#> [1] "A:E" "D:E"
+#> 
+#> $threshold_statistics
+#>       A:B       A:C       B:C       A:D       B:D       C:D       A:E       B:E 
+#> 1.3057152 0.9920623 0.6130628 0.2974010 0.3391920 1.1302809 3.6826238 0.9032479 
+#>       C:E       D:E 
+#> 0.1200008 2.3012798 
+#> 
+#> attr(,"method")
+#> [1] "bayesthresh"
+#> attr(,"nlists")
+#> [1] 5
 
 # Pass a fixed-model specification through ...
 estimate_population(

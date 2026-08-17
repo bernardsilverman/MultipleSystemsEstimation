@@ -1,11 +1,27 @@
+# MultipleSystemsEstimation
+
 Methods for multiple systems estimation using Poisson log-linear models,
-with particular attention to sparse capture data, and to ensuring that
-the estimation uncertainty includes the uncertainty arising from model
-selection. The package implements methodology from Chan, Silverman and
-Vincent (2021)
-\<[doi:10.1080/01621459.2019.1708748](https://doi.org/10.1080/01621459.2019.1708748)\>
-and Silverman, Chan and Vincent (2024)
-\<[doi:10.1007/s11222-023-10346-9](https://doi.org/10.1007/s11222-023-10346-9)\>.
+with particular attention to sparse capture data, model selection and
+its associated uncertainty, and Bayesian thresholding of interaction
+effects.
+
+The package implements methodology from Silverman (2020), Chan,
+Silverman and Vincent (2021), and Silverman, Chan and Vincent (2024).
+
+## References
+
+Silverman, B. W. (2020). Multiple-systems analysis for the
+quantification of modern slavery: classical and Bayesian approaches.
+*Journal of the Royal Statistical Society: Series A*, 183, 691–736.
+
+Chan, L., Silverman, B. W. and Vincent, K. (2021). Multiple systems
+estimation for sparse capture data: inferential challenges when there
+are nonoverlapping lists. *Journal of the American Statistical
+Association*, 116, 129–143.
+
+Silverman, B. W., Chan, L. and Vincent, K. (2024). Multiple systems
+estimation with model selection and uncertainty. *Statistics and
+Computing*.
 
 # Package index
 
@@ -15,6 +31,8 @@ and Silverman, Chan and Vincent (2024)
   : Estimate population size
 - [`estimate_population_bic()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_bic.md)
   : Population estimation using BIC model selection
+- [`estimate_population_bayesthresh()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_bayesthresh.md)
+  : Bayesian-thresholding multiple systems estimation
 - [`estimate_population_fixed()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_fixed.md)
   : Population estimation using a fixed hierarchical model
 - [`estimate_population_stepwise()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_stepwise.md)
@@ -75,6 +93,8 @@ and Silverman, Chan and Vincent (2024)
 
 - [A User Guide to
   MultipleSystemsEstimation](https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/user-guide.md):
+- [Bayesian-thresholding multiple systems
+  estimation](https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/bayesian-threshold.md):
 - [Reproducing Chan, Silverman and Vincent
   (2021)](https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/reproduce-2021.md):
 - [Reproducing Silverman, Chan and Vincent

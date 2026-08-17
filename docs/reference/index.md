@@ -6,6 +6,8 @@
   : Estimate population size
 - [`estimate_population_bic()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_bic.md)
   : Population estimation using BIC model selection
+- [`estimate_population_bayesthresh()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_bayesthresh.md)
+  : Bayesian-thresholding multiple systems estimation
 - [`estimate_population_fixed()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_fixed.md)
   : Population estimation using a fixed hierarchical model
 - [`estimate_population_stepwise()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_stepwise.md)
