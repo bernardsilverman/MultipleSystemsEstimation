@@ -12,10 +12,10 @@ General background on multiple systems estimation and Poisson log-linear
 models is given elsewhere in the `MultipleSystemsEstimation` package.
 
 The basic Bayesian-threshold procedure described here follows Silverman
-(2020). The extension to three-list interactions, and the use of the
-Fienberg-Rinaldo existence check within this Bayesian-threshold
-implementation, were not part of the original paper and are additions in
-the present implementation.
+(2020). The extension to three-list interactions, and the appropriate
+use of the Fienberg-Rinaldo existence check within this
+Bayesian-threshold implementation, were not part of the original paper
+and are additions in the present implementation.
 
 ## The Bayesian-threshold procedure
 
@@ -253,96 +253,106 @@ infinity, and is therefore reported in
 `minus_infinite_estimated_effects` rather than in
 `retained_interactions`.
 
-#### Checking existence of the fitted model
+#### Checking existence with improper interaction priors
 
-For some datasets, there are log-linear models for which there is no
-maximum likelihood solution even after allowing some parameters to take
-the value $`-\infty`$. This can be checked for any particular model
-using the criterion of Fienberg and Rinaldo (2012).
+When improper flat priors are used for the interaction parameters, some
+additional existence checks are required. For some datasets there are
+log-linear models for which there is no maximum likelihood solution even
+after allowing some parameters to take the value $`-\infty`$. This can
+be checked using the criterion of Fienberg and Rinaldo (2012).
 
-Although the method is Bayesian, the Fienberg-Rinaldo existence
-condition is still relevant because the prior specification used here is
-not fully proper in all components of the model. If the condition fails,
-the resulting posterior distribution need not be well defined, and the
-MCMC output cannot be relied upon. The package therefore checks the
-existence condition before carrying out the relevant thresholding step.
+With improper priors on the interaction parameters, failure of this
+criterion also implies that the posterior distribution is not proper.
+The package therefore applies the Fienberg-Rinaldo check when
+`prior = "improper"`.
 
-- **Initial two-list fit.** If the model with all two-list interactions
-  fails the Fienberg-Rinaldo check, the initial model fit will fail and
-  it will not be possible to threshold the two-list interactions. The
-  package returns an error message because a different approach
-  altogether is needed.
+- **Initial two-list fit.** If the model containing all two-list
+  interactions fails the Fienberg-Rinaldo check, the procedure stops
+  before thresholding the two-list interactions.
 
-- **Three-list extension.** In the `maxorder = 3` procedure, it is
-  possible for the initial thresholding to work successfully, but for
-  the model with the retained two-list interactions and all eligible
-  three-list interactions to fail the check. In that case, the completed
-  two-list analysis is returned instead of proceeding with the proposed
-  three-list extension.
+- **Three-list extension.** With `maxorder = 3`, the model containing
+  the retained two-list interactions and all eligible three-list
+  interactions is also checked. If it fails the criterion, the proposed
+  three-list extension is not fitted and the completed two-list analysis
+  is returned.
 
-#### Examples of failure of the existence check
+These checks are not required when proper priors are used for the
+interaction parameters. Results on posterior propriety for Poisson
+log-linear models, including those of Forster (2010), show that proper
+priors can yield a proper posterior even when the corresponding maximum
+likelihood estimate does not exist. The proper-prior Bayesian procedure
+therefore proceeds without applying the Fienberg-Rinaldo criterion.
+
+#### Examples with improper priors
 
 The two possible failures can be illustrated with the `Korea` and
 `Western` datasets.
 
 For `Korea`, the model containing all two-list interactions fails the
-Fienberg-Rinaldo check. The procedure therefore stops before the
-two-list interactions can be thresholded.
+Fienberg-Rinaldo criterion. Thus the improper-prior analysis stops
+before the two-list interactions can be thresholded.
 
 ``` r
 
-
 estimate_population_bayesthresh(
-  Korea
+  Korea,
+  prior = "improper"
 )
 #> Error:
 #> ! Bayesian thresholding cannot be applied: the full pairwise model fails the Fienberg-Rinaldo existence criterion.
 ```
 
-The second possibility is illustrated by `Western`. To make the issue
-visible in a simple example, we deliberately use the unusually low value
-`threshold = 0.2`. The initial two-list fit and thresholding are then
-completed successfully, but the resulting model containing the retained
-two-list interactions and all eligible three-list interactions fails the
-Fienberg-Rinaldo check.
+With the default proper prior, by contrast, the initial Bayesian fit can
+be carried out. In this example the interaction `b:d` is subsequently
+thresholded out, so that the retained model is no longer one of the
+models that fails the Fienberg-Rinaldo criterion.
+
+The second possibility is illustrated by Western. To make the issue
+visible, we use the unusually low value `threshold = 0.2`.
 
 ``` r
 
-
 estimate_population_bayesthresh(
   Western,
+  prior = "improper",
   maxorder = 3,
   threshold = 0.2
 )
 #> Warning: The maximal three-list extension fails the Fienberg-Rinaldo existence
 #> criterion; reverting to maxorder = 2.
 #> $call
-#> estimate_population_bayesthresh(zdat = Western, threshold = 0.2, 
-#>     maxorder = 3)
+#> estimate_population_bayesthresh(zdat = Western, prior = "improper", 
+#>     threshold = 0.2, maxorder = 3)
 #> 
 #> $popest
-#> [1] 2591.47
+#> [1] 10097.75
 #> 
 #> $quantiles
-#>     2.5%      10%      50%      90%    97.5% 
-#> 1360.629 1755.467 2591.470 3623.173 4744.008 
+#>       2.5%        10%        50%        90%      97.5% 
+#>   1412.593   2511.101  10097.746  44546.939 108778.780 
 #> 
 #> $retained_interactions
-#> [1] "A:B" "A:C" "B:C" "C:D" "A:E" "B:E" "C:E" "D:E"
+#> [1] "A:C" "B:C" "A:D" "B:D" "C:D" "A:E" "C:E" "D:E"
 #> 
 #> $eligible_triples
-#> [1] "A:B:C" "A:B:E" "A:C:E" "B:C:E" "C:D:E"
+#> [1] "A:C:D" "B:C:D" "A:C:E" "A:D:E" "C:D:E"
 #> 
 #> $threshold_statistics
-#>        A:B        A:C        B:C        A:D        B:D        C:D        A:E 
-#> 1.53276116 0.74048153 0.59465891 0.02154729 0.07132579 0.89124256 2.85281336 
-#>        B:E        C:E        D:E 
-#> 0.99744074 0.58680854 1.45457342
+#>       A:C       B:C       A:D       B:D       C:D       A:E       C:E       D:E 
+#> 1.5833948 1.5023393 0.7010506 0.9366806 0.2713546 3.0876138 0.4068421 2.3093711 
+#> 
+#> $minus_infinite_estimated_effects
+#> [1] "A:B" "B:E"
 ```
 
-In this case, the procedure does not attempt the three-list extension
-and returns the completed two-list analysis, together with the eligible
-triples in the proposed three-list extension.
+The initial two-list fit and thresholding are completed, but the model
+containing the retained two-list interactions and all eligible
+three-list interactions fails the Fienberg-Rinaldo criterion. The
+three-list extension is therefore not fitted and the completed two-list
+analysis is returned.
+
+With a proper interaction prior the same Fienberg-Rinaldo check is not
+applied, and the three-list fit and thresholding proceed.
 
 ## MCMC settings and posterior output
 
@@ -368,9 +378,10 @@ effects using posterior evidence. The implementation allows either
 proper or improper priors for interaction effects, can extend the
 thresholding procedure hierarchically to three-list interactions, and
 checks the relevant models against the Fienberg-Rinaldo existence
-criterion. The returned object reports the selected interaction
-structure and posterior inference for total population size, with the
-full posterior sample available optionally.
+criterion when improper priors are used for the interactions. The
+returned object reports the selected interaction structure and posterior
+inference for total population size, with the full posterior sample
+available optionally.
 
 ## References
 
@@ -381,6 +392,9 @@ Society)*, **183**(3), 691–736. <doi:10.1111/rssa.12505>.
 
 Fienberg, S. E. and Rinaldo, A. (2012). *Maximum likelihood estimation
 in log-linear models*. *The Annals of Statistics*, **40**, 996–1023.
+
+Forster, J. J. (2010). Bayesian inference for Poisson and multinomial
+log-linear models. *Statistical Methodology*, **7**, 210–224.
 
 Martin, A. D., Quinn, K. M. and Park, J. H. (2011). *MCMCpack: Markov
 Chain Monte Carlo in R*. *Journal of Statistical Software*, **42**(9),

@@ -15,22 +15,26 @@ export(estimate_population_stepwise)
 export(find_neighbour_hierarchies)
 export(get_hierarchical_models)
 export(tidy_lists)
-importFrom(graphics,abline)
-importFrom(graphics,matplot)
-importFrom(stats,as.formula)
-importFrom(stats,glm)
-importFrom(stats,glm.fit)
-importFrom(stats,na.omit)
-importFrom(stats,pnorm)
-importFrom(stats,poisson)
-importFrom(stats,ppoints)
-importFrom(stats,ppois)
-importFrom(stats,predict)
-importFrom(stats,qchisq)
-importFrom(stats,qnorm)
-importFrom(stats,quantile)
-importFrom(stats,rbinom)
-importFrom(stats,rmultinom)
-importFrom(stats,rpois)
-importFrom(stats,setNames)
-importFrom(stats,splinefun)
+importFrom(graphics,
+  abline,
+  matplot
+)
+importFrom(stats,
+  as.formula,
+  glm,
+  glm.fit,
+  na.omit,
+  pnorm,
+  poisson,
+  ppoints,
+  ppois,
+  predict,
+  qchisq,
+  qnorm,
+  quantile,
+  rbinom,
+  rmultinom,
+  rpois,
+  setNames,
+  splinefun
+)

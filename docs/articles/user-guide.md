@@ -505,11 +505,13 @@ of its constituent two-list interactions have survived the first
 thresholding step. The eligible three-list interactions are then fitted
 and thresholded in the same way.
 
-As with the other fitting procedures, models are checked for
-identifiability and for the Fienberg–Rinaldo existence criterion. If the
-initial full two-list model fails these checks, the procedure stops. If
-a proposed three-list extension fails the existence criterion, the
-completed two-list analysis is returned instead.
+With improper priors on the interaction parameters, models are checked
+for identifiability and for the Fienberg–Rinaldo existence criterion. If
+the initial full two-list model fails these checks, the procedure stops.
+If a proposed three-list extension fails the existence criterion, the
+completed two-list analysis is returned instead. These existence checks
+are not needed when proper priors are used for the interaction
+parameters.
 
 The returned `quantiles` are posterior quantiles of the total
 population, so no separate bootstrap calculation is required for

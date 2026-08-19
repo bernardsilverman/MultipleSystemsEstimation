@@ -203,14 +203,22 @@ interactions have been retained. The model containing the retained
 two-list interactions and all eligible three-list interactions is then
 fitted, the three-list interactions are thresholded in the same way, and
 the resulting hierarchical model is refitted.</p>
-<p>In all cases, the model containing all two-list interactions is checked for
-identifiability and for the Fienberg-Rinaldo existence criterion before
-thresholding begins. If it fails, the procedure stops. With
-<code>maxorder = 3</code>, if the model containing the retained two-list
-interactions and all eligible three-list interactions fails the
-Fienberg-Rinaldo criterion, the proposed three-list extension is not
-carried out and the completed two-list analysis is returned, together
-with the eligible triples.</p>
+<p>When improper priors are used for the interaction parameters, the model
+containing all two-list interactions is checked for identifiability and
+for the Fienberg-Rinaldo existence criterion before thresholding begins.
+If it fails, the procedure stops. With <code>maxorder = 3</code>, the model
+containing the retained two-list interactions and all eligible three-list
+interactions is also checked. If this model fails the Fienberg-Rinaldo
+criterion, the proposed three-list extension is not carried out and the
+completed two-list analysis is returned, together with the eligible triples.</p>
+<p>The reason for this check is that, with improper priors on the interaction
+parameters, any model which does not have a maximum likelihood estimate will
+not have a proper posterior either. However, results of Forster (2010)
+show that proper priors on the interaction parameters can yield a proper
+posterior even when the corresponding maximum likelihood estimate does not exist.
+Therefore these checks are not required when proper priors are used for the
+interaction parameters, and the Bayesian fitting and thresholding
+proceed without applying the Fienberg-Rinaldo criterion.</p>
 <p>When proper priors are used for the interaction parameters, the improper
 priors on the intercept and main effects are approximated internally by
 independent zero-centred normal priors with very large variance. This is
@@ -225,6 +233,8 @@ modern slavery: classical and Bayesian approaches. <em>Journal of the
 Royal Statistical Society: Series A (Statistics in Society)</em>, 183, 691–736.</p>
 <p>Fienberg, S. E. and Rinaldo, A. (2012). Maximum likelihood estimation in
 log-linear models. <em>The Annals of Statistics</em>, 40, 996–1023.</p>
+<p>Forster, J. J. (2010). Bayesian inference for Poisson and multinomial
+log-linear models. <em>Statistical Methodology</em>, 7, 210–224.</p>
 <p>Martin, A. D., Quinn, K. M. and Park, J. H. (2011). MCMCpack: Markov Chain
 Monte Carlo in R. <em>Journal of Statistical Software</em>, 42(9), 1–21.</p>
     </div>

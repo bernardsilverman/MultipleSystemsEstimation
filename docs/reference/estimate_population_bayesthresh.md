@@ -155,14 +155,25 @@ two-list interactions and all eligible three-list interactions is then
 fitted, the three-list interactions are thresholded in the same way, and
 the resulting hierarchical model is refitted.
 
-In all cases, the model containing all two-list interactions is checked
-for identifiability and for the Fienberg-Rinaldo existence criterion
-before thresholding begins. If it fails, the procedure stops. With
-`maxorder = 3`, if the model containing the retained two-list
-interactions and all eligible three-list interactions fails the
+When improper priors are used for the interaction parameters, the model
+containing all two-list interactions is checked for identifiability and
+for the Fienberg-Rinaldo existence criterion before thresholding begins.
+If it fails, the procedure stops. With `maxorder = 3`, the model
+containing the retained two-list interactions and all eligible
+three-list interactions is also checked. If this model fails the
 Fienberg-Rinaldo criterion, the proposed three-list extension is not
 carried out and the completed two-list analysis is returned, together
 with the eligible triples.
+
+The reason for this check is that, with improper priors on the
+interaction parameters, any model which does not have a maximum
+likelihood estimate will not have a proper posterior either. However,
+results of Forster (2010) show that proper priors on the interaction
+parameters can yield a proper posterior even when the corresponding
+maximum likelihood estimate does not exist. Therefore these checks are
+not required when proper priors are used for the interaction parameters,
+and the Bayesian fitting and thresholding proceed without applying the
+Fienberg-Rinaldo criterion.
 
 When proper priors are used for the interaction parameters, the improper
 priors on the intercept and main effects are approximated internally by
@@ -181,6 +192,9 @@ Society)*, 183, 691–736.
 
 Fienberg, S. E. and Rinaldo, A. (2012). Maximum likelihood estimation in
 log-linear models. *The Annals of Statistics*, 40, 996–1023.
+
+Forster, J. J. (2010). Bayesian inference for Poisson and multinomial
+log-linear models. *Statistical Methodology*, 7, 210–224.
 
 Martin, A. D., Quinn, K. M. and Park, J. H. (2011). MCMCpack: Markov
 Chain Monte Carlo in R. *Journal of Statistical Software*, 42(9), 1–21.
