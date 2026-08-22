@@ -1,6 +1,6 @@
 Package: MultipleSystemsEstimation
 Title: Methods for Multiple Systems Estimation
-Version: 1.1.0
+Version: 1.2.0
 Authors@R: c(
     person(
   given = c("Bernard", "W."),
@@ -26,9 +26,10 @@ Depends: R (>= 4.2.0)
 License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
-Suggests: MCMCpack, Rcapture, knitr, rmarkdown, testthat (>= 3.0.0)
+Suggests: MCMCpack, knitr, rmarkdown, testthat (>= 3.0.0)
 Imports: lpSolve
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 NeedsCompilation: no
 Config/roxygen2/version: 8.1.0
+RoxygenNote: 7.2.3

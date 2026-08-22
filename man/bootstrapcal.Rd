@@ -40,7 +40,8 @@ If there are already components with these names they will be overwritten.
 }
 \description{
 This routine takes the output from \code{assemble_bic} or \code{subsetmat} and returns bootstrap
-abundance matrix and BIC matrix. This version makes use of the \code{checkident.2}.
+abundance matrix and BIC matrix.
+This version makes use of \code{check_extended_MLE_batch}.
 }
 \references{
 Silverman, B. W., Chan, L. and  Vincent, K., (2024).

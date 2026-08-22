@@ -89,25 +89,31 @@ test_that("fit_hier_model records boundary parameters at minus infinity", {
   )
 })
 
-test_that("existence and identifiability are distinguished", {
+test_that("extended-MLE checking detects rank failure", {
   data("Artificial_3", package = "MultipleSystemsEstimation")
 
   ing <- ingest_data(Artificial_3)
   parvec <- convert_from_hierarchy("[12,13,23]")
-  fit <- fit_hier_model(ing, "[12,13,23]")
 
-  expect_gt(checkident.1(parvec, ing), 0)
   expect_equal(
-    check_identifiability(
-      Artificial_3,
-      mX = matrix(c(1, 2, 1, 3, 2, 3), nrow = 2)
-    ),
+    check_extended_MLE(Artificial_3, parvec),
     2
   )
 
+  fit <- fit_hier_model(
+    ing,
+    "[12,13,23]"
+  )
+
   expect_equal(fit$rank, 4)
-  expect_equal(length(setdiff(parvec, fit$neginfpars)), 5)
-  expect_equal(sum(is.na(fit$coefficients)), 1)
+  expect_equal(
+    length(setdiff(parvec, fit$neginfpars)),
+    5
+  )
+  expect_equal(
+    sum(is.na(fit$coefficients)),
+    1
+  )
 })
 
 test_that("non-identifiable hierarchical fits are not assigned model scores", {

@@ -87,6 +87,23 @@ For six-list data the BIC method remains available by specifying `method = "bic"
 
 The rest of this vignette explains the available methods and the common inferential ideas behind them.
 
+# Specifying log-linear models
+
+Hierarchical log-linear models are specified through their maximal
+interactions. The lists are numbered according to their order in the data.
+For example:
+
+```text
+[1,2,3]    main effects only
+[12,3]     interaction 12, with main effect 3
+[12,23]    interactions 12 and 23
+[123,4]    three-list interaction 123, with main effect 4
+```
+
+All lower-order terms implied by hierarchy are included automatically.
+Thus, for example, `[123,4]` includes the three two-list interactions
+among lists 1, 2 and 3, as well as their main effects and the intercept.
+
 # BIC model selection
 
 The BIC approach is the method used automatically for data with up to five lists. It is based on the methodology of Silverman, Chan and Vincent (2024).
@@ -113,7 +130,7 @@ head(fit_bic$bic_results$res)
 ```
 
 ## Which models are considered?
-
+Unlike the stepwise procedure, which considers only two-list interactions, the BIC method can consider higher-order interactions.
 The argument `maxorder` controls the maximum order of interactions considered. If it is left at its default `NULL`, the package chooses:
 
 | Number of lists | Automatic `maxorder` |
@@ -206,25 +223,21 @@ data(Artificial_3)
 Artificial_3
 ```
 
-Advanced users can check a particular two-list model directly with `check_identifiability()`. For example, the model containing all three two-list interactions is not identifiable for these data:
+Advanced users can check a particular model directly with `check_extended_MLE()`. For example, the model containing all three two-list interactions is not identifiable for these data:
 
-```{r identifiability}
-m <- ncol(Artificial_3) - 1
-mX <- t(expand.grid(1:m, 1:m))
-mX <- mX[, mX[1, ] < mX[2, ], drop = FALSE]
-
-check_identifiability(
+```{r extended-mle-check}
+check_extended_MLE(
   Artificial_3,
-  mX = mX,
-  verbose = TRUE
+  "[12,13,23]"
 )
+  
 ```
 
 Ordinary users do not normally need to call this function themselves: the relevant checks are incorporated into the package's model-fitting procedures.
 
 # The stepwise method
 
-The second principal model-selection method is the forward stepwise procedure of Chan, Silverman and Vincent (2021). It can be requested explicitly for any supported number of lists and is selected automatically when there are six or more lists.
+The second principal model-selection method is the forward stepwise procedure of Chan, Silverman and Vincent (2021). It can be requested explicitly for any supported number of lists and is selected automatically when there are six or more lists. In the present implementation it only considers models with two-list interactions.
 
 The procedure starts with a main-effects model. At each stage it considers candidate two-list interactions not yet included in the model, subject to the existence and identifiability checks described above. The interaction with the smallest p-value is added if that p-value does not exceed the threshold `pthresh`; otherwise the procedure stops.
 
@@ -344,19 +357,6 @@ fit_fixed$popest
 fit_fixed$hiermod
 ```
 
-Hierarchy notation specifies a model through its maximal interactions. For example:
-
-```text
-[1,2,3]    main effects only
-[12,3]     interaction 12, with main effect 3
-[12,23]    interactions 12 and 23
-[123,4]    a three-list interaction 123, with main effect 4
-```
-
-All lower-order terms implied by hierarchy are included automatically.
-
-For two-list models the older `mX` representation can also be used. For example, `mX = c(2, 3)` specifies the interaction between lists 2 and 3.
-
 Bootstrap inference for a fixed model is requested in the same way:
 
 ```{r fixed-bootstrap, eval=FALSE}
@@ -463,9 +463,10 @@ The individual help pages give the complete definitions of returned components:
 The high-level interface is sufficient for most analyses, but the package also exposes tools for inspecting and constructing the model-fitting machinery. Among these are:
 
 ```r
-check_identifiability()
 get_hierarchical_models()
 find_neighbour_hierarchies()
+convert_to_hierarchy
+convert_from_hierarchy
 encode_capture()
 decode_capture()
 ancestors()

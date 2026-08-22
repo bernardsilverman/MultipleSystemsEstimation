@@ -400,23 +400,44 @@
 
 
 .bayesthresh_check_pair_start <- function(zfull) {
-    ierr <- check_identifiability(
-        zfull,
-        mX = 0,
-        verbose = FALSE
+
+  nlists <- ncol(zfull) - 1
+
+  pairs <- utils::combn(seq_len(nlists), 2)
+
+  roots <- apply(
+    pairs,
+    2,
+    function(ii) {
+      z <- integer(nlists)
+      z[ii] <- 1L
+      encode_capture(z)
+    }
+  )
+
+  parset <- sort(unique(
+    ancestors(roots, nlists)
+  ))
+
+  datlist <- ingest_data(zfull)
+
+  ierr <- .check_extended_MLE(
+    parset,
+    datlist
+  )
+
+  if (ierr != 0) {
+    stop(
+      paste(
+        "Bayesian thresholding cannot be applied:",
+        "the full pairwise model fails the",
+        "extended-MLE check."
+      ),
+      call. = FALSE
     )
+  }
 
-    if (ierr != 0)
-        stop(
-            paste(
-                "Bayesian thresholding cannot be applied:",
-                "the full pairwise model fails the",
-                "Fienberg-Rinaldo existence criterion."
-            ),
-            call. = FALSE
-        )
-
-    invisible(TRUE)
+  invisible(TRUE)
 }
 
 
@@ -439,5 +460,5 @@
 
     datlist <- ingest_data(zfull)
 
-    checkident.1(parset, datlist) > 0
+    .check_extended_MLE(parset, datlist) == 0
 }

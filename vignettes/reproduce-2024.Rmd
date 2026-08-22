@@ -61,7 +61,7 @@ full_reproduction <- TRUE
 
 in the setup chunk.  This uses `nboot = 1000`, the value used for the paper, and extends the finite five-list calculations to `ntop = 60`.  Calculations requiring an exhaustive search over all five-list candidate models remain deliberately excluded from an ordinary vignette build; where those results are required, the published values are given and the code needed to recompute them is shown with `eval = FALSE`.  Such exhaustive calculations can take substantially longer.
 
-Table 1 of the paper is not reproduced. It illustrates the issue of existence of the extended maximum likelihood estimate rather than providing a numerical application. The package function `check_identifiability()` provides the corresponding diagnostic.
+Table 1 of the paper is not reproduced. It illustrates the issue of existence of the extended maximum likelihood estimate rather than providing a numerical application. The package function `check_extended_MLE()` provides the corresponding diagnostic.
 
 # Helper functions
 

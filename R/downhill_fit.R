@@ -6,7 +6,7 @@
 #' @param counts  Observed counts for the capture histories defined by desmat
 #' @param desmat  Incidence matrix defining the capture histories observed with counts given by counts
 #' @param maxorder Maximum order of models to be included
-#' @param checkid If it is TRUE, then \code{checkident.1} is called and it performs the Fienberg-Rinaldo linear program check for the existence of the estimates
+#' @param checkid If it is TRUE, then \code{check_extended_MLE} is called and it performs the Fienberg-Rinaldo linear program check for the existence of the estimates
 #' @param niter Number of iterations
 #' @param verbose Specifies the output, if FALSE then only returns the best value, if TRUE, returns a more detailed list of objects
 #'
@@ -95,7 +95,7 @@ downhill_fit = function(counts, desmat, maxorder=dim(desmat)[2]-1, checkid=TRUE,
 #' @param xdata original data matrix
 #' @param nboot number of bootstrap replicates
 #' @param iseed random seed
-#' @param checkid If it is TRUE, then \code{checkident.1} is called and it performs the Fienberg-Rinaldo linear program check for the existence of the estimates
+#' @param checkid If it is TRUE, then \code{check_extended_MLE} is called and it performs the Fienberg-Rinaldo linear program check for the existence of the estimates
 #' @param verbose If TRUE, return the list of extra output from \code{downhill_fit}
 #' @param maxorder Maximum order of models to be included
 #'
@@ -127,7 +127,7 @@ downhill_bootstrapcal <- function(xdata, nboot = 1000, iseed = 1234,
 #'acceleration factor
 #'
 #'@param xdata original data matrix
-#'@param checkid If it is TRUE, then \code{checkident.1} is called and it performs the Fienberg-Rinaldo linear program check for the existence of the estimates
+#'@param checkid If it is TRUE, then \code{check_extended_MLE} is called and it performs the Fienberg-Rinaldo linear program check for the existence of the estimates
 #'@param maxorder Maximum order of models to be included
 #'
 #'@return the estimated acceleration factor

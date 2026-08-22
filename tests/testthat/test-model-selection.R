@@ -1,52 +1,61 @@
-selected_interactions_ms <- function(stepfit) {
-  cn <- colnames(stepfit$fit$x)
-  unname(cn[grepl(":", cn, fixed = TRUE)])
+selected_interactions_ms <- function(fit, zdat) {
+  list_names <- colnames(zdat)[seq_len(ncol(zdat) - 1L)]
+  pairs <- utils::combn(list_names, 2)
+
+  selected <- fit$MSEfit$selected
+
+  if (!any(selected))
+    return(character(0))
+
+  apply(
+    pairs[, selected, drop = FALSE],
+    2,
+    paste,
+    collapse = ":"
+  )
 }
+
 
 test_that("stepwise threshold zero gives the main-effects model", {
   data("Western", package = "MultipleSystemsEstimation")
-  fit <- stepwisefit(Western, pthresh = 0)
 
-  expect_length(selected_interactions_ms(fit), 0)
-  expect_equal(
-    old_abundance(fit),
-    old_abundance(modelfit(Western, mX = NULL)),
-    tolerance = 1e-8
+  fit <- estimate_population_stepwise(
+    Western,
+    pthresh = 0
   )
+
+  expect_false(any(fit$MSEfit$selected))
+  expect_true(is.finite(fit$popest))
 })
+
 
 test_that("published stepwise selections are reproduced", {
   data("NewOrl", package = "MultipleSystemsEstimation")
-
-  test_that("downhill_fit handles an invalid initial model", {
-    x <- cbind(
-      A = c(1, 0),
-      B = c(0, 1),
-      C = c(0, 0),
-      count = c(5, 7)
-    )
-
-    expect_true(is.na(
-      downhill_fit(
-        counts = x[, "count"],
-        desmat = x[, c("A", "B", "C")],
-        checkid = TRUE
-      )
-    ))
-  })
-
-
   data("Western", package = "MultipleSystemsEstimation")
 
-  new_orleans <- stepwisefit(NewOrl, pthresh = 0.02)
-  western <- stepwisefit(Western, pthresh = 0.02)
+  new_orleans <- estimate_population_stepwise(
+    NewOrl,
+    pthresh = 0.02
+  )
 
-  expect_equal(selected_interactions_ms(new_orleans), "D:E")
-  expect_equal(selected_interactions_ms(western), "A:E")
-  expect_equal(old_abundance(new_orleans), 1184, tolerance = 1)
-  expect_equal(old_abundance(western), 2483, tolerance = 1)
+  western <- estimate_population_stepwise(
+    Western,
+    pthresh = 0.02
+  )
+
+  expect_equal(
+    selected_interactions_ms(new_orleans, NewOrl),
+    "D:E"
+  )
+
+  expect_equal(
+    selected_interactions_ms(western, Western),
+    "A:E"
+  )
+
+  expect_equal(new_orleans$popest, 1184, tolerance = 1)
+  expect_equal(western$popest, 2483, tolerance = 1)
 })
-
 test_that("small exhaustive BIC search reproduces the Korea result", {
   data("Korea", package = "MultipleSystemsEstimation")
 

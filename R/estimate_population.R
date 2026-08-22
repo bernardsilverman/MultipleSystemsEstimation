@@ -17,6 +17,10 @@
 #' \code{"fixed"}. The \code{"bayesthresh"} method requires the suggested
 #' package \pkg{MCMCpack}.
 #'
+#' The stepwise method considers two-list interactions only. The BIC and
+#' Bayesian-threshold methods can consider higher-order interactions,
+#' subject to their respective `maxorder` settings.
+#'
 #' Method-specific arguments are passed through \code{...} to the selected
 #' estimation function. See the documentation for the individual methods
 #' for details of the available arguments and their defaults.

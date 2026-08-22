@@ -2,6 +2,7 @@ template:
   bootstrap: 5
 
 url: https://bernardsilverman.github.io/MultipleSystemsEstimation/
+
 articles:
   - title: "Articles"
     navbar: ~
@@ -10,6 +11,7 @@ articles:
       - bayesian-threshold
       - reproduce-2021
       - reproduce-2024
+
 reference:
   - title: "Main user functions"
     contents:
@@ -19,7 +21,7 @@ reference:
       - estimate_population_fixed
       - estimate_population_stepwise
       - tidy_lists
-      - check_identifiability
+      - check_extended_MLE
 
   - title: "Capture-pattern utilities"
     contents:
@@ -44,30 +46,24 @@ reference:
       - UKdat
       - UKdat_5
       - Western
-  - title: internal
+
+  - title: "Internal functions"
     contents:
+      - assemble_bic
       - bcaconfvalues
+      - bootstrapcal
       - boundary_captures
-      - buildmodel
-      - buildmodelmatrix
-      - checkallmodels
-      - checkident.1
-      - checkident.2
-      - checkthetasubset
-      - count_triples
+      - check_extended_MLE_batch
+      - child_captures
       - downhill_bootstrapcal
       - downhill_fit
       - downhill_jackknifecal
-      - estimatepopulation.0
-      - estimatepopulation
       - find_unique_patterns
       - fit_hier_model
       - hiermodels
+      - ingest_data
+      - jackknifecal
       - make_master_design
-      - modelfit
-      - modelorder
-      - ordercaptures
       - parent_captures
-      - stepwisefit
       - subsetmat
-      - subsetsearch
+      - vary_ntop_bca

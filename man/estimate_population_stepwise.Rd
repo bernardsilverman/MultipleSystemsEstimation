@@ -43,8 +43,7 @@ A list with the following components:
   \item{\code{popest}}{The estimated total population for the original
   data, including the estimated unobserved population.}
 
-  \item{\code{MSEfit}}{The model selected and fitted to the original data,
-  in the format returned by \code{\link{stepwisefit}}.}
+  \item{\code{MSEfit}}{The model selected and fitted to the original data.}
 
   \item{\code{bootreps}}{A numeric vector containing the estimated total
   population from each bootstrap sample. This is \code{NULL} when
@@ -66,7 +65,10 @@ confidence limits while repeating the stepwise selection procedure for
 each resampled data set.
 }
 \details{
-The stepwise model-selection procedure is first applied to the observed
+The stepwise procedure considers two-list interactions only;
+higher-order interactions are not candidates for selection.
+
+The procedure is first applied to the observed
 data to obtain the point estimate and fitted model.
 
 If \code{nboot > 0}, multinomial bootstrap samples are generated from the

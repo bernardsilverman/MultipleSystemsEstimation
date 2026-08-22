@@ -23,7 +23,7 @@ The paper has two principal themes. First, sparse tables require explicit attent
 
 The present vignette shows how the principal numerical results and procedures in the paper can be reproduced using `MultipleSystemsEstimation`.
 
-The package has developed since the original paper was published. Where possible, this vignette uses the current public interface. A few functions retained specifically for reproducibility are called explicitly from the package namespace. These should not be taken as the recommended interface for new analyses; see the main user guide for current usage.
+The package has developed since the original paper was published. Where possible, this vignette uses the current public interface. Some compact internal functions are retained where they are useful for reproducing particular calculations, but the original simulation and supplementary routines are not all carried forward into `MultipleSystemsEstimation`. For full reproduction of the original computational material, including routines specific to the paper, see the now-deprecated `SparseMSE` package. Internal functions used below should not be taken as the recommended interface for new analyses; see the main user guide for current usage.
 
 # Sparse capture data and extended maximum likelihood
 
@@ -64,48 +64,35 @@ data(Artificial_3)
 Artificial_3
 ```
 
-There are three possible two-list interactions. Construct them as columns of a matrix:
+The current function `check_extended_MLE()` checks both conditions for a specified hierarchical model. It returns 0 if both conditions are satisfied, 1 for failure of the Fienberg--Rinaldo existence condition, 2 for failure of identifiability, and 3 if both fail.
 
-```{r}
-m <- ncol(Artificial_3) - 1
-
-mX <- t(expand.grid(1:m, 1:m))
-mX <- mX[, mX[1, ] < mX[2, ]]
-
-mX
-```
-
-The function `check_identifiability()` applies the linear-programming existence test and also checks the rank condition for identifiability.
 
 The model containing all three two-list interactions is nonidentifiable:
 
 ```{r}
-check_identifiability(
+MultipleSystemsEstimation::check_extended_MLE(
   Artificial_3,
-  mX = mX,
-  verbose = TRUE
+  "[12,13,23]"
 )
 ```
 
-The model containing only the first interaction has no maximum likelihood estimate:
+This returns 2.
+
+The model containing only the AB interaction has no extended maximum likelihood estimate:
 
 ```{r}
-check_identifiability(
-  Artificial_3,
-  mX = mX[, 1],
-  verbose = TRUE
-)
+MultipleSystemsEstimation::check_extended_MLE( Artificial_3, "[12,3]")
 ```
 
-while the model containing the other two interactions passes both tests:
+This returns 1.
+
+Finally, the model containing AC and BC, but not AB, passes both tests:
 
 ```{r}
-check_identifiability(
-  Artificial_3,
-  mX = mX[, 2:3],
-  verbose = TRUE
-)
+MultipleSystemsEstimation::check_extended_MLE( Artificial_3, "[13,23,1,2]")
 ```
+
+This returns 0.
 
 These examples reproduce the three distinct behaviours displayed in Table 3 of the paper.
 
@@ -115,24 +102,13 @@ Section 2.7 develops an efficient procedure for determining whether the extended
 
 The key observation is that, once existence has been established for a model, removing an interaction corresponding to an *overlapping* pair cannot destroy existence. Consequently, if there are \(M\) nonoverlapping pairs, it is sufficient initially to investigate only \(2^M\) top-level models containing all the overlapping pairs.
 
-The original function implementing this search is retained in the package for reproducibility:
-
-```{r eval=FALSE}
-MultipleSystemsEstimation:::checkallmodels(NewOrl)
-```
+The original `checkallmodels()` routine implemented this search. It is part of the historical computational machinery for Chan, Silverman and Vincent (2021) and is retained in the now-deprecated `SparseMSE` package rather than in `MultipleSystemsEstimation`.
 
 For the full New Orleans data there are eight lists and 28 possible two-list effects, of which 18 correspond to nonoverlapping pairs. Thus there are \(2^{28}\) possible two-list models in total, but the initial existence search requires only \(2^{18}\) linear-programming checks.
 
-The paper reports that neither nonexistence nor nonidentifiability arises for any model for these data.
+The paper reports that neither nonexistence nor nonidentifiability arises for any model for these data. The same conclusion is reported for the five-list Western data.
 
-For the five-list Western data the corresponding calculation is much smaller:
-
-```{r eval=FALSE}
-data(Western)
-MultipleSystemsEstimation:::checkallmodels(Western)
-```
-
-Again, all possible models give estimates that exist and are identifiable.
+For current analyses there is no need to carry out this global search. The estimation routines in `MultipleSystemsEstimation` check the particular candidate models required by their algorithms using `check_extended_MLE()`.
 
 # The stepwise model-selection procedure
 
@@ -324,47 +300,11 @@ For every simulated dataset:
 - the stepwise procedure selects a model afresh;
 - a BCa interval is constructed for the stepwise estimate, repeating the selection within its bootstrap samples.
 
-The historical routine used for this calculation is retained specifically for reproducibility:
-
-```{r eval=FALSE}
-data(UKdat_5)
-
-sim34 <- MultipleSystemsEstimation:::BICandbootstrapsim(
-  UKdat_5,
-  nsims = 500,
-  nboot = 100,
-  pthresh = 0.02,
-  iseed = 1234
-)
-```
-
-This calculation requires the optional package `Rcapture` and is computationally substantial. It is therefore not evaluated when this vignette is built.
-
-The returned object contains the simulated population estimates, BIC estimates, BCa intervals and BIC intervals. For example, the root mean square errors can be investigated from:
-
-```{r eval=FALSE}
-trueN <- sim34$popest
-
-rmse_stepwise <- sqrt(
-  mean((sim34$popestsim - trueN)^2)
-)
-
-rmse_bic <- sqrt(
-  mean((sim34$BICvals[, 1] - trueN)^2)
-)
-
-rmse_log_stepwise <- sqrt(
-  mean((log(sim34$popestsim) - log(trueN))^2)
-)
-
-rmse_log_bic <- sqrt(
-  mean((log(sim34$BICvals[, 1]) - log(trueN))^2)
-)
-```
+The original computational routines used for this simulation are retained in the now-deprecated `SparseMSE` package rather than in `MultipleSystemsEstimation`. `SparseMSE` also retains other routines used for full reproduction of the computational and supplementary material associated with the 2021 paper.
 
 The paper reports population-scale root mean square errors of **3057** for the stepwise method and **5834** for BIC. On the logarithmic scale the corresponding values are **0.19** and **0.34**.
 
-Coverage can similarly be calculated from the returned confidence limits. The paper reports that the nominal 95% BCa interval covered the true value in **90%** of the 500 simulations, compared with **61.4%** for the `Rcapture` method. For nominal 80% intervals, the corresponding coverage rates were approximately **70%** and **42.8%**.
+The paper also reports that the nominal 95% BCa interval covered the true value in **90%** of the 500 simulations, compared with **61.4%** for the `Rcapture` method. For nominal 80% intervals, the corresponding coverage rates were approximately **70%** and **42.8%**.
 
 The purpose of this simulation was not to establish universal superiority of one procedure, but to demonstrate the importance of allowing model-selection uncertainty to enter the inference.
 
@@ -408,11 +348,11 @@ which motivates the default threshold used by the package.
 
 The full threshold simulation is deliberately not run as part of the vignette. It involves 28 generating scenarios, 1000 datasets per scenario, and repeated model fitting across multiple thresholds, so it is better regarded as a published simulation study than as an ordinary package example.
 
-The package retains the underlying model-fitting and simulation machinery needed to reconstruct this study if required.
+The original routines used to carry out this simulation study are retained in the now-deprecated `SparseMSE` package for full reproducibility of the paper.
 
 # Relation to the current package
 
-The original `SparseMSE` package accompanied Chan, Silverman and Vincent (2021). The present `MultipleSystemsEstimation` package retains the methodology but provides a more unified interface.
+The original `SparseMSE` package accompanied Chan, Silverman and Vincent (2021). It is now deprecated for current analysis, but is retained as the historical reproducibility package for the original computational and supplementary material. The present `MultipleSystemsEstimation` package retains the methodology while providing a more unified interface.
 
 For a new analysis using the 2021 method, the recommended call is now
 

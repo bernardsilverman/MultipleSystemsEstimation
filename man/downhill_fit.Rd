@@ -21,7 +21,7 @@ downhill_fit(
 
 \item{maxorder}{Maximum order of models to be included}
 
-\item{checkid}{If it is TRUE, then \code{checkident.1} is called and it performs the Fienberg-Rinaldo linear program check for the existence of the estimates}
+\item{checkid}{If it is TRUE, then \code{check_extended_MLE} is called and it performs the Fienberg-Rinaldo linear program check for the existence of the estimates}
 
 \item{niter}{Number of iterations}
 

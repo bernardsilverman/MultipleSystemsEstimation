@@ -1,35 +1,53 @@
-test_that("Artificial_3 reproduces the published existence and identifiability classifications", {
+test_that("Artificial_3 reproduces the published extended-MLE classifications", {
+
   data("Artificial_3", package = "MultipleSystemsEstimation")
 
-  pairs <- matrix(c(
-    1, 2,  # AB
-    1, 3,  # AC
-    2, 3   # BC
-  ), nrow = 2)
+  # Main effects only: passes both checks
+  expect_equal(
+    check_extended_MLE(Artificial_3,"[1,2,3]"),
+    0
+  )
 
-  expect_equal(check_identifiability(Artificial_3, mX = NULL), 0)
-  expect_equal(check_identifiability(Artificial_3, mX = pairs[, 1]), 1)
-  expect_equal(check_identifiability(Artificial_3, mX = pairs[, 2]), 0)
-  expect_equal(check_identifiability(Artificial_3, mX = pairs[, 3]), 0)
-  expect_equal(check_identifiability(Artificial_3, mX = pairs[, c(1, 2)]), 1)
-  expect_equal(check_identifiability(Artificial_3, mX = pairs[, c(1, 3)]), 1)
-  expect_equal(check_identifiability(Artificial_3, mX = pairs[, c(2, 3)]), 0)
-  expect_equal(check_identifiability(Artificial_3, mX = pairs), 2)
-})
+  # AB only: FR failure
+  expect_equal(
+    check_extended_MLE(Artificial_3,"[12,3]"),
+    1
+  )
 
-test_that("the general hierarchical existence check agrees on Artificial_3", {
-  data("Artificial_3", package = "MultipleSystemsEstimation")
-  dat <- ingest_data(Artificial_3)
+  # AC only: passes both checks
+  expect_equal(
+    check_extended_MLE(Artificial_3,"[13,2]"),
+    0
+  )
 
-  expect_gt(checkident.1("[1,2,3]", dat), 0)
-  expect_equal(checkident.1("[12,3]", dat), 0)
-  expect_gt(checkident.1("[13,2]", dat), 0)
-  expect_gt(checkident.1("[23,1]", dat), 0)
-  expect_equal(checkident.1("[12,13,2,3]", dat), 0)
-  expect_equal(checkident.1("[12,23,1,3]", dat), 0)
-  expect_gt(checkident.1("[13,23,1,2]", dat), 0)
+  # BC only: passes both checks
+  expect_equal(
+    check_extended_MLE(Artificial_3,"[23,1]"),
+    0
+  )
 
-  # The full pairwise model has an extended MLE but is not identifiable.
-  # checkident.1() tests existence only, so its result should be positive.
-  expect_gt(checkident.1("[12,13,23]", dat), 0)
+  # AB + AC: FR failure
+  expect_equal(
+    check_extended_MLE(Artificial_3,"[12,13,2,3]"),
+    1
+  )
+
+  # AB + BC: FR failure
+  expect_equal(
+    check_extended_MLE(Artificial_3,"[12,23,1,3]"),
+    1
+  )
+
+  # AC + BC: passes both checks
+  expect_equal(
+    check_extended_MLE(Artificial_3,"[13,23,1,2]"),
+    0
+  )
+
+  # Full pairwise model: extended MLE exists,
+  # but the model is not identifiable
+  expect_equal(
+    check_extended_MLE(Artificial_3,"[12,13,23]"),
+    2
+  )
 })

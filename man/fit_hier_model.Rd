@@ -13,7 +13,7 @@ fit_hier_model(xdatin, hiermod, bicRcap = TRUE, checkid = FALSE)
 
 \item{bicRcap}{if TRUE then use the Rcapture convention that the BIC sample size is the number of cases observed.  Otherwise use the number of cells in the Poisson log linear model.}
 
-\item{checkid}{if TRUE then \code{checkident.1} is called inside the routine}
+\item{checkid}{if TRUE then \code{.check_extended_MLE} is called inside the routine}
 }
 \description{
 Fit a hierarchical model taking account of possible sparsity

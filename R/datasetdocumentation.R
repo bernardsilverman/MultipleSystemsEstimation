@@ -9,6 +9,7 @@
 #' \emph{Journal of Human Trafficking}, \strong{6(4)}, 375-384, available from
 #' \url{https://www.tandfonline.com/doi/full/10.1080/23322705.2019.1634936}
 "NewOrl"
+
 #' New Orleans data five list version
 #'
 #' New Orleans data consolidated into five lists
@@ -18,14 +19,19 @@
 #'
 #'
 "NewOrl_5"
+
 #' Artificial data set to demonstrate possible instabilities
 #'
 #' This is a simple data set based on three lists, which gives examples of models that
-#'  fail on one or the other of the criteria tested by \code{\link{check_identifiability}}. This is Table 2 in Chan, Silverman and Vincent (2021).
+#' fail on one or the other of the criteria tested by
+#' \code{\link{check_extended_MLE}}. This is Table 2 in Chan, Silverman and Vincent (2021).
 #'
-#' If all three two-list effects are included in the fitted model then the linear program
-#' in \code{\link{check_identifiability}} yields a strictly positive value but the matrix A is not of full column rank, so the parameters are not identifiable.
-#' If the model contains AB either alone or in conjunction with one of AC and BC, then the linear program result is zero, so the MLE does not exist.
+#' If all three two-list effects are included in the fitted model,
+#' \code{\link{check_extended_MLE}} returns status 2: the extended maximum
+#' likelihood estimate exists, but the model matrix is not of full rank, so
+#' the parameters are not identifiable.
+#' If the model contains AB either alone or in conjunction with one of AC and BC,
+#' then the extended maximum likelihood estimate does not exist.
 #' If only main effects are considered, or if either or both of AC and BC, but not AB are included,
 #' then the model passes both tests.
 #'
@@ -35,6 +41,7 @@
 #' \emph{Journal of the American Statistical Association}, \strong{116(535)}, 1297-1306,
 #' Available from \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2019.1708748}.
 "Artificial_3"
+
 #'Victims related to sex trafficking in a U.S. Western site
 #'
 #'These data are collected into 5 lists. For reasons of confidentiality the lists are only labelled as A, B, C, D and E. Full details are
@@ -44,6 +51,7 @@
 #' Capturing human trafficking victimization through crime reporting. Technical Report 2015-VF-GX-0105, National Institute of Justice. Available from \url{https://www.ncjrs.gov/pdffiles1/nij/grants/252520.pdf}.
 #'
 "Western"
+
 #' The Netherlands data
 #'
 #' Victims related to human trafficking in the Netherlands
@@ -55,6 +63,7 @@
 #' from \url{https://rss.onlinelibrary.wiley.com/doi/full/10.1111/rssa.12505}
 #'
 "Ned"
+
 #' Netherlands data five list version
 #'
 #' Netherlands data consolidated into five lists
@@ -63,6 +72,7 @@
 #'  the two smallest lists I and O into a single list.
 #'
 "Ned_5"
+
 #' UK data
 #'
 #'
@@ -80,6 +90,7 @@
 #' @references \url{https://www.gov.uk/government/publications/modern-slavery-an-application-of-multiple-systems-estimation}
 #'
 "UKdat"
+
 #' UK data five list version
 #'
 #' UK data consolidated into five lists
@@ -89,6 +100,7 @@
 #'
 #'
 "UKdat_5"
+
 #' Kosovo data
 #'
 #' Data on 4400 observed killings in the Kosovo war between 20 March and 22 June 1999
@@ -100,6 +112,7 @@
 #' @references Ball, P., W. Betts, F. Scheuren, J. Dudukovich, and J. Asher (2002). Killings and Refugee Flow in Kosovo March-June 1999. American Association for the Advancement of Science. A Report to the International Criminal Tribunal for the Former Yugoslavia.
 #'
 "Kosovo"
+
 #' Korea data
 #'
 #' Korean woman held in sexual slavery by the Japanese military
@@ -112,6 +125,7 @@
 #' \url{https://hrdag.org/wp-content/uploads/2018/12/KP-Palemban-ests.pdf}
 #'
 "Korea"
+
 #' Hierarchical models
 #'
 #' Hierarchical models from two lists to six lists
@@ -121,4 +135,3 @@
 #'
 #'
 "hiermodels"
-
