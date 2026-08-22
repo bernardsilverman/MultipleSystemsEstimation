@@ -2,7 +2,7 @@
 
 This routine takes the output from `assemble_bic` or `subsetmat` and
 returns bootstrap abundance matrix and BIC matrix. This version makes
-use of the `checkident.2`.
+use of `check_extended_MLE_batch`.
 
 ## Usage
 

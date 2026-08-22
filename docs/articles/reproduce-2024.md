@@ -37,7 +37,7 @@ exhaustive calculations can take substantially longer.
 Table 1 of the paper is not reproduced. It illustrates the issue of
 existence of the extended maximum likelihood estimate rather than
 providing a numerical application. The package function
-[`check_identifiability()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/check_identifiability.md)
+[`check_extended_MLE()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/check_extended_MLE.md)
 provides the corresponding diagnostic.
 
 ## Helper functions

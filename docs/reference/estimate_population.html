@@ -9,7 +9,7 @@ methods in MultipleSystemsEstimation."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">MultipleSystemsEstimation</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -103,6 +103,9 @@ method for six-list data and issues an informational message.</p>
 <code>method = "bic"</code>, <code>"stepwise"</code>, <code>"bayesthresh"</code>, or
 <code>"fixed"</code>. The <code>"bayesthresh"</code> method requires the suggested
 package <span class="pkg">MCMCpack</span>.</p>
+<p>The stepwise method considers two-list interactions only. The BIC and
+Bayesian-threshold methods can consider higher-order interactions,
+subject to their respective `maxorder` settings.</p>
 <p>Method-specific arguments are passed through <code>...</code> to the selected
 estimation function. See the documentation for the individual methods
 for details of the available arguments and their defaults.</p>
@@ -226,25 +229,125 @@ for details of the available arguments and their defaults.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$fit</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$fit$coefficients</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         1         2         3         4         5 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4.982083 -2.832024 -3.620482  5.412241 -1.268511 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Call:  glm(formula = zz$modelform, family = poisson, data = zz$datamatrix, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     x = TRUE)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$fit$residuals</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             2             3             4             5             6 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> -4.176136e-01  2.812500e-01  4.829545e-02 -1.733031e-16  1.484848e+00 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             7             8 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> -1.000000e+00 -1.717172e-01 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Coefficients:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)            b            c            d          b:c  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       4.982       -2.832       -3.620       -1.269        5.412  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$fit$fitted.values</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         2         3         4         5         6         7         8 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8.585366  3.902439 51.512195 41.000000  2.414634  1.097561 14.487805 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Degrees of Freedom: 6 Total (i.e. Null);  2 Residual</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Null Deviance:	    143.5 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Residual Deviance: 8.567 	AIC: 44.91</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$fit$effects</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           1           2           3           4           5             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> -37.8739059  -0.1087053  -1.3877657  -7.6927803   4.7545965  -1.7833522 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  -2.3652222 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$emptyoverlaps</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$fit$R</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           1         2         3         4          5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 -11.09054 -6.942856 -6.401854 -5.951020 -5.3198508</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   0.00000  5.366260  4.016362  4.599652 -3.7330505</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   0.00000  0.000000 -3.726271 -2.530297  0.9334429</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4   0.00000  0.000000  0.000000 -1.739589 -1.3577277</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5   0.00000  0.000000  0.000000  0.000000 -3.7481703</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$fit$rank</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$fit$qr</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $qr</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              1           2          3           4          5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 -11.09053653 -6.94285621 -6.4018544 -5.95101958 -5.3198508</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   0.17812116  5.36626016  4.0163624  4.59965154 -3.7330505</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4   0.64714630 -0.39565940 -3.7262707 -2.53029702  0.9334429</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5   0.57735027  0.84023239 -0.2576296 -1.73958866 -1.3577277</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6   0.14011129 -0.08566277 -0.2441369 -0.20535175 -3.7481703</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7   0.09446301  0.13747440  0.2389992 -0.29265174  0.3022582</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8   0.34320115 -0.20983008  0.4234623  0.06809711  0.9058907</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $rank</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $qraux</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.264196 1.259224 1.798488 1.931423 1.296651</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $pivot</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 2 3 4 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $tol</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1e-11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "qr"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$fit$family</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Family: poisson </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Link function: log </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$fit$linear.predictors</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          2          3          4          5          6          7          8 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2.15005911 1.36160175 3.94181858 3.71357207 0.88154778 0.09309042 2.67330725 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$fit$deviance</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 8.566946</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$fit$aic</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 44.90767</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$fit$null.deviance</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 143.5474</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$fit$iter</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$fit$weights</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         2         3         4         5         6         7         8 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8.585366  3.902439 51.512195 41.000000  2.414634  1.097561 14.487805 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$fit$prior.weights</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 3 4 5 6 7 8 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 1 1 1 1 1 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$fit$df.residual</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$fit$df.null</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$fit$y</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2  3  4  5  6  7  8 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5  5 54 41  6  0 12 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$fit$converged</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$fit$boundary</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$fit$abundance</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 268.7778 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$fit$bic</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 58.9686</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$fit$neginfpars</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> numeric(0)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$poisspempty</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$hiermod</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "[12,3]"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$selected</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  TRUE FALSE FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $bootreps</span>

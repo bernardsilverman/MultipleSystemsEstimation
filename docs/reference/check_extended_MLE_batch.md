@@ -9,7 +9,7 @@ model/data combinations satisfy the Fienberg-Rinaldo condition
 ## Usage
 
 ``` r
-checkident.2(x, xcap, zmods)
+check_extended_MLE_batch(x, xcap, zmods)
 ```
 
 ## Arguments

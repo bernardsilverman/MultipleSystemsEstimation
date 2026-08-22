@@ -65,6 +65,10 @@ The estimation method can be selected explicitly using `method = "bic"`,
 `"stepwise"`, `"bayesthresh"`, or `"fixed"`. The `"bayesthresh"` method
 requires the suggested package MCMCpack.
 
+The stepwise method considers two-list interactions only. The BIC and
+Bayesian-threshold methods can consider higher-order interactions,
+subject to their respective \`maxorder\` settings.
+
 Method-specific arguments are passed through `...` to the selected
 estimation function. See the documentation for the individual methods
 for details of the available arguments and their defaults.
@@ -188,25 +192,125 @@ estimate_population(
 #> 
 #> $MSEfit
 #> $MSEfit$fit
+#> $MSEfit$fit$coefficients
+#>         1         2         3         4         5 
+#>  4.982083 -2.832024 -3.620482  5.412241 -1.268511 
 #> 
-#> Call:  glm(formula = zz$modelform, family = poisson, data = zz$datamatrix, 
-#>     x = TRUE)
+#> $MSEfit$fit$residuals
+#>             2             3             4             5             6 
+#> -4.176136e-01  2.812500e-01  4.829545e-02 -1.733031e-16  1.484848e+00 
+#>             7             8 
+#> -1.000000e+00 -1.717172e-01 
 #> 
-#> Coefficients:
-#> (Intercept)            b            c            d          b:c  
-#>       4.982       -2.832       -3.620       -1.269        5.412  
+#> $MSEfit$fit$fitted.values
+#>         2         3         4         5         6         7         8 
+#>  8.585366  3.902439 51.512195 41.000000  2.414634  1.097561 14.487805 
 #> 
-#> Degrees of Freedom: 6 Total (i.e. Null);  2 Residual
-#> Null Deviance:       143.5 
-#> Residual Deviance: 8.567     AIC: 44.91
+#> $MSEfit$fit$effects
+#>           1           2           3           4           5             
+#> -37.8739059  -0.1087053  -1.3877657  -7.6927803   4.7545965  -1.7833522 
+#>             
+#>  -2.3652222 
 #> 
-#> $MSEfit$emptyoverlaps
+#> $MSEfit$fit$R
+#>           1         2         3         4          5
+#> 1 -11.09054 -6.942856 -6.401854 -5.951020 -5.3198508
+#> 2   0.00000  5.366260  4.016362  4.599652 -3.7330505
+#> 3   0.00000  0.000000 -3.726271 -2.530297  0.9334429
+#> 4   0.00000  0.000000  0.000000 -1.739589 -1.3577277
+#> 5   0.00000  0.000000  0.000000  0.000000 -3.7481703
+#> 
+#> $MSEfit$fit$rank
+#> [1] 5
+#> 
+#> $MSEfit$fit$qr
+#> $qr
+#>              1           2          3           4          5
+#> 2 -11.09053653 -6.94285621 -6.4018544 -5.95101958 -5.3198508
+#> 3   0.17812116  5.36626016  4.0163624  4.59965154 -3.7330505
+#> 4   0.64714630 -0.39565940 -3.7262707 -2.53029702  0.9334429
+#> 5   0.57735027  0.84023239 -0.2576296 -1.73958866 -1.3577277
+#> 6   0.14011129 -0.08566277 -0.2441369 -0.20535175 -3.7481703
+#> 7   0.09446301  0.13747440  0.2389992 -0.29265174  0.3022582
+#> 8   0.34320115 -0.20983008  0.4234623  0.06809711  0.9058907
+#> 
+#> $rank
+#> [1] 5
+#> 
+#> $qraux
+#> [1] 1.264196 1.259224 1.798488 1.931423 1.296651
+#> 
+#> $pivot
+#> [1] 1 2 3 4 5
+#> 
+#> $tol
+#> [1] 1e-11
+#> 
+#> attr(,"class")
+#> [1] "qr"
+#> 
+#> $MSEfit$fit$family
+#> 
+#> Family: poisson 
+#> Link function: log 
 #> 
 #> 
+#> $MSEfit$fit$linear.predictors
+#>          2          3          4          5          6          7          8 
+#> 2.15005911 1.36160175 3.94181858 3.71357207 0.88154778 0.09309042 2.67330725 
+#> 
+#> $MSEfit$fit$deviance
+#> [1] 8.566946
+#> 
+#> $MSEfit$fit$aic
+#> [1] 44.90767
+#> 
+#> $MSEfit$fit$null.deviance
+#> [1] 143.5474
+#> 
+#> $MSEfit$fit$iter
+#> [1] 5
+#> 
+#> $MSEfit$fit$weights
+#>         2         3         4         5         6         7         8 
+#>  8.585366  3.902439 51.512195 41.000000  2.414634  1.097561 14.487805 
+#> 
+#> $MSEfit$fit$prior.weights
+#> 2 3 4 5 6 7 8 
+#> 1 1 1 1 1 1 1 
+#> 
+#> $MSEfit$fit$df.residual
+#> [1] 2
+#> 
+#> $MSEfit$fit$df.null
+#> [1] 6
+#> 
+#> $MSEfit$fit$y
+#>  2  3  4  5  6  7  8 
+#>  5  5 54 41  6  0 12 
+#> 
+#> $MSEfit$fit$converged
+#> [1] TRUE
+#> 
+#> $MSEfit$fit$boundary
+#> [1] FALSE
+#> 
+#> $MSEfit$fit$abundance
+#>        1 
+#> 268.7778 
+#> 
+#> $MSEfit$fit$bic
+#> [1] 58.9686
+#> 
+#> $MSEfit$fit$neginfpars
+#> numeric(0)
 #> 
 #> 
-#> $MSEfit$poisspempty
-#> NULL
+#> $MSEfit$hiermod
+#> [1] "[12,3]"
+#> 
+#> $MSEfit$selected
+#> [1]  TRUE FALSE FALSE
 #> 
 #> 
 #> $bootreps

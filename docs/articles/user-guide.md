@@ -125,6 +125,23 @@ burdensome. BIC enumeration is not available for more than six lists.
 The rest of this vignette explains the available methods and the common
 inferential ideas behind them.
 
+## Specifying log-linear models
+
+Hierarchical log-linear models are specified through their maximal
+interactions. The lists are numbered according to their order in the
+data. For example:
+
+``` text
+[1,2,3]    main effects only
+[12,3]     interaction 12, with main effect 3
+[12,23]    interactions 12 and 23
+[123,4]    three-list interaction 123, with main effect 4
+```
+
+All lower-order terms implied by hierarchy are included automatically.
+Thus, for example, `[123,4]` includes the three two-list interactions
+among lists 1, 2 and 3, as well as their main effects and the intercept.
+
 ## BIC model selection
 
 The BIC approach is the method used automatically for data with up to
@@ -171,7 +188,9 @@ head(fit_bic$bic_results$res)
 
 ### Which models are considered?
 
-The argument `maxorder` controls the maximum order of interactions
+Unlike the stepwise procedure, which considers only two-list
+interactions, the BIC method can consider higher-order interactions. The
+argument `maxorder` controls the maximum order of interactions
 considered. If it is left at its default `NULL`, the package chooses:
 
 | Number of lists | Automatic `maxorder` |
@@ -311,28 +330,18 @@ Artificial_3
 #> 4 1 1 0  6
 ```
 
-Advanced users can check a particular two-list model directly with
-[`check_identifiability()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/check_identifiability.md).
+Advanced users can check a particular model directly with
+[`check_extended_MLE()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/check_extended_MLE.md).
 For example, the model containing all three two-list interactions is not
 identifiable for these data:
 
 ``` r
 
-m <- ncol(Artificial_3) - 1
-mX <- t(expand.grid(1:m, 1:m))
-mX <- mX[, mX[1, ] < mX[2, ], drop = FALSE]
-
-check_identifiability(
+check_extended_MLE(
   Artificial_3,
-  mX = mX,
-  verbose = TRUE
+  "[12,13,23]"
 )
-#> The estimate is not identifiable
-#> $ierr
 #> [1] 2
-#> 
-#> $lp
-#> Success: the objective function is 6
 ```
 
 Ordinary users do not normally need to call this function themselves:
@@ -344,7 +353,8 @@ procedures.
 The second principal model-selection method is the forward stepwise
 procedure of Chan, Silverman and Vincent (2021). It can be requested
 explicitly for any supported number of lists and is selected
-automatically when there are six or more lists.
+automatically when there are six or more lists. In the present
+implementation it only considers models with two-list interactions.
 
 The procedure starts with a main-effects model. At each stage it
 considers candidate two-list interactions not yet included in the model,
@@ -368,25 +378,125 @@ fit_step$popest
 #> [1] 268.7778
 fit_step$MSEfit
 #> $fit
+#> $fit$coefficients
+#>         1         2         3         4         5 
+#>  4.982083 -2.832024 -3.620482  5.412241 -1.268511 
 #> 
-#> Call:  glm(formula = zz$modelform, family = poisson, data = zz$datamatrix, 
-#>     x = TRUE)
+#> $fit$residuals
+#>             2             3             4             5             6 
+#> -4.176136e-01  2.812500e-01  4.829545e-02 -1.733031e-16  1.484848e+00 
+#>             7             8 
+#> -1.000000e+00 -1.717172e-01 
 #> 
-#> Coefficients:
-#> (Intercept)            b            c            d          b:c  
-#>       4.982       -2.832       -3.620       -1.269        5.412  
+#> $fit$fitted.values
+#>         2         3         4         5         6         7         8 
+#>  8.585366  3.902439 51.512195 41.000000  2.414634  1.097561 14.487805 
 #> 
-#> Degrees of Freedom: 6 Total (i.e. Null);  2 Residual
-#> Null Deviance:       143.5 
-#> Residual Deviance: 8.567     AIC: 44.91
+#> $fit$effects
+#>           1           2           3           4           5             
+#> -37.8739059  -0.1087053  -1.3877657  -7.6927803   4.7545965  -1.7833522 
+#>             
+#>  -2.3652222 
 #> 
-#> $emptyoverlaps
+#> $fit$R
+#>           1         2         3         4          5
+#> 1 -11.09054 -6.942856 -6.401854 -5.951020 -5.3198508
+#> 2   0.00000  5.366260  4.016362  4.599652 -3.7330505
+#> 3   0.00000  0.000000 -3.726271 -2.530297  0.9334429
+#> 4   0.00000  0.000000  0.000000 -1.739589 -1.3577277
+#> 5   0.00000  0.000000  0.000000  0.000000 -3.7481703
+#> 
+#> $fit$rank
+#> [1] 5
+#> 
+#> $fit$qr
+#> $qr
+#>              1           2          3           4          5
+#> 2 -11.09053653 -6.94285621 -6.4018544 -5.95101958 -5.3198508
+#> 3   0.17812116  5.36626016  4.0163624  4.59965154 -3.7330505
+#> 4   0.64714630 -0.39565940 -3.7262707 -2.53029702  0.9334429
+#> 5   0.57735027  0.84023239 -0.2576296 -1.73958866 -1.3577277
+#> 6   0.14011129 -0.08566277 -0.2441369 -0.20535175 -3.7481703
+#> 7   0.09446301  0.13747440  0.2389992 -0.29265174  0.3022582
+#> 8   0.34320115 -0.20983008  0.4234623  0.06809711  0.9058907
+#> 
+#> $rank
+#> [1] 5
+#> 
+#> $qraux
+#> [1] 1.264196 1.259224 1.798488 1.931423 1.296651
+#> 
+#> $pivot
+#> [1] 1 2 3 4 5
+#> 
+#> $tol
+#> [1] 1e-11
+#> 
+#> attr(,"class")
+#> [1] "qr"
+#> 
+#> $fit$family
+#> 
+#> Family: poisson 
+#> Link function: log 
 #> 
 #> 
+#> $fit$linear.predictors
+#>          2          3          4          5          6          7          8 
+#> 2.15005911 1.36160175 3.94181858 3.71357207 0.88154778 0.09309042 2.67330725 
+#> 
+#> $fit$deviance
+#> [1] 8.566946
+#> 
+#> $fit$aic
+#> [1] 44.90767
+#> 
+#> $fit$null.deviance
+#> [1] 143.5474
+#> 
+#> $fit$iter
+#> [1] 5
+#> 
+#> $fit$weights
+#>         2         3         4         5         6         7         8 
+#>  8.585366  3.902439 51.512195 41.000000  2.414634  1.097561 14.487805 
+#> 
+#> $fit$prior.weights
+#> 2 3 4 5 6 7 8 
+#> 1 1 1 1 1 1 1 
+#> 
+#> $fit$df.residual
+#> [1] 2
+#> 
+#> $fit$df.null
+#> [1] 6
+#> 
+#> $fit$y
+#>  2  3  4  5  6  7  8 
+#>  5  5 54 41  6  0 12 
+#> 
+#> $fit$converged
+#> [1] TRUE
+#> 
+#> $fit$boundary
+#> [1] FALSE
+#> 
+#> $fit$abundance
+#>        1 
+#> 268.7778 
+#> 
+#> $fit$bic
+#> [1] 58.9686
+#> 
+#> $fit$neginfpars
+#> numeric(0)
 #> 
 #> 
-#> $poisspempty
-#> NULL
+#> $hiermod
+#> [1] "[12,3]"
+#> 
+#> $selected
+#> [1]  TRUE FALSE FALSE
 ```
 
 The threshold can be varied explicitly:
@@ -543,21 +653,6 @@ fit_fixed$hiermod
 #> [1] "[12,23]"
 ```
 
-Hierarchy notation specifies a model through its maximal interactions.
-For example:
-
-``` text
-[1,2,3]    main effects only
-[12,3]     interaction 12, with main effect 3
-[12,23]    interactions 12 and 23
-[123,4]    a three-list interaction 123, with main effect 4
-```
-
-All lower-order terms implied by hierarchy are included automatically.
-
-For two-list models the older `mX` representation can also be used. For
-example, `mX = c(2, 3)` specifies the interaction between lists 2 and 3.
-
 Bootstrap inference for a fixed model is requested in the same way:
 
 ``` r
@@ -703,9 +798,10 @@ model-fitting machinery. Among these are:
 
 ``` r
 
-check_identifiability()
 get_hierarchical_models()
 find_neighbour_hierarchies()
+convert_to_hierarchy
+convert_from_hierarchy
 encode_capture()
 decode_capture()
 ancestors()

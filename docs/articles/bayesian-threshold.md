@@ -299,7 +299,7 @@ estimate_population_bayesthresh(
   prior = "improper"
 )
 #> Error:
-#> ! Bayesian thresholding cannot be applied: the full pairwise model fails the Fienberg-Rinaldo existence criterion.
+#> ! Bayesian thresholding cannot be applied: the full pairwise model fails the extended-MLE check.
 ```
 
 With the default proper prior, by contrast, the initial Bayesian fit can

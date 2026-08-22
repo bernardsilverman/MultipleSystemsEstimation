@@ -17,7 +17,7 @@ downhill_jackknifecal(xdata, checkid = TRUE, maxorder = dim(xdata)[2] - 2)
 
 - checkid:
 
-  If it is TRUE, then `checkident.1` is called and it performs the
+  If it is TRUE, then `check_extended_MLE` is called and it performs the
   Fienberg-Rinaldo linear program check for the existence of the
   estimates
 

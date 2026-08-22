@@ -26,7 +26,7 @@ fit_hier_model(xdatin, hiermod, bicRcap = TRUE, checkid = FALSE)
 
 - checkid:
 
-  if TRUE then `checkident.1` is called inside the routine
+  if TRUE then `.check_extended_MLE` is called inside the routine
 
 ## References
 
