@@ -2,20 +2,16 @@
 % Please edit documentation in R/extended-MLE.R
 \name{check_extended_MLE}
 \alias{check_extended_MLE}
-\title{Check existence and identifiability of the extended MLE for a given model and dataset}
+\title{Check existence and identifiability of the extended MLE}
 \usage{
 check_extended_MLE(data, model)
 }
 \arguments{
-\item{data}{A data frame or matrix containing the capture histories and
-their observed counts. The first columns are binary indicators for the
-capture lists and the final column contains the count for each capture
-history. Missing capture histories are treated as having count zero.}
+\item{data}{Capture-history data in the standard package format, with one
+indicator column for each list followed by a count column.}
 
-\item{model}{The model to be checked. This may be either a character string
-giving the model in hierarchical notation, such as
-\code{"[12,13,23]"}, or a numeric vector of encoded model parameters,
-such as that returned by \code{\link{convert_from_hierarchy}}.}
+\item{model}{A character string specifying a hierarchical model, such as
+\code{"[12,13,23]"}.}
 }
 \value{
 A single integer status code:
@@ -25,51 +21,37 @@ A single integer status code:
   \item{\code{2}}{The model parameters are not identifiable.}
   \item{\code{3}}{Both conditions fail.}
 }
-
-A model returning a nonzero status should not be fitted using the package's
-ordinary maximum-likelihood estimation routines.
 }
 \description{
-Checks whether a specified hierarchical log-linear model satisfies both
-the Fienberg--Rinaldo condition for maximum-likelihood estimation and the
-rank condition required for identifiable model parameters.
+Checks whether a hierarchical log-linear model satisfies both the
+Fienberg--Rinaldo condition for existence of the extended maximum-likelihood
+estimate and the rank condition required for identifiable model
+parameters.
 }
 \details{
 Two distinct conditions are checked.
 
-First, the Fienberg--Rinaldo condition determines whether the required
-maximum-likelihood fit exists, after accounting for parameters forced to
-the boundary by zero observed margins.
+The Fienberg--Rinaldo condition determines whether the required
+extended maximum-likelihood fit exists, accounting for parameters
+whose extended-MLE value is minus infinity because the
+corresponding observed margins are zero.
 
-Second, the relevant model matrix is checked for full column rank. Failure
+The relevant model matrix is also checked for full column rank. Failure
 of this condition means that the model parameters are not identifiable.
 
-The model may be supplied in hierarchical notation or as its corresponding
-vector of encoded parameters. Hierarchical notation specifies the
-generators of the model; all lower-order terms required by hierarchy are
-included automatically. See \code{\link{convert_from_hierarchy}}.
-
-The two checks are carried out independently, so it is possible for either
-one or both to fail.
+The two checks are carried out separately, so either one or both may fail.
+A model returning a nonzero status should not be fitted using the
+package's ordinary maximum-likelihood estimation routines.
 }
 \examples{
 data(Artificial_3)
 
-# Specify the model in hierarchical notation.
 check_extended_MLE(
   Artificial_3,
   "[12,13,23]"
 )
 
-# Equivalently, use the encoded parameter representation.
-encoded_model <- convert_from_hierarchy("[12,13,23]")
-
-check_extended_MLE(
-  Artificial_3,
-  encoded_model
-)
-
-# Both calls return 2: the existence condition is satisfied,
+# The result is 2: the existence condition is satisfied,
 # but the model parameters are not identifiable.
 
 }
@@ -79,8 +61,9 @@ Maximum likelihood estimation in log-linear models.
 \emph{The Annals of Statistics}, \strong{40}, 996--1023.
 
 Chan, L., Silverman, B. W. and Vincent, K. (2021).
-Multiple systems estimation for sparse capture data: Inferential challenges
-when there are nonoverlapping lists.
+Multiple Systems Estimation for Sparse Capture Data: Inferential
+Challenges When There Are Nonoverlapping Lists.
 \emph{Journal of the American Statistical Association},
-\strong{116}, 1297--1310.
+\strong{116}(535), 1297--1306.
+\doi{10.1080/01621459.2019.1708748}.
 }

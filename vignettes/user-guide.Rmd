@@ -33,7 +33,7 @@ whose default `method = "auto"` chooses an estimation method according to the nu
 The BIC/bootstrap approach follows Silverman, Chan and Vincent (2024). The stepwise procedure and the treatment of sparse-data existence and identifiability issues build on Chan, Silverman and Vincent (2021).
 The package also implements the Bayesian thresholding approach of Section 6 of Silverman (2020).
 
-This vignette is intended as a guide to analysing data with the package. Separate vignettes describe how to reproduce specific results from the two papers.
+This vignette is intended as a guide to analysing data with the package. A separate vignette describes how hierarchical models are handled, and others discuss specific results from the three papers as well as subsequent methodological extensions.
 
 # Data format
 
@@ -457,34 +457,24 @@ The individual help pages give the complete definitions of returned components:
 ?estimate_population_fixed
 ?estimate_population_bayesthresh
 ```
+## Where next?
 
-# Lower-level tools
+This vignette has described the package as a tool for current analysis. Four
+companion vignettes give further details and, in some cases, paper-specific
+workflows:
 
-The high-level interface is sufficient for most analyses, but the package also exposes tools for inspecting and constructing the model-fitting machinery. Among these are:
+* *Working with hierarchical models and capture histories*: hierarchy notation,
+  model enumeration and navigation, and the package's internal encoding;
+* *Reproducing Silverman, Chan and Vincent (2024)*: the BIC/bootstrap
+  methodology and selected published results;
+* *Reproducing Chan, Silverman and Vincent (2021)*: the sparse-data and
+  stepwise methodology and selected published results; and
+* *Bayesian-thresholding multiple systems estimation*: the Bayesian
+  thresholding method, prior specification, three-list interactions, and
+  sparse-data edge cases.
 
-```r
-get_hierarchical_models()
-find_neighbour_hierarchies()
-convert_to_hierarchy
-convert_from_hierarchy
-encode_capture()
-decode_capture()
-ancestors()
-descendants()
-```
-
-These functions are useful when models need to be constructed or inspected directly, but they are not required for a standard population estimate.
-
-# Where next?
-
-This vignette has described the package as a tool for current analysis. Three companion vignettes give further details and, in some cases, paper-specific workflows:
-
-* *Reproducing Silverman, Chan and Vincent (2024)*: the BIC/bootstrap methodology and selected published results;
-* *Reproducing Chan, Silverman and Vincent (2021)*: the sparse-data and stepwise methodology and selected published results; and
-* *Bayesian-thresholding multiple systems estimation*: the Bayesian thresholding method, prior specification, three-list interactions, and sparse-data edge cases.
-
-
-These reproducibility vignettes may use lower-level or historically oriented functions that are not part of the normal user workflow.
+The reproducibility vignettes may use lower-level or historically oriented
+functions that are not part of the normal user workflow.
 
 # References
 

@@ -25,6 +25,7 @@
 #' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
 #'
 #' @importFrom stats setNames
+#' @keywords internal
 downhill_fit = function(counts, desmat, maxorder=dim(desmat)[2]-1, checkid=TRUE, niter=20,verbose=FALSE) {
   # initialise
  nlists = dim(desmat)[2]
@@ -107,6 +108,7 @@ downhill_fit = function(counts, desmat, maxorder=dim(desmat)[2]-1, checkid=TRUE,
 #' \emph{Statistics and Computing}, \strong{34(44)},
 #' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
 #'
+#' @keywords internal
 downhill_bootstrapcal <- function(xdata, nboot = 1000, iseed = 1234,
       checkid = TRUE, verbose=FALSE, maxorder=dim(xdata)[2]-2) {
   set.seed(iseed)
@@ -140,6 +142,7 @@ downhill_bootstrapcal <- function(xdata, nboot = 1000, iseed = 1234,
 #' \emph{Statistics and Computing}, \strong{34(44)},
 #' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
 #'
+#' @keywords internal
 downhill_jackknifecal <- function(xdata,checkid = TRUE, maxorder=dim(xdata)[2]-2) {
   xdata = tidy_lists(xdata, includezerocounts=FALSE)
   n1= dim(xdata)[1]

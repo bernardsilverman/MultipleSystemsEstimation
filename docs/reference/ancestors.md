@@ -1,13 +1,12 @@
 # Find the "ancestors" of a given capture history
 
-Given any encoded capture history and the number of lists, find all the
-encoded capture histories that are included in the original capture
-history
+Given any encoded capture history, find all the encoded capture
+histories that are included in the original capture history
 
 ## Usage
 
 ``` r
-ancestors(k, nlists = 10)
+ancestors(k)
 ```
 
 ## Arguments
@@ -15,10 +14,6 @@ ancestors(k, nlists = 10)
 - k:
 
   An encoded capture history
-
-- nlists:
-
-  The total number of lists
 
 ## Value
 
@@ -34,8 +29,8 @@ and Computing*, **34(44)**, Available from
 ## Examples
 
 ``` r
-ancestors(2,10)
-#> [1] 1 2
-ancestors(1,5)
-#> [1] 1
+ancestors(2)
+#> Error in ancestors(2): could not find function "ancestors"
+ancestors(1)
+#> Error in ancestors(1): could not find function "ancestors"
 ```

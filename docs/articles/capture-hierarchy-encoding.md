@@ -1,0 +1,362 @@
+# Working with hierarchical models and capture histories
+
+## Introduction
+
+Multiple systems estimation uses a binary *capture history* to record
+the lists on which an individual appears. Capture histories are also
+used to index the parameters in the Poisson log-linear models used to
+fit the observed data and to predict the unobserved *dark figure*.
+
+The log-linear models used by the package are hierarchical: whenever an
+interaction is included, all its lower-order terms are included as well.
+
+The public interface of `MultipleSystemsEstimation` describes
+hierarchical models by readable strings such as
+
+``` r
+
+"[12,23]"
+```
+
+The package also uses an integer encoding of capture histories and model
+terms internally. This vignette first describes the public hierarchy
+notation and the functions for enumerating and navigating models. It
+then explains the integer encoding and the internal functions built on
+it. The latter are documented to make the implementation transparent;
+they are not part of the supported public interface. They may also be
+useful to developers building other methods based on hierarchical
+models.
+
+## Hierarchical-model notation
+
+A hierarchical model is specified by its *generators*, enclosed in
+square brackets and separated by commas. For example,
+
+``` r
+
+"[12,23]"
+```
+
+has generators 12 and 23. It therefore includes the interactions between
+lists 1 and 2 and between lists 2 and 3, together with the intercept and
+the main effects for lists 1, 2 and 3. Lower-order terms implied by the
+generators do not need to be written separately. These are the
+*elements* of the model, so `[12,23]` has elements
+$`\varnothing, 1, 2, 3, 12`$, and $`23`$.
+
+Similarly,
+
+``` r
+
+"[123,4]"
+```
+
+contains the three-list interaction 123, all its lower-order terms, and
+the main effect for list 4.
+
+### Enumerating hierarchical models
+
+The function
+[`get_hierarchical_models()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/get_hierarchical_models.md)
+returns the available hierarchical models which include all main
+effects, for a specified number of lists and maximum interaction order.
+The number of models increases very rapidly as the number of lists
+increases, and the routine works by selecting from a pre-computed
+internal data file. All models for up to five lists are included, but
+for six lists only those of order at most two.
+
+For example, the hierarchical models for three lists with interactions
+of order at most two are obtained by
+
+``` r
+
+get_hierarchical_models(nlists = 3, maxorder = 2)
+#> [1] "[12,13,23]" "[12,13]"    "[12,23]"    "[13,23]"    "[12,3]"    
+#> [6] "[13,2]"     "[23,1]"     "[1,2,3]"
+```
+
+The function returns model strings, so its results can be passed
+directly to other functions that accept hierarchical-model
+specifications.
+
+### Neighbouring models
+
+Two hierarchical models are *neighbours* if one can be obtained from the
+other by adding or removing a single element while retaining hierarchy.
+
+The *parents* of a capture history are obtained by removing one list,
+and its *children* by adding one list. Thus `13` is a parent of `123`,
+while `1235` is a child of `123`. An *outer neighbour* of a hierarchical
+model is obtained by adding an element all of whose immediate parents
+are already in the model.
+
+An *inner neighbour* is obtained by removing a single maximal element of
+the model—that is, an element having no children within the model. These
+maximal elements are the generators displayed in the hierarchical-model
+notation. Only the generator itself is removed; all its lower-order
+elements remain. For example, removing `123` from `[123]` gives
+`[12,13,23]`. By default, main effects are protected from removal. By
+default, main effects are protected from removal.
+
+The function
+[`find_neighbour_hierarchies()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/find_neighbour_hierarchies.md)
+can return all neighbours or restrict the search to one direction:
+
+``` r
+
+model <- "[12,23]"
+
+find_neighbour_hierarchies(model, type = "all")
+#> [1] "[23,1]"     "[12,3]"     "[12,13,23]"
+find_neighbour_hierarchies(model, type = "outer")
+#> [1] "[12,13,23]"
+find_neighbour_hierarchies(model, type = "inner")
+#> [1] "[23,1]" "[12,3]"
+```
+
+The `nlists` argument may be supplied when the full system contains
+lists not mentioned in `model`. The `maxorder` argument restricts the
+interaction order of outer neighbours, while `keepmaineffects = TRUE`
+prevents inner moves that remove a main effect.
+
+## Internal integer encoding
+
+The remainder of this vignette describes the package’s internal
+representation. Users fitting models through the public interface do not
+need to construct or interpret these integers.
+
+For a set of lists $`S`$, the encoded capture history is
+
+``` math
+k = 1 + \sum_{i \in S} 2^{i-1}.
+```
+
+The offset of one makes the all-zero capture history equal to 1 and
+allows encoded values to be used directly as row or column indices in R.
+The same encoding is used for log-linear model terms: 1 is the
+intercept, single-list histories represent main effects, and histories
+involving two or more lists represent interactions.
+
+For three lists the complete encoding is:
+
+| Lists present | Binary indicators | Encoded value | Model term      |
+|:--------------|:------------------|--------------:|:----------------|
+| none          | 000               |             1 | intercept       |
+| 1             | 100               |             2 | main effect 1   |
+| 2             | 010               |             3 | main effect 2   |
+| 12            | 110               |             4 | interaction 12  |
+| 3             | 001               |             5 | main effect 3   |
+| 13            | 101               |             6 | interaction 13  |
+| 23            | 011               |             7 | interaction 23  |
+| 123           | 111               |             8 | interaction 123 |
+
+The binary indicators are displayed in least-significant-bit-first
+order: the indicator for list 1 appears on the left.
+
+### Encoding and decoding
+
+Internally,
+[`encode_capture()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/encode_capture.md)
+maps a logical or binary vector to its integer encoding, while
+[`decode_capture()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/decode_capture.md)
+performs the reverse operation:
+
+``` r
+
+encode_capture <- .mse_internal("encode_capture")
+decode_capture <- .mse_internal("decode_capture")
+
+encode_capture(c(1, 0, 1))
+#> [1] 6
+decode_capture(6, nlists = 3)
+#> [1]  TRUE FALSE  TRUE
+```
+
+The function
+[`decode_capture()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/decode_capture.md)
+genuinely needs `nlists`. For example, encoded value 4 represents lists
+1 and 2 in both a two-list system and a five-list system, but the
+required decoded vectors have different lengths:
+
+``` r
+
+decode_capture(4, nlists = 2)
+#> [1] TRUE TRUE
+decode_capture(4, nlists = 5)
+#> [1]  TRUE  TRUE FALSE FALSE FALSE
+```
+
+The trailing absent lists cannot be recovered from the encoded value
+alone.
+
+### Parents, children, ancestors and descendants
+
+Routines are provided for finding parents and children of encoded
+captures.
+
+An immediate parent is obtained by removing one list. Encoded history 8
+represents 123, whose parents are 12, 13 and 23:
+
+``` r
+
+parent_captures <- .mse_internal("parent_captures")
+
+sort(parent_captures(8))
+#> [1] 4 6 7
+```
+
+The total number of lists is not needed: parents can involve only lists
+already present in the capture history. The *ancestors* comprise the
+history itself and everything obtained by repeatedly taking parents.
+Thus all encoded values from 1 to 8 are ancestors of 123:
+
+``` r
+
+ancestors <- .mse_internal("ancestors")
+
+ancestors(8)
+#> [1] 1 2 3 4 5 6 7 8
+```
+
+By contrast, an immediate child is obtained by adding one list, and the
+possible additions depend on the total number of lists in the system:
+
+``` r
+
+child_captures <- .mse_internal("child_captures")
+
+child_captures(4, nlists = 4)
+#> [1]  8 12
+```
+
+Here encoded history 4 represents 12; in a four-list system its children
+are 123 and 124.
+
+The same dependence on the complete system applies to descendants,
+defined in the natural way by repeatedly finding children:
+
+``` r
+
+descendants <- .mse_internal("descendants")
+
+descendants(8, nlists = 4)
+#> [1]  8 16
+```
+
+Consequently,
+[`parent_captures()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/parent_captures.md)
+and
+[`ancestors()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/ancestors.md)
+do not require `nlists`, whereas
+[`child_captures()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/child_captures.md)
+and
+[`descendants()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/descendants.md)
+do.
+
+### Converting between hierarchy strings and encoded terms
+
+The package converts a hierarchy string to the complete vector of
+encoded terms before fitting a model. For example, the hierarchy
+generated by 12 and 23 contains the intercept, all three main effects,
+and the two specified interactions:
+
+``` r
+
+convert_from_hierarchy <- .mse_internal("convert_from_hierarchy")
+convert_to_hierarchy <- .mse_internal("convert_to_hierarchy")
+
+encoded_model <- convert_from_hierarchy("[12,23]")
+sort(encoded_model)
+#> [1] 1 2 3 4 5 7
+
+convert_to_hierarchy(encoded_model)
+#> [1] "[12,23]"
+```
+
+The function
+[`convert_to_hierarchy()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/convert_to_hierarchy.md)
+raises an error if the encoded captures in its vector argument do not
+define a hierarchical model; it does not silently add missing terms. For
+example, encoded value 4 represents the interaction 12, so the vector
+`c(1, 4)` is invalid because the two main effects are absent:
+
+``` r
+
+convert_to_hierarchy(c(1, 4))
+#> Error:
+#> ! `kcap` does not define a hierarchical model; missing encoded parameter(s): 2, 3.
+```
+
+### Boundary terms
+
+For a hierarchical set, a *boundary term* is a term not currently in the
+model whose immediate parents are all present. Adding a boundary term
+therefore preserves hierarchy.
+
+For the hierarchy generated by 12 and 23 in a three-list system, the
+missing pair 13 is on the boundary:
+
+``` r
+
+boundary_captures <- .mse_internal("boundary_captures")
+
+boundary_captures(encoded_model, nlists = 3)
+#> [1] 6
+```
+
+Adding it gives the outer neighbour `[12,13,23]`. The public
+[`find_neighbour_hierarchies()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/find_neighbour_hierarchies.md)
+function performs this calculation and returns the resulting readable
+model strings.
+
+### The master design matrix
+
+The function
+[`make_master_design()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/make_master_design.md)
+constructs the inclusion matrix mapping log-linear parameters to
+observable capture histories. Its columns are the encoded model terms
+and its rows are the nonempty capture histories. An entry is one exactly
+when the column term is an ancestor of the row history.
+
+``` r
+
+make_master_design <- .mse_internal("make_master_design")
+
+master <- make_master_design(3)
+dim(master)
+#> [1] 7 8
+master[c("2", "8"), ]
+#>   1 2 3 4 5 6 7 8
+#> 2 1 1 0 0 0 0 0 0
+#> 8 1 1 1 1 1 1 1 1
+```
+
+For three lists there are seven observable capture histories and eight
+possible parameters, including the intercept. The row for encoded
+history 2 depends only on the intercept and main effect 1, while the row
+for encoded history 8 depends on every possible term.
+
+## Public interface and internal machinery
+
+The division between the public hierarchy interface and the internal
+encoding is summarised below.
+
+| Role | Functions |
+|:---|:---|
+| Public hierarchy strings | [`get_hierarchical_models()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/get_hierarchical_models.md), [`find_neighbour_hierarchies()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/find_neighbour_hierarchies.md) |
+| Internal encoding | [`encode_capture()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/encode_capture.md), [`decode_capture()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/decode_capture.md) |
+| Internal navigation | [`parent_captures()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/parent_captures.md), [`child_captures()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/child_captures.md), [`ancestors()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/ancestors.md), [`descendants()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/descendants.md), [`boundary_captures()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/boundary_captures.md) |
+| Internal conversion | [`convert_from_hierarchy()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/convert_from_hierarchy.md), [`convert_to_hierarchy()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/convert_to_hierarchy.md) |
+| Internal model construction | [`make_master_design()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/make_master_design.md) |
+
+The public functions deliberately use readable hierarchy strings. The
+encoded representation remains documented because it explains the
+structure of the package and is useful to developers, but it is not
+required for ordinary use.
+
+## Reference
+
+Silverman, B. W., Chan, L. and Vincent, K. (2024). Bootstrapping
+multiple systems estimates to account for model selection. *Statistics
+and Computing*, **34**, 44.
+<https://doi.org/10.1007/s11222-023-10346-9>.

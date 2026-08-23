@@ -37,8 +37,8 @@ and Computing*, **34(44)**, Available from
 ``` r
 modelstr = "[12,23]"
 convert_from_hierarchy(modelstr)
-#> [1] 1 2 3 4 5 7
+#> Error in convert_from_hierarchy(modelstr): could not find function "convert_from_hierarchy"
 modelstr = "[12,3]"
 convert_from_hierarchy(modelstr, findancestors=FALSE)
-#> [1] 4 5
+#> Error in convert_from_hierarchy(modelstr, findancestors = FALSE): could not find function "convert_from_hierarchy"
 ```

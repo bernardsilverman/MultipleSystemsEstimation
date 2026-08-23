@@ -35,7 +35,7 @@ and Computing*, **34(44)**, Available from
 
 ``` r
 decode_capture(2,5)
-#> [1]  TRUE FALSE FALSE FALSE FALSE
+#> Error in decode_capture(2, 5): could not find function "decode_capture"
 decode_capture(1,4)
-#> [1] FALSE FALSE FALSE FALSE
+#> Error in decode_capture(1, 4): could not find function "decode_capture"
 ```

@@ -416,7 +416,7 @@
   )
 
   parset <- sort(unique(
-    ancestors(roots, nlists)
+    ancestors(roots)
   ))
 
   datlist <- ingest_data(zfull)
@@ -455,7 +455,7 @@
     )
 
     parset <- sort(unique(
-        ancestors(roots, nlists)
+        ancestors(roots)
     ))
 
     datlist <- ingest_data(zfull)

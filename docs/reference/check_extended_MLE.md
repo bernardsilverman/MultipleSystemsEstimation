@@ -94,12 +94,13 @@ check_extended_MLE(
 
 # Equivalently, use the encoded parameter representation.
 encoded_model <- convert_from_hierarchy("[12,13,23]")
+#> Error in convert_from_hierarchy("[12,13,23]"): could not find function "convert_from_hierarchy"
 
 check_extended_MLE(
   Artificial_3,
   encoded_model
 )
-#> [1] 2
+#> Error: object 'encoded_model' not found
 
 # Both calls return 2: the existence condition is satisfied,
 # but the model parameters are not identifiable.

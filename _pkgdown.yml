@@ -9,61 +9,38 @@ articles:
     contents:
       - user-guide
       - bayesian-threshold
+      - capture-hierarchy-encoding
       - reproduce-2021
       - reproduce-2024
 
 reference:
-  - title: "Main user functions"
-    contents:
-      - estimate_population
-      - estimate_population_bic
-      - estimate_population_bayesthresh
-      - estimate_population_fixed
-      - estimate_population_stepwise
-      - tidy_lists
-      - check_extended_MLE
+- title: "Population estimation"
+  contents:
+  - estimate_population
+  - estimate_population_bic
+  - estimate_population_stepwise
+  - estimate_population_fixed
+  - estimate_population_bayesthresh
 
-  - title: "Capture-pattern utilities"
-    contents:
-      - ancestors
-      - descendants
-      - encode_capture
-      - decode_capture
-      - convert_to_hierarchy
-      - convert_from_hierarchy
-      - find_neighbour_hierarchies
-      - get_hierarchical_models
+- title: "Data preparation and model checking"
+  contents:
+  - tidy_lists
+  - check_extended_MLE
 
-  - title: "Data"
-    contents:
-      - Artificial_3
-      - Korea
-      - Kosovo
-      - Ned
-      - Ned_5
-      - NewOrl
-      - NewOrl_5
-      - UKdat
-      - UKdat_5
-      - Western
+- title: "Hierarchical models"
+  contents:
+  - get_hierarchical_models
+  - find_neighbour_hierarchies
 
-  - title: "Internal functions"
-    contents:
-      - assemble_bic
-      - bcaconfvalues
-      - bootstrapcal
-      - boundary_captures
-      - check_extended_MLE_batch
-      - child_captures
-      - downhill_bootstrapcal
-      - downhill_fit
-      - downhill_jackknifecal
-      - find_unique_patterns
-      - fit_hier_model
-      - hiermodels
-      - ingest_data
-      - jackknifecal
-      - make_master_design
-      - parent_captures
-      - subsetmat
-      - vary_ntop_bca
+- title: "Data"
+  contents:
+  - Artificial_3
+  - Korea
+  - Kosovo
+  - Ned
+  - Ned_5
+  - NewOrl
+  - NewOrl_5
+  - UKdat
+  - UKdat_5
+  - Western

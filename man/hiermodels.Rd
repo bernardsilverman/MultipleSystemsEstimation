@@ -17,4 +17,4 @@ Hierarchical models from two lists to six lists
 These data provide hierarchical models constructed
 from two lists to six lists of maximal order 2.
 }
-\keyword{datasets}
+\keyword{internal}

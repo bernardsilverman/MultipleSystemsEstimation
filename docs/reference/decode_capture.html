@@ -22,6 +22,7 @@ presence or absence in the capture history."></head><body>
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/user-guide.html">A User Guide to MultipleSystemsEstimation</a></li>
     <li><a class="dropdown-item" href="../articles/bayesian-threshold.html">Bayesian-thresholding multiple systems estimation</a></li>
+    <li><a class="dropdown-item" href="../articles/capture-hierarchy-encoding.html">Working with hierarchical models and capture histories</a></li>
     <li><a class="dropdown-item" href="../articles/reproduce-2021.html">Reproducing Chan, Silverman and Vincent (2021)</a></li>
     <li><a class="dropdown-item" href="../articles/reproduce-2024.html">Reproducing Silverman, Chan and Vincent (2024)</a></li>
   </ul></li>
@@ -77,9 +78,9 @@ Available from <a href="\doi{10.1007/s11222-023-10346-9}">\doi{10.1007/s11222-02
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">decode_capture</span><span class="op">(</span><span class="fl">2</span>,<span class="fl">5</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  TRUE FALSE FALSE FALSE FALSE</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in decode_capture(2, 5):</span> could not find function "decode_capture"</span>
 <span class="r-in"><span><span class="fu">decode_capture</span><span class="op">(</span><span class="fl">1</span>,<span class="fl">4</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE FALSE FALSE FALSE</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in decode_capture(1, 4):</span> could not find function "decode_capture"</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

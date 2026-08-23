@@ -20,6 +20,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/user-guide.html">A User Guide to MultipleSystemsEstimation</a></li>
     <li><a class="dropdown-item" href="../articles/bayesian-threshold.html">Bayesian-thresholding multiple systems estimation</a></li>
+    <li><a class="dropdown-item" href="../articles/capture-hierarchy-encoding.html">Working with hierarchical models and capture histories</a></li>
     <li><a class="dropdown-item" href="../articles/reproduce-2021.html">Reproducing Chan, Silverman and Vincent (2021)</a></li>
     <li><a class="dropdown-item" href="../articles/reproduce-2024.html">Reproducing Silverman, Chan and Vincent (2024)</a></li>
   </ul></li>
@@ -37,7 +38,7 @@
     </div>
 
     <div class="section level2">
-      <h2 id="main-user-functions">Main user functions<a class="anchor" aria-label="anchor" href="#main-user-functions"></a></h2>
+      <h2 id="population-estimation">Population estimation<a class="anchor" aria-label="anchor" href="#population-estimation"></a></h2>
 
 
 
@@ -62,10 +63,10 @@
 
         <dt>
 
-          <code><a href="estimate_population_bayesthresh.html">estimate_population_bayesthresh()</a></code>
+          <code><a href="estimate_population_stepwise.html">estimate_population_stepwise()</a></code>
 
         </dt>
-        <dd>Bayesian-thresholding multiple systems estimation</dd>
+        <dd>Population estimation using stepwise model selection</dd>
 
         <dt>
 
@@ -76,12 +77,21 @@
 
         <dt>
 
-          <code><a href="estimate_population_stepwise.html">estimate_population_stepwise()</a></code>
+          <code><a href="estimate_population_bayesthresh.html">estimate_population_bayesthresh()</a></code>
 
         </dt>
-        <dd>Population estimation using stepwise model selection</dd>
+        <dd>Bayesian-thresholding multiple systems estimation</dd>
+      </dl></div><div class="section level2">
+      <h2 id="data-preparation-and-model-checking">Data preparation and model checking<a class="anchor" aria-label="anchor" href="#data-preparation-and-model-checking"></a></h2>
 
-        <dt>
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
 
           <code><a href="tidy_lists.html">tidy_lists()</a></code>
 
@@ -95,7 +105,7 @@
         </dt>
         <dd>Check existence and identifiability of the extended MLE for a given model and dataset</dd>
       </dl></div><div class="section level2">
-      <h2 id="capture-pattern-utilities">Capture-pattern utilities<a class="anchor" aria-label="anchor" href="#capture-pattern-utilities"></a></h2>
+      <h2 id="hierarchical-models">Hierarchical models<a class="anchor" aria-label="anchor" href="#hierarchical-models"></a></h2>
 
 
 
@@ -106,59 +116,17 @@
 
       <dl><dt>
 
-          <code><a href="ancestors.html">ancestors()</a></code>
+          <code><a href="get_hierarchical_models.html">get_hierarchical_models()</a></code>
 
         </dt>
-        <dd>Find the "ancestors" of a given capture history</dd>
-
-        <dt>
-
-          <code><a href="descendants.html">descendants()</a></code>
-
-        </dt>
-        <dd>Find the "descendants" of a given capture history</dd>
-
-        <dt>
-
-          <code><a href="encode_capture.html">encode_capture()</a></code>
-
-        </dt>
-        <dd>Encode capture history</dd>
-
-        <dt>
-
-          <code><a href="decode_capture.html">decode_capture()</a></code>
-
-        </dt>
-        <dd>Decode capture history</dd>
-
-        <dt>
-
-          <code><a href="convert_to_hierarchy.html">convert_to_hierarchy()</a></code>
-
-        </dt>
-        <dd>Find hierarchical representation of a vector of captures</dd>
-
-        <dt>
-
-          <code><a href="convert_from_hierarchy.html">convert_from_hierarchy()</a></code>
-
-        </dt>
-        <dd>Find the vector of captures corresponding to a given hierarchical model</dd>
+        <dd>Get a list of all hierarchical models for given number of lists and maximum order</dd>
 
         <dt>
 
           <code><a href="find_neighbour_hierarchies.html">find_neighbour_hierarchies()</a></code>
 
         </dt>
-        <dd>Find all neighbouring hierarchical model to a given one</dd>
-
-        <dt>
-
-          <code><a href="get_hierarchical_models.html">get_hierarchical_models()</a></code>
-
-        </dt>
-        <dd>Get a list of all hierarchical models for given number of lists and maximum order</dd>
+        <dd>Find neighbouring hierarchical models</dd>
       </dl></div><div class="section level2">
       <h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a></h2>
 
@@ -238,141 +206,6 @@
 
         </dt>
         <dd>Victims related to sex trafficking in a U.S. Western site</dd>
-      </dl></div><div class="section level2">
-      <h2 id="internal-functions">Internal functions<a class="anchor" aria-label="anchor" href="#internal-functions"></a></h2>
-
-
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="assemble_bic.html">assemble_bic()</a></code>
-
-        </dt>
-        <dd>Models BICS, abundance and maxorder.</dd>
-
-        <dt>
-
-          <code><a href="bcaconfvalues.html">bcaconfvalues()</a></code>
-
-        </dt>
-        <dd>BCa confidence intervals</dd>
-
-        <dt>
-
-          <code><a href="bootstrapcal.html">bootstrapcal()</a></code>
-
-        </dt>
-        <dd>Bootstrap abundance and bic</dd>
-
-        <dt>
-
-          <code><a href="boundary_captures.html">boundary_captures()</a></code>
-
-        </dt>
-        <dd>Given a vector of captures, find those which are not in the vector but all of whose parents are</dd>
-
-        <dt>
-
-          <code><a href="check_extended_MLE_batch.html">check_extended_MLE_batch()</a></code>
-
-        </dt>
-        <dd>Carry out the Fienberg-Rinaldo procedure on an array of data vectors and a vector of models</dd>
-
-        <dt>
-
-          <code><a href="child_captures.html">child_captures()</a></code>
-
-        </dt>
-        <dd>Find the "children" of a given capture history</dd>
-
-        <dt>
-
-          <code><a href="downhill_bootstrapcal.html">downhill_bootstrapcal()</a></code>
-
-        </dt>
-        <dd>Bootstrap downhill</dd>
-
-        <dt>
-
-          <code><a href="downhill_fit.html">downhill_fit()</a></code>
-
-        </dt>
-        <dd>Conduct downhill search among hierarchical models starting from the main effects only.</dd>
-
-        <dt>
-
-          <code><a href="downhill_jackknifecal.html">downhill_jackknifecal()</a></code>
-
-        </dt>
-        <dd>Jackknife downhill</dd>
-
-        <dt>
-
-          <code><a href="find_unique_patterns.html">find_unique_patterns()</a></code>
-
-        </dt>
-        <dd>Find unique patterns in matrix columns</dd>
-
-        <dt>
-
-          <code><a href="fit_hier_model.html">fit_hier_model()</a></code>
-
-        </dt>
-        <dd>Fit a hierarchical model taking account of possible sparsity</dd>
-
-        <dt>
-
-          <code><a href="hiermodels.html">hiermodels</a></code>
-
-        </dt>
-        <dd>Hierarchical models</dd>
-
-        <dt>
-
-          <code><a href="ingest_data.html">ingest_data()</a></code>
-
-        </dt>
-        <dd>Preliminary processing of a data matrix</dd>
-
-        <dt>
-
-          <code><a href="jackknifecal.html">jackknifecal()</a></code>
-
-        </dt>
-        <dd>Jackknife abundance and Jackknife bic</dd>
-
-        <dt>
-
-          <code><a href="make_master_design.html">make_master_design()</a></code>
-
-        </dt>
-        <dd>Set up the inclusion matrix for all possible capture histories</dd>
-
-        <dt>
-
-          <code><a href="parent_captures.html">parent_captures()</a></code>
-
-        </dt>
-        <dd>Find the "parents" of a given capture history</dd>
-
-        <dt>
-
-          <code><a href="subsetmat.html">subsetmat()</a></code>
-
-        </dt>
-        <dd>Subset matrix</dd>
-
-        <dt>
-
-          <code><a href="vary_ntop_bca.html">vary_ntop_bca()</a></code>
-
-        </dt>
-        <dd>BCa inference for varying numbers of top BIC models</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

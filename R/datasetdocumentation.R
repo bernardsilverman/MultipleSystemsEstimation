@@ -134,4 +134,5 @@
 #' from two lists to six lists of maximal order 2.
 #'
 #'
+#' @keywords internal
 "hiermodels"

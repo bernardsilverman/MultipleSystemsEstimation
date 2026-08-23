@@ -12,7 +12,7 @@ test_that("capture histories encode and decode exactly", {
 test_that("parents and children have the expected relationship", {
   nlists <- 5
   for (k in 2:(2^nlists)) {
-    parents <- parent_captures(k, nlists)
+    parents <- parent_captures(k)
     expect_true(all(vapply(parents, function(p) k %in% child_captures(p, nlists), logical(1))))
     expect_true(all(vapply(parents, function(p) sum(decode_capture(k, nlists)) ==
       sum(decode_capture(p, nlists)) + 1, logical(1))))
@@ -27,7 +27,7 @@ test_that("ancestors and descendants are correct", {
 
   # The ancestors of {1,2,3} are the empty history, the three singletons,
   # the three pairs, and the history itself.
-  expect_equal(ancestors(8, 4), 1:8)
+  expect_equal(ancestors(8), 1:8)
 })
 
 test_that("hierarchy conversion includes all required lower-order terms", {

@@ -32,7 +32,10 @@ tidy_lists(zdat, includezerocounts = FALSE, remove_noninformative = FALSE)
 - remove_noninformative:
 
   Logical; if `TRUE`, remove non-informative capture lists before
-  returning the data.
+  returning the data. For a given data set, a list will be noninfomative
+  if it contains all or none of the cases, or if it contains identical
+  cases with another list corresponding to an earlier column in the data
+  matrix.
 
 ## Value
 

@@ -24,6 +24,7 @@ these are all removed."></head><body>
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/user-guide.html">A User Guide to MultipleSystemsEstimation</a></li>
     <li><a class="dropdown-item" href="../articles/bayesian-threshold.html">Bayesian-thresholding multiple systems estimation</a></li>
+    <li><a class="dropdown-item" href="../articles/capture-hierarchy-encoding.html">Working with hierarchical models and capture histories</a></li>
     <li><a class="dropdown-item" href="../articles/reproduce-2021.html">Reproducing Chan, Silverman and Vincent (2021)</a></li>
     <li><a class="dropdown-item" href="../articles/reproduce-2024.html">Reproducing Silverman, Chan and Vincent (2024)</a></li>
   </ul></li>
@@ -73,7 +74,9 @@ excluding the all-zero row corresponding to the dark figure.</p></dd>
 
 <dt id="arg-remove-noninformative">remove_noninformative<a class="anchor" aria-label="anchor" href="#arg-remove-noninformative"></a></dt>
 <dd><p>Logical; if <code>TRUE</code>, remove non-informative
-capture lists before returning the data.</p></dd>
+capture lists before returning the data.  For a given data set, a list will be
+noninfomative if it contains all or none of the cases, or if it contains identical cases with
+another list corresponding to an earlier column in the data matrix.</p></dd>
 
 </dl></div>
     <div class="section level2">
