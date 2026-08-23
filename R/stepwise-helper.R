@@ -1,9 +1,9 @@
 .stepwise_estimate <- function(zdat, pthresh = 0.02) {
 
-  nlists <- ncol(zdat) - 1
+  nlists <- ncol(zdat) - 1L
   ing <- ingest_data(zdat)
 
-  # Encoded main effects and all possible two-list effects
+  # Encoded main effects and all possible two-list effects.
   mainpars <- vapply(
     seq_len(nlists),
     function(i) {
@@ -14,11 +14,11 @@
     numeric(1)
   )
 
-  pairs <- utils::combn(seq_len(nlists), 2)
+  pairs <- utils::combn(seq_len(nlists), 2L)
 
   pairpars <- apply(
     pairs,
-    2,
+    2L,
     function(ii) {
       z <- integer(nlists)
       z[ii] <- 1L
@@ -26,10 +26,8 @@
     }
   )
 
-  # Construct and fit a model from the currently selected pairs
-  fit_pairs <- function(selected) {
-
-    pars <- c(1L, mainpars, pairpars[selected])
+  # Fit a model specified by its complete vector of encoded parameters.
+  fit_model <- function(pars) {
 
     hiermod <- convert_to_hierarchy(pars)
 
@@ -42,13 +40,13 @@
     list(
       fit = fit,
       hiermod = hiermod,
-      selected = selected
+      selected = pairpars %in% pars
     )
   }
 
-  # Main-effects model
-  selected <- rep(FALSE, ncol(pairs))
-  current <- fit_pairs(selected)
+  # Main-effects model.
+  currentpars <- c(1L, mainpars)
+  current <- fit_model(currentpars)
 
   if (pthresh == 0) {
     return(list(
@@ -57,22 +55,20 @@
     ))
   }
 
-  # Preserve the old special treatment of pthresh = 1
+  # Preserve the old special treatment of pthresh = 1.
   if (pthresh == 1) {
 
-    hiermod <- .mX_to_hiermod(
-      0,
-      nlists
-    )
+    fullpars <- c(1L, mainpars, pairpars)
+    fullmodel <- convert_to_hierarchy(fullpars)
 
     ierr <- .check_extended_MLE(
-      hiermod,
+      fullmodel,
       ing
     )
 
     if (ierr == 0) {
-      selected[] <- TRUE
-      current <- fit_pairs(selected)
+      currentpars <- fullpars
+      current <- fit_model(currentpars)
 
       return(list(
         estimate = unname(current$fit$abundance),
@@ -81,14 +77,11 @@
     }
   }
 
-  # Observed pairwise overlap counts
-  nstar <- unname(ing$nstar[pairpars])
-
-  for (icycle in seq_len(ncol(pairs))) {
+  for (icycle in seq_along(pairpars)) {
 
     fit <- current$fit
 
-    # Rows retained in the finite GLM fit
+    # Rows retained in the finite GLM fit.
     removed <- if (length(fit$neginfpars)) {
       sort(unique(unlist(
         lapply(
@@ -106,40 +99,54 @@
       removed
     )
 
-    pval <- rep(1, ncol(pairs))
+    # Terms that can be added while preserving hierarchy.
+    candidates <- boundary_captures(
+      currentpars,
+      nlists
+    )
 
-    for (j in which(!selected)) {
+    # For the equivalence check, retain two-list interactions only.
+    candidate_order <- vapply(
+      candidates,
+      function(k) {
+        sum(decode_capture(k, nlists))
+      },
+      numeric(1)
+    )
 
-      # Expected number in the intersection of this pair
+    candidates <- candidates[candidate_order == 2L]
+
+    if (!length(candidates))
+      break
+
+    pval <- rep(1, length(candidates))
+
+    for (j in seq_along(candidates)) {
+
+      k <- candidates[j]
+
+      # Expected number in the intersection represented by k.
       pstar <- sum(
         fit$fitted.values *
-          ing$masterdesign[keep, pairpars[j]]
+          ing$masterdesign[keep, k]
       )
 
+      nstar <- unname(ing$nstar[k])
+
       pval[j] <- min(
-        stats::ppois(nstar[j], pstar),
+        stats::ppois(nstar, pstar),
         stats::ppois(
-          nstar[j] - 1,
+          nstar - 1,
           pstar,
           lower.tail = FALSE
         )
       )
 
-      # Candidate model obtained by adding this pair
-      candidate <- cbind(
-        if (any(selected))
-          pairs[, selected, drop = FALSE]
-        else
-          NULL,
-        pairs[, j]
-      )
+      # Candidate model obtained by adding this boundary term.
+      candidatepars <- union(currentpars, k)
+      hiermod <- convert_to_hierarchy(candidatepars)
 
-      # Candidate must have an identifiable finite extended MLE
-      hiermod <- .mX_to_hiermod(
-        candidate,
-        nlists
-      )
-
+      # Candidate must have an identifiable finite extended MLE.
       ierr <- .check_extended_MLE(
         hiermod,
         ing
@@ -155,100 +162,16 @@
       break
 
     jbest <- min(which(pval == pvmin))
-    selected[jbest] <- TRUE
+    currentpars <- union(
+      currentpars,
+      candidates[jbest]
+    )
 
-    current <- fit_pairs(selected)
+    current <- fit_model(currentpars)
   }
 
   list(
     estimate = unname(current$fit$abundance),
     MSEfit = current
-  )
-}
-
-.mX_to_hiermod <- function(mX, nlists) {
-  if (length(nlists) != 1L ||
-      is.na(nlists) ||
-      nlists < 1L ||
-      nlists != as.integer(nlists)) {
-    stop("`nlists` must be a positive integer.", call. = FALSE)
-  }
-
-  # Main-effects model.
-  if (is.null(mX)) {
-    return(
-      paste0(
-        "[",
-        paste(seq_len(nlists), collapse = ","),
-        "]"
-      )
-    )
-  }
-
-  # All pairwise interactions.
-  if (length(mX) == 1L && isTRUE(mX == 0)) {
-    pairs <- utils::combn(seq_len(nlists), 2L)
-  } else {
-    # Allow one interaction to be supplied as c(i, j).
-    if (is.atomic(mX) && is.null(dim(mX)) && length(mX) == 2L) {
-      mX <- matrix(mX, nrow = 2L)
-    }
-
-    if (!is.matrix(mX) || nrow(mX) != 2L) {
-      stop(
-        paste0(
-          "`mX` must be NULL, 0, a vector of length 2, ",
-          "or a matrix with two rows."
-        ),
-        call. = FALSE
-      )
-    }
-
-    pairs <- mX
-  }
-
-  if (anyNA(pairs) ||
-      any(pairs != as.integer(pairs)) ||
-      any(pairs < 1L) ||
-      any(pairs > nlists)) {
-    stop(
-      "All entries of `mX` must be list numbers between 1 and `nlists`.",
-      call. = FALSE
-    )
-  }
-
-  if (any(pairs[1L, ] == pairs[2L, ])) {
-    stop(
-      "Each column of `mX` must specify two different lists.",
-      call. = FALSE
-    )
-  }
-
-  # Put the smaller list number first in each pair.
-  pairs <- apply(pairs, 2L, sort)
-
-  if (is.null(dim(pairs))) {
-    pairs <- matrix(pairs, nrow = 2L)
-  }
-
-  pair_labels <- unique(
-    apply(pairs, 2L, paste0, collapse = "")
-  )
-
-  # Lists that occur in no pair must be included explicitly as main effects.
-  unused_lists <- setdiff(
-    seq_len(nlists),
-    unique(as.vector(pairs))
-  )
-
-  generators <- c(
-    pair_labels,
-    as.character(unused_lists)
-  )
-
-  paste0(
-    "[",
-    paste(generators, collapse = ","),
-    "]"
   )
 }
