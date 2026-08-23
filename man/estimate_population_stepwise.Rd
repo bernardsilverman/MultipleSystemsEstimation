@@ -8,6 +8,7 @@ estimate_population_stepwise(
   zdat,
   nboot = 0,
   pthresh = 0.02,
+  maxorder = 2,
   iseed = 1234,
   alpha = c(0.025, 0.1, 0.9, 0.975)
 )
@@ -28,6 +29,10 @@ The default is 0.}
 
 \item{pthresh}{P-value threshold used by the stepwise model-selection
 procedure. The default is 0.02.}
+
+\item{maxorder}{Maximum order of interactions considered for selection.
+An integer of at least 2, or \code{Inf} to allow interactions of any order.
+The default is 2.}
 
 \item{iseed}{Integer seed used to initialise the random-number generator
 when \code{nboot > 0}. The default is 1234.}
@@ -59,14 +64,18 @@ A list with the following components:
 }
 \description{
 Estimates the total population, including the unobserved population, using
-the stepwise model-selection procedure of Chan, Silverman and Vincent
-(2021). Optional bootstrap and jackknife calculations provide BCa
-confidence limits while repeating the stepwise selection procedure for
+an extension of the stepwise model-selection procedure of Chan, Silverman
+and Vincent (2021). Optional bootstrap and jackknife calculations provide
+BCa confidence limits while repeating the stepwise selection procedure for
 each resampled data set.
 }
 \details{
-The stepwise procedure considers two-list interactions only;
-higher-order interactions are not candidates for selection.
+By default, the procedure considers two-list interactions only, reproducing
+the method of Chan, Silverman and Vincent (2021). Higher-order interactions
+may be considered by increasing \code{maxorder}, or by setting
+\code{maxorder = Inf}. An interaction is considered only when all its
+lower-order terms are already present, so every candidate model is
+hierarchical.
 
 The procedure is first applied to the observed
 data to obtain the point estimate and fitted model.
@@ -91,6 +100,9 @@ data(Korea)
 
 # Point estimate and fitted model without bootstrapping
 estimate_population_stepwise(Korea)
+
+# Allow interactions of any order
+estimate_population_stepwise(Kosovo, maxorder = Inf)
 
 # A very small number of bootstrap replications is used here only
 # to keep the example quick.

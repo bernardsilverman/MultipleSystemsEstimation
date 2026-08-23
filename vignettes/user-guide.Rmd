@@ -237,11 +237,22 @@ Ordinary users do not normally need to call this function themselves: the releva
 
 # The stepwise method
 
-The second principal model-selection method is the forward stepwise procedure of Chan, Silverman and Vincent (2021). It can be requested explicitly for any supported number of lists and is selected automatically when there are six or more lists. In the present implementation it only considers models with two-list interactions.
+The second principal model-selection method is an extension of the forward
+stepwise procedure of Chan, Silverman and Vincent (2021). It can be requested
+explicitly for any supported number of lists and is selected automatically
+when there are six or more lists.
 
-The procedure starts with a main-effects model. At each stage it considers candidate two-list interactions not yet included in the model, subject to the existence and identifiability checks described above. The interaction with the smallest p-value is added if that p-value does not exceed the threshold `pthresh`; otherwise the procedure stops.
+The procedure starts with the main-effects model. At each stage it considers
+interactions that can be added while preserving the hierarchical structure of
+the model. Candidates that fail the existence or identifiability checks
+described above are discarded. Among the remaining candidates, the interaction
+with the smallest p-value is added if that p-value is below the threshold
+`pthresh`; otherwise the procedure stops.
 
-The default is `pthresh = 0.02`, following the simulation study reported by Chan, Silverman and Vincent (2021).
+The default is `pthresh = 0.02`, following the simulation study reported by
+Chan, Silverman and Vincent (2021). Setting `maxorder = 2` clemeans that only
+two-list interactions are considered and the procedure agrees with the method
+studied in that paper.
 
 For example:
 
@@ -267,8 +278,48 @@ fit_step_01 <- estimate_population(
 fit_step_01$popest
 ```
 
-The stepwise method is not merely a computational fallback. It can be chosen deliberately when the 2021 model-selection procedure is scientifically preferred or when sensitivity to the threshold is of interest.
+Higher-order interactions can be allowed by increasing `maxorder`. Setting
+`maxorder = Inf` allows interactions of any order to be considered. A
+higher-order interaction becomes eligible only when its lower-order terms are
+already present, so every model considered by the procedure is hierarchical.
 
+For the Kosovo data, allowing interactions of any order changes both the
+selected model and the population estimate:
+
+```{r stepwise-higher-order}
+fit_step_pairwise <- estimate_population(
+  Kosovo,
+  method = "stepwise",
+  maxorder = 2
+)
+
+fit_step_unrestricted <- estimate_population(
+  Kosovo,
+  method = "stepwise",
+  maxorder = Inf
+)
+
+c(
+  pairwise = fit_step_pairwise$popest,
+  unrestricted = fit_step_unrestricted$popest
+)
+
+c(
+  pairwise = fit_step_pairwise$MSEfit$hiermod,
+  unrestricted = fit_step_unrestricted$MSEfit$hiermod
+)
+```
+
+The pairwise search selects `[12,13,14,23,34]`, whereas the unrestricted
+search selects `[134,12,23]`. The latter hierarchy includes interactions 13,
+14 and 34 implicitly and adds the three-list interaction 134. The corresponding
+population estimates are approximately 14,342 and 18,393.
+
+The stepwise method is not merely a computational fallback. It can be chosen
+deliberately when the 2021 pairwise procedure is scientifically preferred,
+when sensitivity to `pthresh` is of interest, or when a forward search over
+higher-order hierarchical models is desired. The 2021 reproducibility vignette
+describes the published pairwise procedure in more detail.
 # Bootstrap inference after stepwise selection
 
 As with the BIC approach, bootstrap inference repeats the complete model-selection procedure for every bootstrap sample rather than conditioning on the model selected from the original data.
@@ -350,11 +401,11 @@ For example:
 fit_fixed <- estimate_population(
   Korea,
   method = "fixed",
-  hiermod = "[12,23]"
+  model = "[12,23]"
 )
 
 fit_fixed$popest
-fit_fixed$hiermod
+fit_fixed$model
 ```
 
 Bootstrap inference for a fixed model is requested in the same way:
@@ -363,7 +414,7 @@ Bootstrap inference for a fixed model is requested in the same way:
 fit_fixed_boot <- estimate_population(
   Korea,
   method = "fixed",
-  hiermod = "[12,23]",
+  model = "[12,23]",
   nboot = 1000
 )
 
@@ -446,7 +497,7 @@ For fixed fitting:
 names(fit_fixed)
 ```
 
-`hiermod` records the model that was fitted and `MSEfit` contains the detailed fitted object.
+`model` records the model that was fitted and `MSEfit` contains the detailed fitted object.
 
 The individual help pages give the complete definitions of returned components:
 

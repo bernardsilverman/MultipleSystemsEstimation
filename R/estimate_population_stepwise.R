@@ -1,9 +1,9 @@
 #' Population estimation using stepwise model selection
 #'
 #' Estimates the total population, including the unobserved population, using
-#' the stepwise model-selection procedure of Chan, Silverman and Vincent
-#' (2021). Optional bootstrap and jackknife calculations provide BCa
-#' confidence limits while repeating the stepwise selection procedure for
+#' an extension of the stepwise model-selection procedure of Chan, Silverman
+#' and Vincent (2021). Optional bootstrap and jackknife calculations provide
+#' BCa confidence limits while repeating the stepwise selection procedure for
 #' each resampled data set.
 #'
 #' @param zdat A capture-history data matrix with \eqn{t+1} columns. The first
@@ -22,6 +22,10 @@
 #' @param pthresh P-value threshold used by the stepwise model-selection
 #' procedure. The default is 0.02.
 #'
+#' @param maxorder Maximum order of interactions considered for selection.
+#' An integer of at least 2, or \code{Inf} to allow interactions of any order.
+#' The default is 2.
+#'
 #' @param iseed Integer seed used to initialise the random-number generator
 #' when \code{nboot > 0}. The default is 1234.
 #'
@@ -31,8 +35,12 @@
 #' \code{c(0.025, 0.1, 0.9, 0.975)}.
 #'
 #' @details
-#' The stepwise procedure considers two-list interactions only;
-#' higher-order interactions are not candidates for selection.
+#' By default, the procedure considers two-list interactions only, reproducing
+#' the method of Chan, Silverman and Vincent (2021). Higher-order interactions
+#' may be considered by increasing \code{maxorder}, or by setting
+#' \code{maxorder = Inf}. An interaction is considered only when all its
+#' lower-order terms are already present, so every candidate model is
+#' hierarchical.
 #'
 #' The procedure is first applied to the observed
 #' data to obtain the point estimate and fitted model.
@@ -90,6 +98,9 @@
 #' # Point estimate and fitted model without bootstrapping
 #' estimate_population_stepwise(Korea)
 #'
+#' # Allow interactions of any order
+#' estimate_population_stepwise(Kosovo, maxorder = Inf)
+#'
 #' # A very small number of bootstrap replications is used here only
 #' # to keep the example quick.
 #' estimate_population_stepwise(Korea, nboot = 10)
@@ -99,6 +110,7 @@ estimate_population_stepwise <- function(
     zdat,
     nboot = 0,
     pthresh = 0.02,
+    maxorder = 2,
     iseed = 1234,
     alpha = c(0.025, 0.1, 0.9, 0.975)
 ) {
@@ -112,9 +124,7 @@ estimate_population_stepwise <- function(
   #   find point estimate and corresponding model using given pthresh
   populationestimatefromdata <- .stepwise_estimate(
     zdat,
-    #method = "stepwise",
-    #quantiles = NULL,
-    pthresh = pthresh
+    pthresh = pthresh, maxorder = maxorder
   )
   popest <- unname(populationestimatefromdata$estimate)
 
@@ -141,8 +151,8 @@ estimate_population_stepwise <- function(
     counts = rmultinom(1,nobs,countsobserved)
     zdatboot = cbind(zdat[,-n2], counts)
     #   for each sample, find estimated total population size
-    bootreps[j] = .stepwise_estimate(zdatboot, #method="stepwise", quantiles=NULL,
-                                       pthresh=pthresh)$estimate
+    bootreps[j] = .stepwise_estimate(zdatboot,
+                                       pthresh=pthresh, maxorder = maxorder)$estimate
   }
   # use jackknife to find acceleration factor
   jackest = rep(0, n1)
@@ -151,8 +161,8 @@ estimate_population_stepwise <- function(
     if (nj > 0) {
       zd1 = zdat
       zd1[j,n2] = nj - 1
-      jackest[j] = .stepwise_estimate(zd1,#method="stepwise", quantiles=NULL,
-                                        pthresh=pthresh)$estimate
+      jackest[j] = .stepwise_estimate(zd1,
+                                        pthresh=pthresh, maxorder = maxorder)$estimate
     }
   }
   jr = sum(countsobserved*jackest)/sum(countsobserved) - jackest

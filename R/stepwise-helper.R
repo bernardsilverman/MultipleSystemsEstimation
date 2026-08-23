@@ -1,9 +1,24 @@
-.stepwise_estimate <- function(zdat, pthresh = 0.02) {
+.stepwise_estimate <- function(
+    zdat,
+    pthresh = 0.02,
+    maxorder = 2
+) {
 
+  if (!is.numeric(maxorder) ||
+      length(maxorder) != 1L ||
+      is.na(maxorder) ||
+      maxorder < 2L ||
+      (is.finite(maxorder) &&
+       maxorder != as.integer(maxorder))) {
+    stop(
+      "`maxorder` must be an integer of at least 2 or Inf.",
+      call. = FALSE
+    )
+  }
   nlists <- ncol(zdat) - 1L
   ing <- ingest_data(zdat)
 
-  # Encoded main effects and all possible two-list effects.
+  # Encoded main effects.
   mainpars <- vapply(
     seq_len(nlists),
     function(i) {
@@ -14,16 +29,25 @@
     numeric(1)
   )
 
-  pairs <- utils::combn(seq_len(nlists), 2L)
+  # All interaction terms eligible for selection.
+  termpars <- unlist(
+    lapply(
+      seq.int(2L, min(maxorder, nlists)),
+      function(order) {
+        effects <- utils::combn(seq_len(nlists), order)
 
-  pairpars <- apply(
-    pairs,
-    2L,
-    function(ii) {
-      z <- integer(nlists)
-      z[ii] <- 1L
-      encode_capture(z)
-    }
+        apply(
+          effects,
+          2L,
+          function(ii) {
+            z <- integer(nlists)
+            z[ii] <- 1L
+            encode_capture(z)
+          }
+        )
+      }
+    ),
+    use.names = FALSE
   )
 
   # Fit a model specified by its complete vector of encoded parameters.
@@ -40,7 +64,7 @@
     list(
       fit = fit,
       hiermod = hiermod,
-      selected = pairpars %in% pars
+      selected = termpars %in% pars
     )
   }
 
@@ -55,10 +79,10 @@
     ))
   }
 
-  # Preserve the old special treatment of pthresh = 1.
+  # Preserve the special treatment of pthresh = 1.
   if (pthresh == 1) {
 
-    fullpars <- c(1L, mainpars, pairpars)
+    fullpars <- c(1L, mainpars, termpars)
     fullmodel <- convert_to_hierarchy(fullpars)
 
     ierr <- .check_extended_MLE(
@@ -77,7 +101,7 @@
     }
   }
 
-  for (icycle in seq_along(pairpars)) {
+  for (icycle in seq_along(termpars)) {
 
     fit <- current$fit
 
@@ -99,22 +123,11 @@
       removed
     )
 
-    # Terms that can be added while preserving hierarchy.
-    candidates <- boundary_captures(
-      currentpars,
-      nlists
+    # Eligible boundary terms up to the requested maximum order.
+    candidates <- intersect(
+      boundary_captures(currentpars, nlists),
+      termpars
     )
-
-    # For the equivalence check, retain two-list interactions only.
-    candidate_order <- vapply(
-      candidates,
-      function(k) {
-        sum(decode_capture(k, nlists))
-      },
-      numeric(1)
-    )
-
-    candidates <- candidates[candidate_order == 2L]
 
     if (!length(candidates))
       break
@@ -146,7 +159,7 @@
       candidatepars <- union(currentpars, k)
       hiermod <- convert_to_hierarchy(candidatepars)
 
-      # Candidate must have an identifiable finite extended MLE.
+      # Candidate must satisfy the extended-MLE checks.
       ierr <- .check_extended_MLE(
         hiermod,
         ing
@@ -162,6 +175,7 @@
       break
 
     jbest <- min(which(pval == pvmin))
+
     currentpars <- union(
       currentpars,
       candidates[jbest]

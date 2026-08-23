@@ -68,3 +68,22 @@ test_that("estimate_population validates zdat", {
   )
 })
 
+test_that("population wrapper passes maxorder to stepwise estimation", {
+  direct <- estimate_population_stepwise(
+    Kosovo,
+    maxorder = Inf
+  )
+
+  wrapped <- estimate_population(
+    Kosovo,
+    method = "stepwise",
+    maxorder = Inf
+  )
+
+  expect_equal(wrapped$popest, direct$popest)
+  expect_equal(
+    wrapped$MSEfit$hiermod,
+    direct$MSEfit$hiermod
+  )
+})
+

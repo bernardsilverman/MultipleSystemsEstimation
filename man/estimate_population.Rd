@@ -55,9 +55,9 @@ The estimation method can be selected explicitly using
 \code{"fixed"}. The \code{"bayesthresh"} method requires the suggested
 package \pkg{MCMCpack}.
 
-The stepwise method considers two-list interactions only. The BIC and
-Bayesian-threshold methods can consider higher-order interactions,
-subject to their respective `maxorder` settings.
+Through their respective \code{maxorder} arguments,
+the stepwise, BIC and Bayesian-threshold methods can all be restricted to
+two-list interactions, or consider higher-order interactions.
 
 Method-specific arguments are passed through \code{...} to the selected
 estimation function. See the documentation for the individual methods
@@ -97,7 +97,7 @@ if (requireNamespace("MCMCpack", quietly = TRUE)) {
 estimate_population(
   Korea,
   method = "fixed",
-  hiermod = "[12,23]"
+  model = "[12,23]"
 )
 
 }

@@ -167,7 +167,6 @@ jackknifecal <- function(z, checkexist = TRUE) {
   )
   jackbic = jackabund
 
-  #hiermod = topmodels[imod]
   # now the relevant jackknife values for this particular model
   for (j in (1:n1)[jest]) {
     yy = countsobserved

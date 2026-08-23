@@ -374,3 +374,93 @@ test_that("BCa acceleration is unavailable after positive-weight jackknife failu
 
   expect_true(anyNA(ahat))
 })
+
+test_that("stepwise maxorder defaults to pairwise selection", {
+  default <- estimate_population_stepwise(Korea)
+  pairwise <- estimate_population_stepwise(Korea, maxorder = 2)
+
+  expect_equal(default$popest, pairwise$popest)
+  expect_equal(
+    default$MSEfit$hiermod,
+    pairwise$MSEfit$hiermod
+  )
+  expect_equal(
+    default$MSEfit$selected,
+    pairwise$MSEfit$selected
+  )
+})
+
+
+test_that("stepwise selection can include higher-order interactions", {
+  pairwise <- estimate_population_stepwise(
+    Kosovo,
+    maxorder = 2
+  )
+
+  order3 <- estimate_population_stepwise(
+    Kosovo,
+    maxorder = 3
+  )
+
+  unrestricted <- estimate_population_stepwise(
+    Kosovo,
+    maxorder = Inf
+  )
+
+  expect_equal(
+    pairwise$MSEfit$hiermod,
+    "[12,13,14,23,34]"
+  )
+
+  expect_equal(
+    order3$MSEfit$hiermod,
+    "[134,12,23]"
+  )
+
+  expect_equal(
+    unrestricted$MSEfit$hiermod,
+    order3$MSEfit$hiermod
+  )
+
+  expect_equal(
+    round(pairwise$popest, 2),
+    14341.66
+  )
+
+  expect_equal(
+    round(order3$popest, 2),
+    18393.31
+  )
+
+  expect_equal(
+    unrestricted$popest,
+    order3$popest
+  )
+})
+
+
+test_that("stepwise maxorder is validated", {
+  expect_error(
+    estimate_population_stepwise(Korea, maxorder = 1),
+    "`maxorder` must be an integer of at least 2 or Inf.",
+    fixed = TRUE
+  )
+
+  expect_error(
+    estimate_population_stepwise(Korea, maxorder = 2.5),
+    "`maxorder` must be an integer of at least 2 or Inf.",
+    fixed = TRUE
+  )
+
+  expect_error(
+    estimate_population_stepwise(Korea, maxorder = NA),
+    "`maxorder` must be an integer of at least 2 or Inf.",
+    fixed = TRUE
+  )
+
+  expect_error(
+    estimate_population_stepwise(Korea, maxorder = c(2, 3)),
+    "`maxorder` must be an integer of at least 2 or Inf.",
+    fixed = TRUE
+  )
+})

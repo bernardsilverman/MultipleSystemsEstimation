@@ -21,7 +21,7 @@ Chan, Silverman and Vincent (2021), *Multiple Systems Estimation for Sparse Capt
 
 The paper has two principal themes. First, sparse tables require explicit attention to the existence and identifiability of maximum likelihood estimates, including the possibility of extended maximum likelihood estimates in which some log-linear parameters are equal to \(-\infty\). Second, the paper develops a forward stepwise model-selection procedure and uses the BCa bootstrap to obtain population-size confidence intervals that allow for the model-selection process.
 
-The present vignette shows how the principal numerical results and procedures in the paper can be reproduced using `MultipleSystemsEstimation`.
+The present vignette shows how the principal numerical results and procedures in the paper can be reproduced and extended using `MultipleSystemsEstimation`.
 
 The package has developed since the original paper was published. Where possible, this vignette uses the current public interface. Some compact internal functions are retained where they are useful for reproducing particular calculations, but the original simulation and supplementary routines are not all carried forward into `MultipleSystemsEstimation`. For full reproduction of the original computational material, including routines specific to the paper, see the now-deprecated `SparseMSE` package. Internal functions used below should not be taken as the recommended interface for new analyses; see the main user guide for current usage.
 
@@ -122,14 +122,17 @@ The paper ultimately recommends the threshold
 p=0.02.
 \]
 
-The current high-level implementation is `estimate_population_stepwise()`.
-
+The current high-level implementation is `estimate_population_stepwise()`. In
+the package, the approach has been extended to allow hierarchical models
+containing interactions up to any specified order, or interactions of any
+order by setting `maxorder = Inf`.
 For a point estimate without bootstrapping:
 
 ```{r}
 fit <- estimate_population_stepwise(
   Korea,
-  pthresh = 0.02
+  pthresh = 0.02,
+  maxorder = 2
 )
 
 fit$popest
@@ -142,9 +145,55 @@ The same method is also available from the overall package interface:
 fit <- estimate_population(
   Korea,
   method = "stepwise",
-  pthresh = 0.02
+  pthresh = 0.02,
+  maxorder = 2
 )
 ```
+
+## Allowing higher-order interactions
+
+The package also extends the stepwise procedure beyond the pairwise models
+considered in the paper. Setting `maxorder = Inf` allows interactions of any
+order to be considered, subject to the hierarchy and extended-MLE checks.
+
+For the Kosovo data, the pairwise and unrestricted searches give different
+results:
+
+```{r stepwise-higher-order}
+data(Kosovo)
+
+Kosovo_pairwise <- estimate_population_stepwise(
+  Kosovo,
+  pthresh = 0.02,
+  maxorder = 2
+)
+
+Kosovo_unrestricted <- estimate_population_stepwise(
+  Kosovo,
+  pthresh = 0.02,
+  maxorder = Inf
+)
+
+c(
+  pairwise = Kosovo_pairwise$popest,
+  unrestricted = Kosovo_unrestricted$popest
+)
+
+c(
+  pairwise = Kosovo_pairwise$MSEfit$hiermod,
+  unrestricted = Kosovo_unrestricted$MSEfit$hiermod
+)
+```
+
+The pairwise search selects `[12,13,14,23,34]`, whereas the unrestricted
+search selects `[134,12,23]`. The latter model includes interactions 13, 14
+and 34 implicitly, so its additional maximal interaction is the three-list
+term 134. The corresponding population estimates are approximately 14,342
+and 18,393.
+
+This higher-order extension is available for current analyses; the remaining
+calculations in this vignette use `maxorder = 2` in order to reproduce the
+procedure studied in the 2021 paper.
 
 # Bootstrap inference
 
@@ -161,6 +210,7 @@ fit_boot <- estimate_population_stepwise(
   Korea,
   nboot = 1000,
   pthresh = 0.02,
+  maxorder = 2,
   iseed = 1234
 )
 
@@ -188,7 +238,8 @@ Applying the stepwise procedure with \(p=0.02\):
 ```{r}
 NewOrl_fit <- estimate_population_stepwise(
   NewOrl,
-  pthresh = 0.02
+  pthresh = 0.02, 
+  maxorder = 2
 )
 
 NewOrl_fit$popest
@@ -205,6 +256,7 @@ The corresponding calculation with the current package is:
 NewOrl_boot <- estimate_population_stepwise(
   NewOrl,
   pthresh = 0.02,
+  maxorder = 2, 
   nboot = 1000
 )
 
@@ -219,6 +271,7 @@ This can be examined by setting the threshold to zero:
 NewOrl_main <- estimate_population_stepwise(
   NewOrl,
   pthresh = 0,
+  maxorder = 2, 
   nboot = 1000
 )
 
@@ -235,7 +288,8 @@ data(NewOrl_5)
 
 NewOrl5_fit <- estimate_population_stepwise(
   NewOrl_5,
-  pthresh = 0.02
+  pthresh = 0.02,
+  maxorder = 2
 )
 
 NewOrl5_fit$popest
@@ -250,6 +304,7 @@ The bootstrap calculation is:
 NewOrl5_boot <- estimate_population_stepwise(
   NewOrl_5,
   pthresh = 0.02,
+  maxorder = 2, 
   nboot = 1000
 )
 
@@ -265,7 +320,8 @@ data(Western)
 
 Western_fit <- estimate_population_stepwise(
   Western,
-  pthresh = 0.02
+  pthresh = 0.02,
+  maxorder = 2
 )
 
 Western_fit$popest
@@ -282,6 +338,7 @@ It can be recalculated using:
 Western_boot <- estimate_population_stepwise(
   Western,
   pthresh = 0.02,
+  maxorder = 2, 
   nboot = 1000
 )
 
@@ -359,14 +416,15 @@ For a new analysis using the 2021 method, the recommended call is now
 ```{r}
 estimate_population(
   Korea,
-  method = "stepwise"
+  method = "stepwise",
+  maxorder = 2
 )
 ```
 
 or, equivalently,
 
 ```{r}
-estimate_population_stepwise(Korea)
+estimate_population_stepwise(Korea, maxorder = 2)
 ```
 
 The default package interface is `estimate_population(..., method = "auto")`; this uses the BIC-based approach for up to five lists and the stepwise approach for six or more. The main user guide discusses the current choice of methods in detail.
