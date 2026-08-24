@@ -12,33 +12,40 @@ bcaconfvalues(
 )
 }
 \arguments{
-\item{bootreps}{Point estimates of total population sizes from each bootstrap sample.}
+\item{bootreps}{Numeric vector of population estimates from the bootstrap
+samples.}
 
-\item{popest}{A point estimate of the total population of the original data set.}
+\item{popest}{Population estimate from the original data.}
 
-\item{ahat}{the estimated acceleration factor}
+\item{ahat}{Estimated BCa acceleration parameter.}
 
-\item{alpha}{Bootstrap quantiles of interests}
+\item{alpha}{Cumulative probability levels at which the interval endpoints
+are required.}
 }
 \value{
-BCa confidence intervals
+A named numeric vector containing the requested BCa confidence
+interval endpoints.
 }
 \description{
-The BCa confidence intervals use percentiles of the bootstrap distribution of the population size
-, but adjust the percentile actually used. The adjusted percentiles depend on an
-estimated bias parameter, and the quantile function of the estimated bias parameter is the proportion
-of the bootstrap estimates that fall below the estimate from the original data, and an
-estimated acceleration factor, which derivation depends on a jackknife approach. This routine is called internally
-by \code{estimatepopulation}.
+Calculates bias-corrected and accelerated (BCa) confidence intervals from
+bootstrap estimates of population size. The percentile levels are adjusted
+using the proportion of bootstrap estimates below the original-data
+estimate and an acceleration parameter obtained by jackknife.
 }
 \references{
 Chan, L., Silverman, B. W., and Vincent, K. (2021).
- Multiple Systems Estimation for Sparse Capture Data: Inferential Challenges when there are Non-Overlapping Lists.
-\emph{Journal of the American Statistical Association}, \strong{116(535)}, 1297-1306,
-Available from \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2019.1708748}.
+Multiple Systems Estimation for Sparse Capture Data: Inferential Challenges
+When There Are Nonoverlapping Lists.
+\emph{Journal of the American Statistical Association},
+\strong{116}(535), 1297--1306.
+\href{https://doi.org/10.1080/01621459.2019.1708748}{doi:10.1080/01621459.2019.1708748}.
 
-DiCiccio, T. J. and Efron, B. (1996). Bootstrap Confidence Intervals. \emph{Statistical Science}, \strong{40(3)}, 189-228.
+DiCiccio, T. J. and Efron, B. (1996).
+Bootstrap confidence intervals.
+\emph{Statistical Science}, \strong{11}(3), 189--228.
 
-Efron, B. (1987). Better Bootstrap Confidence Intervals. \emph{Journal of the American Statistical Association}, \strong{82(397)}, 171-185.
+Efron, B. (1987). Better bootstrap confidence intervals.
+\emph{Journal of the American Statistical Association},
+\strong{82}(397), 171--185.
 }
 \keyword{internal}

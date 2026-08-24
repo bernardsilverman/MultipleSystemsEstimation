@@ -1,9 +1,7 @@
-^MultipleSystemsEstimationnew\.Rproj$
+^.*\.Rproj$
 ^\.Rproj\.user$
-^MultipleSystemsEstimation\.Rproj$
 ^doc$
 ^Meta$
-^docs$
-^_pkgdown\.yml$
 ^\.github$
-^pkgdown$
+^_pkgdown\.yml$
+^docs$

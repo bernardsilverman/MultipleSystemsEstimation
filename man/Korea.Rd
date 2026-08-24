@@ -3,23 +3,24 @@
 \docType{data}
 \name{Korea}
 \alias{Korea}
-\title{Korea data}
+\title{Korean military-sexual-slavery data}
 \format{
-An object of class \code{matrix} (inherits from \code{array}) with 7 rows and 4 columns.
+A numeric matrix with 7 rows and 4 columns. Columns \code{b},
+\code{c} and \code{d} are binary list-membership indicators. Column
+\code{Count} gives the number of cases having each capture history.
 }
 \usage{
 Korea
 }
 \description{
-Korean woman held in sexual slavery by the Japanese military
-}
-\details{
-These data are collected into three lists. Full details are given in Figure 1 and the Data section
-of Ball et al. (2018)
+Three-list capture-history data concerning Korean women held in sexual
+slavery by the Japanese military in Palembang, Indonesia. Further details
+are given in the data section and Figure 1 of Ball, Shin and Yang (2018).
 }
 \references{
-Ball, P., Shin, E. H-S. and Yang, H. (2018).
-There may have been 14 undocumented Korean "comfort women" in Palembang, Indonesia. Technical Report, Humans Rights Data Analysis Group. Available from
-\url{https://hrdag.org/wp-content/uploads/2018/12/KP-Palemban-ests.pdf}
+Ball, P., Shin, E. H.-S. and Yang, H. (2018).
+There may have been 14 undocumented Korean "comfort women" in Palembang,
+Indonesia. Technical report, Human Rights Data Analysis Group.
+\url{https://hrdag.org/wp-content/uploads/2018/12/KP-Palemban-ests.pdf}.
 }
 \keyword{datasets}

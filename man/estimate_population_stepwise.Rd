@@ -14,7 +14,7 @@ estimate_population_stepwise(
 )
 }
 \arguments{
-\item{zdat}{A capture-history data matrix with \eqn{t+1} columns. The first
+\item{zdat}{A capture history data matrix with \eqn{t+1} columns. The first
 \eqn{t} columns correspond to the capture lists and contain zeros and ones
 defining the observed capture histories. The final column contains the
 number of cases having each capture history. List names \code{A},
@@ -37,8 +37,9 @@ The default is 2.}
 \item{iseed}{Integer seed used to initialise the random-number generator
 when \code{nboot > 0}. The default is 1234.}
 
-\item{alpha}{Numeric vector of cumulative probability levels at which BCa
-confidence limits are to be calculated. This argument is used only when
+\item{alpha}{Numeric vector of cumulative probability levels at which the
+endpoints of the BCa confidence intervals are to be calculated. This
+argument is used only when
 \code{nboot > 0}. The default is
 \code{c(0.025, 0.1, 0.9, 0.975)}.}
 }
@@ -57,7 +58,8 @@ A list with the following components:
   \item{\code{ahat}}{The estimated BCa acceleration parameter. This is
   \code{NULL} when \code{nboot = 0}.}
 
-  \item{\code{BCaquantiles}}{The BCa confidence limits at the cumulative
+  \item{\code{BCaquantiles}}{The endpoints of the BCa confidence intervals
+  at the cumulative
   probability levels specified by \code{alpha}. This is \code{NULL} when
   \code{nboot = 0}.}
 }
@@ -66,7 +68,7 @@ A list with the following components:
 Estimates the total population, including the unobserved population, using
 an extension of the stepwise model-selection procedure of Chan, Silverman
 and Vincent (2021). Optional bootstrap and jackknife calculations provide
-BCa confidence limits while repeating the stepwise selection procedure for
+BCa confidence intervals while repeating the stepwise selection procedure for
 each resampled data set.
 }
 \details{
@@ -77,17 +79,23 @@ may be considered by increasing \code{maxorder}, or by setting
 lower-order terms are already present, so every candidate model is
 hierarchical.
 
-The procedure is first applied to the observed
-data to obtain the point estimate and fitted model.
+The procedure starts with a main-effects model. At each stage it considers
+eligible interactions not already included and adds the interaction having
+the smallest p-value if that p-value does not exceed \code{pthresh}. It
+stops when no eligible interaction meets the threshold. Candidate models
+are checked for parameter identifiability and existence of the extended MLE.
+
+The procedure is first applied to the observed data to obtain the point
+estimate and fitted model.
 
 If \code{nboot > 0}, multinomial bootstrap samples are generated from the
-observed capture-history counts. The complete stepwise model-selection
+observed capture history counts. The complete stepwise model-selection
 procedure is repeated for each bootstrap sample, so the resulting
 inference allows for variation in the selected model rather than treating
 the model selected from the original data as fixed.
 
 A delete-one jackknife calculation is also carried out to estimate the
-acceleration parameter required for the BCa confidence limits. The
+acceleration parameter required for the BCa confidence intervals. The
 jackknife calculation takes account of the number of individuals having
 each observed capture history.
 

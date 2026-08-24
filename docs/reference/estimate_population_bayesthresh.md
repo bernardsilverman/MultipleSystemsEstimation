@@ -1,7 +1,7 @@
 # Bayesian-thresholding multiple systems estimation
 
 Fits the Bayesian-threshold estimator of Silverman (2020), based on a
-Poisson log-linear model for the capture-pattern counts.
+Poisson log-linear model for the capture history counts.
 
 The intercept and main effects have independent improper flat priors.
 For the interaction parameters, a proper normal prior is used by
@@ -11,12 +11,12 @@ chain Monte Carlo, calling
 [`MCMCpack::MCMCpoisson()`](https://rdrr.io/pkg/MCMCpack/man/MCMCpoisson.html).
 
 The method begins by including all two-list interactions. The
-interactions are then thresholded by discarding those whose posterior
-mean to posterior standard deviation ratio has absolute value below
-`threshold`. The model containing the retained interactions is then
-re-estimated, and the posterior distribution of the total population is
-obtained by adding the observed population to the posterior estimate of
-the unobserved cell.
+interactions are then thresholded by discarding those for which the
+absolute ratio of posterior mean to posterior standard deviation is
+below `threshold`. The model containing the retained interactions is
+then re-estimated, and the posterior distribution of the total
+population is obtained by adding the observed population to the
+posterior estimate of the unobserved cell.
 
 ## Usage
 
@@ -36,7 +36,7 @@ estimate_population_bayesthresh(
 
 - zdat:
 
-  Multiple systems data in the usual MultipleSystemsEstimation format.
+  Capture history data in the standard package format.
 
 - prior:
 
@@ -49,8 +49,8 @@ estimate_population_bayesthresh(
 
 - threshold:
 
-  Threshold applied to the absolute posterior mean to posterior standard
-  deviation ratio for interaction parameters.
+  Threshold applied to the absolute ratio of posterior mean to posterior
+  standard deviation for interaction parameters.
 
 - maxorder:
 
@@ -105,8 +105,8 @@ A list with the following components:
 
 - `threshold_statistics`:
 
-  Absolute posterior mean to posterior standard deviation ratios for the
-  two-list interactions considered in the initial thresholding step.
+  Absolute ratios of posterior mean to posterior standard deviation for
+  the two-list interactions considered in the initial thresholding step.
 
 - `eligible_triples`:
 
@@ -157,23 +157,23 @@ the resulting hierarchical model is refitted.
 
 When improper priors are used for the interaction parameters, the model
 containing all two-list interactions is checked for identifiability and
-for the Fienberg-Rinaldo existence criterion before thresholding begins.
+for the Fienberg–Rinaldo existence criterion before thresholding begins.
 If it fails, the procedure stops. With `maxorder = 3`, the model
 containing the retained two-list interactions and all eligible
 three-list interactions is also checked. If this model fails the
-Fienberg-Rinaldo criterion, the proposed three-list extension is not
+Fienberg–Rinaldo criterion, the proposed three-list extension is not
 carried out and the completed two-list analysis is returned, together
 with the eligible triples.
 
 The reason for this check is that, with improper priors on the
-interaction parameters, any model which does not have a maximum
-likelihood estimate will not have a proper posterior either. However,
-results of Forster (2010) show that proper priors on the interaction
-parameters can yield a proper posterior even when the corresponding
-maximum likelihood estimate does not exist. Therefore these checks are
+interaction parameters, a model without a finite maximum-likelihood
+estimate will not have a proper posterior either. However, results of
+Forster (2010) show that proper priors on the interaction parameters can
+yield a proper posterior even when the corresponding finite
+maximum-likelihood estimate does not exist. Therefore these checks are
 not required when proper priors are used for the interaction parameters,
 and the Bayesian fitting and thresholding proceed without applying the
-Fienberg-Rinaldo criterion.
+Fienberg–Rinaldo criterion.
 
 When proper priors are used for the interaction parameters, the improper
 priors on the intercept and main effects are approximated internally by

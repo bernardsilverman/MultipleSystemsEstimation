@@ -7,16 +7,17 @@
 encode_capture(z)
 }
 \arguments{
-\item{z}{The capture history to be encoded, as a logical vector or a vector of 0s and 1s}
+\item{z}{Logical vector, or vector of zeros and ones, defining a capture
+history.}
 }
 \value{
-The capture history encoded as a number that corresponds to the row number of the capture history data set
+The integer encoding of the capture history.
 }
 \description{
-Given a 0/1 capture history \eqn{S}, encode it as
+Encodes a binary capture history as the integer
 \deqn{1 + \sum_{i \in S} 2^{i-1},}
-where \eqn{S} is the set of list numbers. Thus 1 represents the
-intercept (the empty set), 2 and 3 represent the single list capture histories
-1 and 2, and 4 represents the two-list history 12.
+where \eqn{S} is the set of lists containing the case. Thus 1 represents
+the intercept or empty set, 2 and 3 represent lists 1 and 2 respectively,
+and 4 represents the two-list history 12.
 }
 \keyword{internal}

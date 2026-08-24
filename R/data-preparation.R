@@ -1,31 +1,31 @@
-#' Produce a data matrix with a unique row for each capture history
+#' Consolidate capture history data
 #'
-#' This routine finds rows with the same capture history and consolidates them into a single row whose count is the sum of counts of
-#' the relevant rows.  If \code{includezerocounts = TRUE} then it also includes rows for all the capture histories with zero count; otherwise
-#' these are all removed.
+#' Combines duplicate capture histories by summing their counts. It can also
+#' add all observable histories having zero count and remove non-informative
+#' capture lists.
 #'
-#' @param zdat Data matrix with \eqn{t+1} columns. The first \eqn{t} columns, each corresponding to a particular list,
-#' are 0s and 1s defining the capture histories
-#' observed. The last column is the count of cases with that particular capture history.
-#' List names A, B, ... are constructed if not supplied. Where a capture history is not explicitly listed,
-#' it is assumed that it has zero count.
+#' @param zdat A matrix or data frame with \eqn{t+1} columns. The first
+#' \eqn{t} columns are binary list-membership indicators and the final column
+#' contains the capture history counts. Histories not included explicitly are
+#' assumed to have zero count.
 #'
-#' @param includezerocounts  If \code{FALSE} then remove rows corresponding to capture histories with zero count.
-#' If \code{TRUE} then include all possible capture histories including those with zero count,
-#' excluding the all-zero row corresponding to the dark figure.
+#' @param includezerocounts If \code{TRUE}, include every observable capture
+#' history, including those with zero count. The all-zero history representing
+#' the unobserved population is never included. If \code{FALSE}, return only
+#' positive-count histories.
 #'
-#' @param remove_noninformative Logical; if \code{TRUE}, remove non-informative
-#' capture lists before returning the data.  For a given data set, a list will be
-#' noninfomative if it contains all or none of the cases, or if it contains identical cases with
-#' another list corresponding to an earlier column in the data matrix.
+#' @param remove_noninformative If \code{TRUE}, remove lists containing all or
+#' none of the observed cases and remove duplicate list columns, retaining the
+#' first copy.
 #'
-#' @return A data matrix in the form specified above, including all capture histories with zero counts if  \code{includezerocounts=TRUE}.
+#' @return A data frame with one row for each retained capture history and
+#' one column for each retained list, followed by the count column.
 #'
 #' @examples
 #' data(NewOrl)
-#' tidy_lists(NewOrl,includezerocounts=TRUE)
+#' tidy_lists(NewOrl, includezerocounts = TRUE)
 #'
-#'@export
+#' @export
 tidy_lists <- function(
     zdat,
     includezerocounts = FALSE,
@@ -116,26 +116,31 @@ tidy_lists <- function(
 
 #' Preliminary processing of a data matrix
 #'
-#' Perform various preprocessing tasks on the data
+#' Converts capture history data to the encoded representation used by the
+#' model-fitting and extended-MLE routines.
 #'
-#' @param xdat Data matrix of the usual kind
+#' @param xdat Capture history data in the standard package format.
 #'
-#' @return A list with the following elements
+#' @return A list with components:
 #' \describe{
-#' \item{nobs}{Numbers of observations indexed by encoded histories}
-#' \item{nstar}{For each capture history, total number of observations for that capture history and all its descendants}
-#'  \item{nlists}{Total number of lists}
-#'  \item{listnames}{Names of the lists, constructed to be A, B, ... if necessary}
-#'  \item{data}{The input data matrix}
-#'  \item{notestimable}{A vector indicating which parameters are not estimable, because they are strict descendants of parameters
-#'  which would be already estimated to be \eqn{-\infty} if they are included in the model}
-#'  \item{masterdesign}{The inclusion matrix as constructed by \code{\link{make_master_design}}}}
+#'   \item{\code{nobs}}{Counts indexed by encoded capture history.}
+#'   \item{\code{nstar}}{For each encoded history, the total count for that
+#'   history and all its descendants.}
+#'   \item{\code{nlists}}{Number of capture lists.}
+#'   \item{\code{listnames}}{List names, constructed as A, B, and so on if
+#'   necessary.}
+#'   \item{\code{data}}{The input data.}
+#'   \item{\code{notestimable}}{Logical vector identifying parameters that
+#'   are strict descendants of parameters having zero sufficient statistic.}
+#'   \item{\code{masterdesign}}{The inclusion matrix constructed by
+#'   \code{make_master_design()}.}
+#' }
 #'
-#'@references
+#' @references
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
-#' Bootstrapping Multiple Systems Estimates to Account for Model Selection
-#' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+#' Bootstrapping Multiple Systems Estimates to Account for Model Selection.
+#' \emph{Statistics and Computing}, \strong{34}, 44.
+#' \href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 #'
 #' @keywords internal
 ingest_data = function(xdat)  {

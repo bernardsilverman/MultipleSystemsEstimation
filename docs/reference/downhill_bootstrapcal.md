@@ -1,8 +1,8 @@
 # Bootstrap downhill
 
-Construct bootstrap replications and use the downhill fit method to
-obtain point estimates of total population sizes from each bootstrap
-sample.
+Generates multinomial bootstrap samples and applies
+[`downhill_fit()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/downhill_fit.md)
+to each one.
 
 ## Usage
 
@@ -21,37 +21,40 @@ downhill_bootstrapcal(
 
 - xdata:
 
-  original data matrix
+  Capture history data in the standard package format.
 
 - nboot:
 
-  number of bootstrap replicates
+  Number of bootstrap replications.
 
 - iseed:
 
-  random seed
+  Integer random-number seed.
 
 - checkid:
 
-  If it is TRUE, then `check_extended_MLE` is called and it performs the
-  Fienberg-Rinaldo linear program check for the existence of the
-  estimates
+  Passed to
+  [`downhill_fit()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/downhill_fit.md).
 
 - verbose:
 
-  If TRUE, return the list of extra output from `downhill_fit`
+  Passed to
+  [`downhill_fit()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/downhill_fit.md).
 
 - maxorder:
 
-  Maximum order of models to be included
+  Maximum interaction order considered.
 
 ## Value
 
-Point estimates of total population sizes from each bootstrap sample.
+If `verbose = FALSE`, a numeric vector of bootstrap population
+estimates. If `verbose = TRUE`, the detailed results returned by
+[`downhill_fit()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/downhill_fit.md)
+for each replication.
 
 ## References
 
 Silverman, B. W., Chan, L. and Vincent, K., (2024). Bootstrapping
 Multiple Systems Estimates to Account for Model Selection *Statistics
-and Computing*, **34(44)**, Available from
-[\doi{10.1007/s11222-023-10346-9}](NA).
+and Computing*, **34**, 44.
+[doi:10.1007/s11222-023-10346-9](https://doi.org/10.1007/s11222-023-10346-9).

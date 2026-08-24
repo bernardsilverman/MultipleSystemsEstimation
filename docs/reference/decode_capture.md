@@ -1,7 +1,7 @@
 # Decode capture history
 
-Given a capture history as a number and the number of lists, decode it
-into a logical vector giving presence or absence in the capture history.
+Converts an encoded capture history to a logical vector indicating
+membership of each list.
 
 ## Usage
 
@@ -13,29 +13,19 @@ decode_capture(k, nlists)
 
 - k:
 
-  The capture history to be decoded
+  Integer encoding of a capture history.
 
 - nlists:
 
-  The number of lists
+  Number of lists.
 
 ## Value
 
-A logical vector of length `nlists` giving presence or absence in the
-capture history
+A logical vector of length `nlists`.
 
 ## References
 
 Silverman, B. W., Chan, L. and Vincent, K., (2024). Bootstrapping
 Multiple Systems Estimates to Account for Model Selection *Statistics
-and Computing*, **34(44)**, Available from
-[\doi{10.1007/s11222-023-10346-9}](NA).
-
-## Examples
-
-``` r
-decode_capture(2,5)
-#> Error in decode_capture(2, 5): could not find function "decode_capture"
-decode_capture(1,4)
-#> Error in decode_capture(1, 4): could not find function "decode_capture"
-```
+and Computing*, **34**, 44,
+[doi:10.1007/s11222-023-10346-9](https://doi.org/10.1007/s11222-023-10346-9).

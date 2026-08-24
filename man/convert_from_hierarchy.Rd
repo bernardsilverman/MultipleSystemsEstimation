@@ -2,25 +2,27 @@
 % Please edit documentation in R/capture-hierarchy.R
 \name{convert_from_hierarchy}
 \alias{convert_from_hierarchy}
-\title{Find the vector of captures corresponding to a given hierarchical model}
+\title{Convert a hierarchy string to encoded parameters}
 \usage{
 convert_from_hierarchy(modelstr, findancestors = TRUE)
 }
 \arguments{
-\item{modelstr}{A given hierarchical model}
+\item{modelstr}{Character string specifying a hierarchical model.}
 
-\item{findancestors}{If TRUE then find all the captures.  If FALSE then just return the encoded defining histories of the hierarchy}
+\item{findancestors}{If \code{TRUE}, return the complete hierarchical
+closure. If \code{FALSE}, return only the encoded generators.}
 }
 \value{
-The encoded capture histories requested
+A numeric vector containing the requested encoded parameters.
 }
 \description{
-Given a hierarchical model, find the vector of all the corresponding encoded captures
+Converts a hierarchical-model specification to its encoded generators or
+to the complete hierarchical closure.
 }
 \references{
 Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 Bootstrapping Multiple Systems Estimates to Account for Model Selection
-\emph{Statistics and Computing}, \strong{34(44)},
-Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+\emph{Statistics and Computing}, \strong{34}, 44,
+\href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 }
 \keyword{internal}

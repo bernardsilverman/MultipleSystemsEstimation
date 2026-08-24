@@ -1,8 +1,9 @@
-# Check existence and identifiability of the extended MLE for a given model and dataset
+# Check existence and identifiability of the extended MLE
 
-Checks whether a specified hierarchical log-linear model satisfies both
-the Fienberg–Rinaldo condition for maximum-likelihood estimation and the
-rank condition required for identifiable model parameters.
+Checks whether a hierarchical log-linear model satisfies both the
+Fienberg–Rinaldo condition for existence of the extended
+maximum-likelihood estimate and the rank condition required for
+identifiable model parameters.
 
 ## Usage
 
@@ -14,17 +15,13 @@ check_extended_MLE(data, model)
 
 - data:
 
-  A data frame or matrix containing the capture histories and their
-  observed counts. The first columns are binary indicators for the
-  capture lists and the final column contains the count for each capture
-  history. Missing capture histories are treated as having count zero.
+  Capture history data in the standard package format, with one
+  indicator column for each list followed by a count column.
 
 - model:
 
-  The model to be checked. This may be either a character string giving
-  the model in hierarchical notation, such as `"[12,13,23]"`, or a
-  numeric vector of encoded model parameters, such as that returned by
-  [`convert_from_hierarchy`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/convert_from_hierarchy.md).
+  A character string specifying a hierarchical model, such as
+  `"[12,13,23]"`.
 
 ## Value
 
@@ -46,62 +43,44 @@ A single integer status code:
 
   Both conditions fail.
 
-A model returning a nonzero status should not be fitted using the
-package's ordinary maximum-likelihood estimation routines.
-
 ## Details
 
 Two distinct conditions are checked.
 
-First, the Fienberg–Rinaldo condition determines whether the required
-maximum-likelihood fit exists, after accounting for parameters forced to
-the boundary by zero observed margins.
+The Fienberg–Rinaldo condition determines whether the required extended
+maximum-likelihood fit exists, accounting for parameters whose
+extended-MLE value is minus infinity because the corresponding observed
+margins are zero.
 
-Second, the relevant model matrix is checked for full column rank.
-Failure of this condition means that the model parameters are not
-identifiable.
+The relevant model matrix is also checked for full column rank. Failure
+of this condition means that the model parameters are not identifiable.
 
-The model may be supplied in hierarchical notation or as its
-corresponding vector of encoded parameters. Hierarchical notation
-specifies the generators of the model; all lower-order terms required by
-hierarchy are included automatically. See
-[`convert_from_hierarchy`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/convert_from_hierarchy.md).
-
-The two checks are carried out independently, so it is possible for
-either one or both to fail.
+The two checks are carried out separately, so either one or both may
+fail. A model returning a nonzero status should not be fitted using the
+package's ordinary maximum-likelihood estimation routines.
 
 ## References
 
 Fienberg, S. E. and Rinaldo, A. (2012). Maximum likelihood estimation in
 log-linear models. *The Annals of Statistics*, **40**, 996–1023.
 
-Chan, L., Silverman, B. W. and Vincent, K. (2021). Multiple systems
-estimation for sparse capture data: Inferential challenges when there
-are nonoverlapping lists. *Journal of the American Statistical
-Association*, **116**, 1297–1310.
+Chan, L., Silverman, B. W. and Vincent, K. (2021). Multiple Systems
+Estimation for Sparse Capture Data: Inferential Challenges When There
+Are Nonoverlapping Lists. *Journal of the American Statistical
+Association*, **116**(535), 1297–1306.
+[doi:10.1080/01621459.2019.1708748](https://doi.org/10.1080/01621459.2019.1708748).
 
 ## Examples
 
 ``` r
 data(Artificial_3)
 
-# Specify the model in hierarchical notation.
 check_extended_MLE(
   Artificial_3,
   "[12,13,23]"
 )
 #> [1] 2
 
-# Equivalently, use the encoded parameter representation.
-encoded_model <- convert_from_hierarchy("[12,13,23]")
-#> Error in convert_from_hierarchy("[12,13,23]"): could not find function "convert_from_hierarchy"
-
-check_extended_MLE(
-  Artificial_3,
-  encoded_model
-)
-#> Error: object 'encoded_model' not found
-
-# Both calls return 2: the existence condition is satisfied,
+# The result is 2: the existence condition is satisfied,
 # but the model parameters are not identifiable.
 ```

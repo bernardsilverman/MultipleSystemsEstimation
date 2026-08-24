@@ -1,17 +1,14 @@
-test_that("estimate_population_bic returns BCa confidence limits", {
+test_that("estimate_population_bic returns BCa confidence intervals", {
   result <- estimate_population_bic(Korea, nboot = 2)
 
   expect_type(result, "list")
-  expect_true(is.matrix(result$BCaquantiles))
   expect_type(result$BCaquantiles, "double")
-  expect_equal(ncol(result$BCaquantiles), 4L)
+  expect_length(result$BCaquantiles, 4L)
 
   expect_identical(
-    colnames(result$BCaquantiles),
+    names(result$BCaquantiles),
     c("0.025", "0.1", "0.9", "0.975")
   )
-
-  expect_true(!is.null(rownames(result$BCaquantiles)))
 })
 
 test_that("BIC estimation supports no-bootstrap fitting", {
@@ -58,9 +55,9 @@ test_that("stepwise estimation defaults to no bootstrap", {
 test_that("BIC estimation uses the common alpha defaults", {
   result <- estimate_population_bic(Korea, nboot = 10)
 
-  expect_true(is.matrix(result$BCaquantiles))
-  expect_equal(
-    colnames(result$BCaquantiles),
+  expect_type(result$BCaquantiles, "double")
+  expect_identical(
+    names(result$BCaquantiles),
     c("0.025", "0.1", "0.9", "0.975")
   )
 })

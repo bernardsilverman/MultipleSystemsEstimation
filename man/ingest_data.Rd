@@ -7,27 +7,32 @@
 ingest_data(xdat)
 }
 \arguments{
-\item{xdat}{Data matrix of the usual kind}
+\item{xdat}{Capture history data in the standard package format.}
 }
 \value{
-A list with the following elements
+A list with components:
 \describe{
-\item{nobs}{Numbers of observations indexed by encoded histories}
-\item{nstar}{For each capture history, total number of observations for that capture history and all its descendants}
- \item{nlists}{Total number of lists}
- \item{listnames}{Names of the lists, constructed to be A, B, ... if necessary}
- \item{data}{The input data matrix}
- \item{notestimable}{A vector indicating which parameters are not estimable, because they are strict descendants of parameters
- which would be already estimated to be \eqn{-\infty} if they are included in the model}
- \item{masterdesign}{The inclusion matrix as constructed by \code{\link{make_master_design}}}}
+  \item{\code{nobs}}{Counts indexed by encoded capture history.}
+  \item{\code{nstar}}{For each encoded history, the total count for that
+  history and all its descendants.}
+  \item{\code{nlists}}{Number of capture lists.}
+  \item{\code{listnames}}{List names, constructed as A, B, and so on if
+  necessary.}
+  \item{\code{data}}{The input data.}
+  \item{\code{notestimable}}{Logical vector identifying parameters that
+  are strict descendants of parameters having zero sufficient statistic.}
+  \item{\code{masterdesign}}{The inclusion matrix constructed by
+  \code{make_master_design()}.}
+}
 }
 \description{
-Perform various preprocessing tasks on the data
+Converts capture history data to the encoded representation used by the
+model-fitting and extended-MLE routines.
 }
 \references{
 Silverman, B. W., Chan, L. and  Vincent, K., (2024).
-Bootstrapping Multiple Systems Estimates to Account for Model Selection
-\emph{Statistics and Computing}, \strong{34(44)},
-Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+Bootstrapping Multiple Systems Estimates to Account for Model Selection.
+\emph{Statistics and Computing}, \strong{34}, 44.
+\href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 }
 \keyword{internal}

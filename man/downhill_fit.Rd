@@ -2,8 +2,7 @@
 % Please edit documentation in R/downhill_fit.R
 \name{downhill_fit}
 \alias{downhill_fit}
-\title{Conduct downhill search among hierarchical models starting
-  from the main effects only.}
+\title{Downhill search among hierarchical models}
 \usage{
 downhill_fit(
   counts,
@@ -15,34 +14,42 @@ downhill_fit(
 )
 }
 \arguments{
-\item{counts}{Observed counts for the capture histories defined by desmat}
+\item{counts}{Numeric vector of observed counts.}
 
-\item{desmat}{Incidence matrix defining the capture histories observed with counts given by counts}
+\item{desmat}{Binary matrix defining the corresponding capture histories.}
 
-\item{maxorder}{Maximum order of models to be included}
+\item{maxorder}{Maximum interaction order considered.}
 
-\item{checkid}{If it is TRUE, then \code{check_extended_MLE} is called and it performs the Fienberg-Rinaldo linear program check for the existence of the estimates}
+\item{checkid}{If \code{TRUE}, check parameter identifiability and existence
+of the extended MLE before fitting each model.}
 
-\item{niter}{Number of iterations}
+\item{niter}{Maximum number of downhill iterations.}
 
-\item{verbose}{Specifies the output, if FALSE then only returns the best value, if TRUE, returns a more detailed list of objects}
+\item{verbose}{If \code{FALSE}, return only the selected population
+estimate. If \code{TRUE}, return detailed search results.}
 }
 \value{
-A list with the following components
+If \code{verbose = FALSE}, the population estimate from the selected
+model, or \code{NA} if the main-effects model has no valid fit. If
+\code{verbose = TRUE}, a list with components:
 \describe{
-\item{optimum_hierarchy}{Optimal hierarchical model}
-  \item{minimum_value}{hierarchical model with the minimum value}
-  \item{hierarchies_considered}{hierarhical models considered}
-  \item{function_values}{Values of function}
- }
+  \item{\code{optimum_hierarchy}}{Selected hierarchical model.}
+  \item{\code{minimum_value}}{Named vector containing its BIC and population
+  estimate.}
+  \item{\code{hierarchies_considered}}{Character vector of models examined.}
+  \item{\code{function_values}}{Matrix containing the BIC and population
+  estimate for each model examined.}
+}
 }
 \description{
-Find a local optimum by downhill search among hierarchical models
+Starting from the main-effects model, repeatedly moves to the neighbouring
+hierarchical model with the smallest BIC until no improvement is available
+or the iteration limit is reached.
 }
 \references{
 Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 Bootstrapping Multiple Systems Estimates to Account for Model Selection
-\emph{Statistics and Computing}, \strong{34(44)},
-Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+\emph{Statistics and Computing}, \strong{34}, 44.
+\href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 }
 \keyword{internal}

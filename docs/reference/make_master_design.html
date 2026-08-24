@@ -9,7 +9,7 @@ Rows correspond to observations and columns to parameters."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">MultipleSystemsEstimation</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,20 +56,21 @@ Rows correspond to observations and columns to parameters.</p>
 
 
 <dl><dt id="arg-nlists">nlists<a class="anchor" aria-label="anchor" href="#arg-nlists"></a></dt>
-<dd><p>The number of lists</p></dd>
+<dd><p>Number of lists.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A matrix whose  \((i,j)\) element is 1 if the expected log of observation \(i\) depends on parameter \(j\),
-in other words if \(j\) is an ancestor of \(i\).</p>
+    <p>A binary matrix whose \((i,j)\) element is 1 when the expected
+log count for history \(i\) depends on parameter \(j\); equivalently,
+when \(j\) is an ancestor of \(i\).</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 Bootstrapping Multiple Systems Estimates to Account for Model Selection
-<em>Statistics and Computing</em>, <strong>34(44)</strong>,
-Available from <a href="\doi{10.1007/s11222-023-10346-9}">\doi{10.1007/s11222-023-10346-9}</a>.</p>
+<em>Statistics and Computing</em>, <strong>34</strong>, 44,
+<a href="https://doi.org/10.1007/s11222-023-10346-9" class="external-link">doi:10.1007/s11222-023-10346-9</a>.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

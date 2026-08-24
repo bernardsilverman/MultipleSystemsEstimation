@@ -3,22 +3,27 @@
 \docType{data}
 \name{Kosovo}
 \alias{Kosovo}
-\title{Kosovo data}
+\title{Kosovo conflict data}
 \format{
-An object of class \code{data.frame} with 15 rows and 5 columns.
+A data frame with 15 rows and 5 columns. The first four columns
+are binary list-membership indicators. Column \code{Frequency} gives the
+number of cases having each capture history.
 }
 \usage{
 Kosovo
 }
 \description{
-Data on 4400 observed killings in the Kosovo war between 20 March and 22 June 1999
-}
-\details{
-These data give the numbers of cases on each possible combination of four lists.
-The lists are labelled as follows: EXH = exhumations; ABA = American Bar Association Central and East European Law Initiative; OSCE = Organization for Security and Cooperation in Europe; HRW = Human Rights Watch.
-All 15 combinations have a nonzero count.
+Four-list capture-history data for 4,400 documented killings during the
+Kosovo conflict between 20 March and 22 June 1999. The lists are
+exhumations (\code{EXH}), the American Bar Association Central and East
+European Law Initiative (\code{ABA}), the Organization for Security and
+Co-operation in Europe (\code{OSCE}), and Human Rights Watch
+(\code{HRW}). All 15 observable capture histories have positive count.
 }
 \references{
-Ball, P., W. Betts, F. Scheuren, J. Dudukovich, and J. Asher (2002). Killings and Refugee Flow in Kosovo March-June 1999. American Association for the Advancement of Science. A Report to the International Criminal Tribunal for the Former Yugoslavia.
+Ball, P., Betts, W., Scheuren, F., Dudukovich, J. and Asher, J. (2002).
+Killings and refugee flow in Kosovo, March--June 1999.
+American Association for the Advancement of Science. Report to the
+International Criminal Tribunal for the Former Yugoslavia.
 }
 \keyword{datasets}

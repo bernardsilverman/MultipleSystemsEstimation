@@ -95,8 +95,7 @@ the model—that is, an element having no children within the model. These
 maximal elements are the generators displayed in the hierarchical-model
 notation. Only the generator itself is removed; all its lower-order
 elements remain. For example, removing `123` from `[123]` gives
-`[12,13,23]`. By default, main effects are protected from removal. By
-default, main effects are protected from removal.
+`[12,13,23]`. By default, main effects are protected from removal.
 
 The function
 [`find_neighbour_hierarchies()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/find_neighbour_hierarchies.md)

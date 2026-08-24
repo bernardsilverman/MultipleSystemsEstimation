@@ -1,9 +1,8 @@
-# Produce a data matrix with a unique row for each capture history
+# Consolidate capture history data
 
-This routine finds rows with the same capture history and consolidates
-them into a single row whose count is the sum of counts of the relevant
-rows. If `includezerocounts = TRUE` then it also includes rows for all
-the capture histories with zero count; otherwise these are all removed.
+Combines duplicate capture histories by summing their counts. It can
+also add all observable histories having zero count and remove
+non-informative capture lists.
 
 ## Usage
 
@@ -15,38 +14,33 @@ tidy_lists(zdat, includezerocounts = FALSE, remove_noninformative = FALSE)
 
 - zdat:
 
-  Data matrix with \\t+1\\ columns. The first \\t\\ columns, each
-  corresponding to a particular list, are 0s and 1s defining the capture
-  histories observed. The last column is the count of cases with that
-  particular capture history. List names A, B, ... are constructed if
-  not supplied. Where a capture history is not explicitly listed, it is
-  assumed that it has zero count.
+  A matrix or data frame with \\t+1\\ columns. The first \\t\\ columns
+  are binary list-membership indicators and the final column contains
+  the capture history counts. Histories not included explicitly are
+  assumed to have zero count.
 
 - includezerocounts:
 
-  If `FALSE` then remove rows corresponding to capture histories with
-  zero count. If `TRUE` then include all possible capture histories
-  including those with zero count, excluding the all-zero row
-  corresponding to the dark figure.
+  If `TRUE`, include every observable capture history, including those
+  with zero count. The all-zero history representing the unobserved
+  population is never included. If `FALSE`, return only positive-count
+  histories.
 
 - remove_noninformative:
 
-  Logical; if `TRUE`, remove non-informative capture lists before
-  returning the data. For a given data set, a list will be noninfomative
-  if it contains all or none of the cases, or if it contains identical
-  cases with another list corresponding to an earlier column in the data
-  matrix.
+  If `TRUE`, remove lists containing all or none of the observed cases
+  and remove duplicate list columns, retaining the first copy.
 
 ## Value
 
-A data matrix in the form specified above, including all capture
-histories with zero counts if `includezerocounts=TRUE`.
+A data frame with one row for each retained capture history and one
+column for each retained list, followed by the count column.
 
 ## Examples
 
 ``` r
 data(NewOrl)
-tidy_lists(NewOrl,includezerocounts=TRUE)
+tidy_lists(NewOrl, includezerocounts = TRUE)
 #>     A B C D E F G H  n
 #> 1   1 0 0 0 0 0 0 0 25
 #> 2   0 1 0 0 0 0 0 0  5

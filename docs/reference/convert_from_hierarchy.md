@@ -1,7 +1,7 @@
-# Find the vector of captures corresponding to a given hierarchical model
+# Convert a hierarchy string to encoded parameters
 
-Given a hierarchical model, find the vector of all the corresponding
-encoded captures
+Converts a hierarchical-model specification to its encoded generators or
+to the complete hierarchical closure.
 
 ## Usage
 
@@ -13,32 +13,20 @@ convert_from_hierarchy(modelstr, findancestors = TRUE)
 
 - modelstr:
 
-  A given hierarchical model
+  Character string specifying a hierarchical model.
 
 - findancestors:
 
-  If TRUE then find all the captures. If FALSE then just return the
-  encoded defining histories of the hierarchy
+  If `TRUE`, return the complete hierarchical closure. If `FALSE`,
+  return only the encoded generators.
 
 ## Value
 
-The encoded capture histories that corresponds to the row number of the
-capture history data set
+A numeric vector containing the requested encoded parameters.
 
 ## References
 
 Silverman, B. W., Chan, L. and Vincent, K., (2024). Bootstrapping
 Multiple Systems Estimates to Account for Model Selection *Statistics
-and Computing*, **34(44)**, Available from
-[\doi{10.1007/s11222-023-10346-9}](NA).
-
-## Examples
-
-``` r
-modelstr = "[12,23]"
-convert_from_hierarchy(modelstr)
-#> Error in convert_from_hierarchy(modelstr): could not find function "convert_from_hierarchy"
-modelstr = "[12,3]"
-convert_from_hierarchy(modelstr, findancestors=FALSE)
-#> Error in convert_from_hierarchy(modelstr, findancestors = FALSE): could not find function "convert_from_hierarchy"
-```
+and Computing*, **34**, 44,
+[doi:10.1007/s11222-023-10346-9](https://doi.org/10.1007/s11222-023-10346-9).

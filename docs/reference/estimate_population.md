@@ -17,7 +17,7 @@ estimate_population(
 
 - zdat:
 
-  Capture-pattern data. The first columns identify list membership and
+  Capture history data. The first columns identify list membership and
   the final column contains the observed counts.
 
 - method:
@@ -65,9 +65,9 @@ The estimation method can be selected explicitly using `method = "bic"`,
 `"stepwise"`, `"bayesthresh"`, or `"fixed"`. The `"bayesthresh"` method
 requires the suggested package MCMCpack.
 
-The stepwise method considers two-list interactions only. The BIC and
-Bayesian-threshold methods can consider higher-order interactions,
-subject to their respective \`maxorder\` settings.
+Through their respective `maxorder` arguments, the stepwise, BIC and
+Bayesian-threshold methods can all be restricted to two-list
+interactions, or consider higher-order interactions.
 
 Method-specific arguments are passed through `...` to the selected
 estimation function. See the documentation for the individual methods
@@ -364,7 +364,7 @@ if (requireNamespace("MCMCpack", quietly = TRUE)) {
 estimate_population(
   Korea,
   method = "fixed",
-  hiermod = "[12,23]"
+  model = "[12,23]"
 )
 #> $popest
 #> [1] 157.1667
@@ -485,7 +485,7 @@ estimate_population(
 #> numeric(0)
 #> 
 #> 
-#> $hiermod
+#> $model
 #> [1] "[12,23]"
 #> 
 #> $bootreps

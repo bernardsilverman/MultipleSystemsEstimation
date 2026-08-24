@@ -2,27 +2,27 @@
 % Please edit documentation in R/capture-hierarchy.R
 \name{descendants}
 \alias{descendants}
-\title{Find the "descendants" of a given capture history}
+\title{Find descendants of an encoded capture history}
 \usage{
 descendants(k, nlists, omitk = FALSE)
 }
 \arguments{
-\item{k}{An encoded capture history}
+\item{k}{An encoded capture history.}
 
-\item{nlists}{The total number of lists}
+\item{nlists}{Total number of lists.}
 
-\item{omitk}{Determine whether the original capture history is included as a descendant of itself. If \code{omitk=TRUE} it is not.}
+\item{omitk}{If \code{TRUE}, omit \code{k} itself from the result.}
 }
 \value{
-a vector giving the encoded versions of the descendants
+A sorted numeric vector containing the encoded descendants.
 }
 \description{
-Given any encoded capture history, find all the encoded capture histories that include the original capture history and any other lists
+Finds all encoded histories that contain the supplied history.
 }
 \references{
 Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 Bootstrapping Multiple Systems Estimates to Account for Model Selection
-\emph{Statistics and Computing}, \strong{34(44)},
-Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+\emph{Statistics and Computing}, \strong{34}, 44,
+\href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 }
 \keyword{internal}

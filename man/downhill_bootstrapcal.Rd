@@ -14,28 +14,31 @@ downhill_bootstrapcal(
 )
 }
 \arguments{
-\item{xdata}{original data matrix}
+\item{xdata}{Capture history data in the standard package format.}
 
-\item{nboot}{number of bootstrap replicates}
+\item{nboot}{Number of bootstrap replications.}
 
-\item{iseed}{random seed}
+\item{iseed}{Integer random-number seed.}
 
-\item{checkid}{If it is TRUE, then \code{check_extended_MLE} is called and it performs the Fienberg-Rinaldo linear program check for the existence of the estimates}
+\item{checkid}{Passed to \code{downhill_fit()}.}
 
-\item{verbose}{If TRUE, return the list of extra output from \code{downhill_fit}}
+\item{verbose}{Passed to \code{downhill_fit()}.}
 
-\item{maxorder}{Maximum order of models to be included}
+\item{maxorder}{Maximum interaction order considered.}
 }
 \value{
-Point estimates of total population sizes from each bootstrap sample.
+If \code{verbose = FALSE}, a numeric vector of bootstrap population
+estimates. If \code{verbose = TRUE}, the detailed results returned by
+\code{downhill_fit()} for each replication.
 }
 \description{
-Construct bootstrap replications and use the downhill fit method to obtain point estimates of total population sizes from each bootstrap sample.
+Generates multinomial bootstrap samples and applies \code{downhill_fit()}
+to each one.
 }
 \references{
 Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 Bootstrapping Multiple Systems Estimates to Account for Model Selection
-\emph{Statistics and Computing}, \strong{34(44)},
-Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+\emph{Statistics and Computing}, \strong{34}, 44.
+\href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 }
 \keyword{internal}

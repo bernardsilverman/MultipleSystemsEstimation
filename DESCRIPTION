@@ -1,6 +1,6 @@
 Package: MultipleSystemsEstimation
 Title: Methods for Multiple Systems Estimation
-Version: 1.2.0
+Version: 1.0.0
 Authors@R: c(
     person(
   given = c("Bernard", "W."),
@@ -33,3 +33,8 @@ Config/testthat/edition: 3
 NeedsCompilation: no
 Config/roxygen2/version: 8.1.0
 RoxygenNote: 7.2.3
+Packaged: 2026-08-24 10:02:32 UTC; berna
+Author: Bernard W. Silverman [aut, cre],
+  Lax Chan [ctb],
+  Kyle Vincent [ctb]
+Maintainer: Bernard W. Silverman <bernard.silverman@stats.ox.ac.uk>

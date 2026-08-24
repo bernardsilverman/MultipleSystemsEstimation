@@ -1,7 +1,7 @@
-# Find neighbouring hierarchical models
+# Find the neighbours of a hierarchical model
 
-Given a hierarchical model, find models obtained either by adding one
-admissible term or by removing one generator while preserving hierarchy.
+Given a hierarchical model, finds its outer neighbours, its inner
+neighbours, or both.
 
 ## Usage
 
@@ -48,18 +48,22 @@ models.
 
 ## Details
 
-Outer neighbours are obtained by adding a term for which all immediate
-parents are already present. Inner neighbours are obtained by removing
-one of the generators of the hierarchy. Main effects are not removed
-when `keepmaineffects = TRUE`.
+An outer neighbour is obtained by adding an interaction term all of
+whose subsets are already in the model.
+
+An inner neighbour is obtained by removing one of the generators
+defining the hierarchical model. Removing a generator removes only the
+defining interaction term itself, not the lower-order terms that it
+implies. For example, removing the generator `123` from `[123,34]`
+yields `[12,13,23,34]`, not `[34]`. Main effects are not removed when
+`keepmaineffects = TRUE`.
 
 ## References
 
 Silverman, B. W., Chan, L. and Vincent, K. (2024). Bootstrapping
 Multiple Systems Estimates to Account for Model Selection. *Statistics
-and Computing*, **34**(44).
-[doi:10.1007/s11222-023-10346-9](https://doi.org/10.1007/s11222-023-10346-9)
-.
+and Computing*, **34**, 44.
+[doi:10.1007/s11222-023-10346-9](https://doi.org/10.1007/s11222-023-10346-9).
 
 ## Examples
 

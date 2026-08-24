@@ -51,8 +51,8 @@ vary_ntop_bca(
 
 - maxorder:
 
-  The maximum order of interaction allowed in the hierarchical loglinear
-  models considered. Must be at least 2.
+  The maximum order of interaction allowed in the hierarchical
+  log-linear models considered. Must be at least 2.
 
 - ntopmax:
 
@@ -80,7 +80,8 @@ vary_ntop_bca(
 
 - alpha:
 
-  The probabilities at which BCa confidence limits are required.
+  The cumulative probability levels at which the endpoints of the BCa
+  confidence intervals are required.
 
 ## Value
 
@@ -95,8 +96,9 @@ A list with two components:
 
   A data frame with one row for each value of `ntop` considered. The
   first column gives `ntop`; the remaining columns give the requested
-  BCa confidence limits. If `ntopmax = Inf`, rows are returned for every
-  value of `ntop` up to the total number of candidate models.
+  BCa confidence interval endpoints. If `ntopmax = Inf`, rows are
+  returned for every value of `ntop` up to the total number of candidate
+  models.
 
 ## Details
 
@@ -136,8 +138,7 @@ without materially changing the resulting confidence intervals.
 - Silverman, B. W., Chan, L. and Vincent, K. (2024). Bootstrapping
   multiple systems estimates to account for model selection. *Statistics
   and Computing*, **34**, 44.
-  [doi:10.1007/s11222-023-10346-9](https://doi.org/10.1007/s11222-023-10346-9)
-  .
+  [doi:10.1007/s11222-023-10346-9](https://doi.org/10.1007/s11222-023-10346-9).
 
 - Efron, B. and Tibshirani, R. (1986). Bootstrap methods for standard
   errors, confidence intervals, and other measures of statistical

@@ -4,9 +4,9 @@
 #' a specified hierarchical log-linear model.
 #'
 #' Optional bootstrap and jackknife calculations provide BCa confidence
-#' limits while fitting the same fixed model to every resampled data set.
+#' intervals while fitting the same fixed model to every resampled data set.
 #'
-#' @param zdat A capture-history data matrix with \eqn{t+1} columns. The first
+#' @param zdat A capture history data matrix with \eqn{t+1} columns. The first
 #' \eqn{t} columns correspond to the capture lists and contain zeros and ones
 #' defining the observed capture histories. The final column contains the
 #' number of cases having each capture history. Capture histories not
@@ -26,22 +26,21 @@
 #' @param iseed Integer seed used to initialise the random-number generator
 #' when \code{nboot > 0}. The default is 1234.
 #'
-#' @param alpha Numeric vector of cumulative probability levels at which BCa
-#' confidence limits are to be calculated. This argument is used only when
+#' @param alpha Numeric vector of cumulative probability levels at which the
+#' endpoints of the BCa confidence intervals are to be calculated. This
+#' argument is used only when
 #' \code{nboot > 0}. The default is
 #' \code{c(0.025, 0.1, 0.9, 0.975)}.
 #'
-#' @param checkid Logical value indicating whether the identifiability and
-#' existence conditions should be checked for the original data and for each
-#' bootstrap and jackknife data set. The default is \code{TRUE}.
-#'
 #' @details
 #' The specified hierarchical model is fitted to the observed data.
+#' Parameter identifiability and existence of the extended MLE are checked
+#' for the original data and for every bootstrap and jackknife data set.
 #' Parameters whose extended-MLE values are minus infinity are handled by
 #' the fitting routine.
 #'
 #' If \code{nboot > 0}, multinomial bootstrap samples are generated from the
-#' observed capture-history counts. The same fixed hierarchical model is
+#' observed capture history counts. The same fixed hierarchical model is
 #' fitted to every bootstrap sample. Unlike
 #' \code{\link{estimate_population_stepwise}}, there is no model-selection
 #' step within the bootstrap replications.
@@ -51,7 +50,7 @@
 #' sample, the routine stops with an error.
 #'
 #' A delete-one jackknife calculation is also carried out to estimate the
-#' acceleration parameter required for the BCa confidence limits. If the
+#' acceleration parameter required for the BCa confidence intervals. If the
 #' fixed model cannot be fitted after a positive-count deletion, the routine
 #' stops with an informative error.
 #'
@@ -76,7 +75,8 @@
 #'   \item{\code{ahat}}{The estimated BCa acceleration parameter. This is
 #'   \code{NULL} when \code{nboot = 0}.}
 #'
-#'   \item{\code{BCaquantiles}}{The BCa confidence limits at the cumulative
+#'   \item{\code{BCaquantiles}}{The endpoints of the BCa confidence intervals
+#'   at the cumulative
 #'   probability levels specified by \code{alpha}. This is \code{NULL} when
 #'   \code{nboot = 0}.}
 #' }
@@ -117,8 +117,7 @@ estimate_population_fixed <- function(
     model = NULL,
     nboot = 0,
     iseed = 1234,
-    alpha = c(0.025, 0.1, 0.9, 0.975),
-    checkid = TRUE
+    alpha = c(0.025, 0.1, 0.9, 0.975)
 ) {
   if (length(nboot) != 1L ||
       is.na(nboot) ||
@@ -142,13 +141,16 @@ estimate_population_fixed <- function(
   MSEfit <- fit_hier_model(
     xdatin = ing_dat,
     hiermod = model,
-    checkid = checkid
+    checkid = TRUE
   )
 
   popest <- unname(MSEfit$abundance)
   if (!is.finite(popest)) {
     stop(
-      "The specified fixed hierarchical model could not be fitted to the original data.",
+      paste0(
+        "No finite population-size estimate exists for the original data ",
+        "under the specified fixed hierarchical model."
+      ),
       call. = FALSE
     )
   }
@@ -190,7 +192,7 @@ estimate_population_fixed <- function(
     bootfit <- fit_hier_model(
       xdatin = ingest_data(zdatboot),
       hiermod = model,
-      checkid = checkid
+      checkid = TRUE
     )
 
     bootreps[j] <- bootfit$abundance
@@ -202,7 +204,10 @@ estimate_population_fixed <- function(
 
   if (!any(usable_bootreps)) {
     stop(
-      "The fixed hierarchical model could not be fitted to any bootstrap sample.",
+      paste0(
+        "No bootstrap replication produced a finite population-size ",
+        "estimate under the specified fixed hierarchical model."
+      ),
       call. = FALSE
     )
   }
@@ -210,9 +215,10 @@ estimate_population_fixed <- function(
   if (nfailed > 0L) {
     warning(
       nfailed,
-      " bootstrap replication",
-      if (nfailed != 1L) "s were" else " was",
-      " omitted because the fixed hierarchical model could not be fitted.",
+      " of ",
+      nboot,
+      " bootstrap replications did not produce a finite population-size ",
+      "estimate under the specified fixed hierarchical model and were omitted.",
       call. = FALSE
     )
 
@@ -232,16 +238,21 @@ estimate_population_fixed <- function(
       jackfit <- fit_hier_model(
         xdatin = ingest_data(zd1),
         hiermod = model,
-        checkid = checkid
+        checkid = TRUE
       )
 
       if (!is.finite(jackfit$abundance)) {
+        capture_history <- paste0(zdat[j, -n2], collapse = "")
+
         stop(
           paste0(
-            "The fixed hierarchical model could not be fitted after deleting ",
-            "one individual from capture-history row ",
+            "BCa confidence intervals cannot be calculated: after deleting one ",
+            "individual from capture history ",
+            capture_history,
+            " (row ",
             j,
-            "."
+            "), no finite population-size estimate exists under the specified ",
+            "fixed hierarchical model."
           ),
           call. = FALSE
         )

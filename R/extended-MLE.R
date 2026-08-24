@@ -5,7 +5,7 @@
 #' estimate and the rank condition required for identifiable model
 #' parameters.
 #'
-#' @param data Capture-history data in the standard package format, with one
+#' @param data Capture history data in the standard package format, with one
 #'   indicator column for each list followed by a count column.
 #' @param model A character string specifying a hierarchical model, such as
 #'   \code{"[12,13,23]"}.
@@ -43,7 +43,7 @@
 #' Challenges When There Are Nonoverlapping Lists.
 #' \emph{Journal of the American Statistical Association},
 #' \strong{116}(535), 1297--1306.
-#' \doi{10.1080/01621459.2019.1708748}.
+#' \href{https://doi.org/10.1080/01621459.2019.1708748}{doi:10.1080/01621459.2019.1708748}.
 #'
 #' @examples
 #' data(Artificial_3)
@@ -129,22 +129,27 @@ check_extended_MLE <- function(data, model) {
   (zlp$objval == 0) + 2L * (rankdef > 0)
 }
 
-#' Find unique patterns in matrix columns
+#' Find unique support patterns
 #'
-#' Given a matrix (for example of bootstrap replications) construct the matrix of unique patterns of non-zeroes,
-#' together with a vector of pointers back to that matrix.
+#' Finds the distinct zero and nonzero patterns among the columns of a matrix,
+#' together with indices mapping the original columns to those patterns.
 #'
-#' @param x a matrix
-#' @returns The original data \code{x} with the additional components {\describe{
-#'   \item{yuniq}{matrix of unique patterns of non-zeroes/zeroes in the columns of \code{x}}
-#'   \item{pointers}{vector of length dim(x)[2] giving the column of yuniq corresponding to each column of x}
-#' }}
+#' @param x Numeric matrix whose columns are data vectors, typically bootstrap
+#' replications.
+#' @return A list with components:
+#' \describe{
+#'   \item{\code{x}}{The original matrix.}
+#'   \item{\code{yuniq}}{A binary matrix containing the distinct support
+#'   patterns as columns.}
+#'   \item{\code{pointers}}{An integer vector mapping each column of \code{x}
+#'   to the corresponding column of \code{yuniq}.}
+#' }
 #'
-#'@references
+#' @references
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
-#' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+#' \emph{Statistics and Computing}, \strong{34}, 44,
+#' \href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 #'
 #' @keywords internal
 find_unique_patterns = function(x) {
@@ -164,26 +169,32 @@ find_unique_patterns = function(x) {
   return(zreturn)
 }
 
-#' Carry out the Fienberg-Rinaldo procedure on an array of data vectors and a vector of models
+#' Check extended-MLE conditions for multiple data vectors and models
 #'
-#' Suppose we have a collection of different data outcomes on the same set of capture histories and a vector of models.
-#' Typically the data outcomes will be bootstrap replications. This routine finds the unique support patterns among the data
-#' and hence economises the task of finding which model/data combinations satisfy the Fienberg-Rinaldo condition
+#' Suppose we have a vector of models and a collection of different data
+#' outcomes on the same set of capture histories. Typically, these will be
+#' bootstrap replications. This routine carries out the extended-MLE checks
+#' for every combination of data outcome and model. It economises the task of
+#' determining which model/data combinations satisfy both the identifiability
+#' and Fienberg--Rinaldo conditions by first finding the unique support
+#' patterns among the data outcomes.
 #'
-#' @param x a matrix of data observations for a common capture matrix
-#' @param xcap the incidence matrix of the capture histories corresponding to the rows of x
-#' @param zmods a vector of models
+#' @param x Numeric matrix whose columns contain count vectors for a common
+#' set of capture histories.
+#' @param xcap Binary matrix defining the capture histories corresponding to
+#' the rows of \code{x}.
+#' @param zmods Character vector of hierarchical-model strings.
 #'
-#' @returns a matrix with rows corresponding to the models and columns to the columns of x, with elements
-#' taking the value TRUE if the FR linear program for a vector of 0s and 1s with the same zero pattern as the x data yields a strictly
-#' positive value
+#' @return A logical matrix with models in rows and data vectors in columns.
+#' An element is \code{TRUE} when both extended-MLE conditions are satisfied
+#' for that model and support pattern.
 #'
 #'
-#'@references
+#' @references
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
-#' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+#' \emph{Statistics and Computing}, \strong{34}, 44,
+#' \href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 #'
 #'
 #' @keywords internal

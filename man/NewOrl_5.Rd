@@ -3,18 +3,18 @@
 \docType{data}
 \name{NewOrl_5}
 \alias{NewOrl_5}
-\title{New Orleans data five list version}
+\title{Five-list version of the Greater New Orleans data}
 \format{
-An object of class \code{data.frame} with 14 rows and 6 columns.
+A data frame with 14 rows and 6 columns. Columns \code{A},
+\code{BEFG}, \code{C}, \code{D} and \code{H} are binary list-membership
+indicators. Column \code{n} gives the number of cases having each
+observed capture history.
 }
 \usage{
 NewOrl_5
 }
 \description{
-New Orleans data consolidated into five lists
-}
-\details{
-This reduces the New Orleans data \code{\link{NewOrl}} into five lists, constructed by combining
- the four smallest lists B, E, F and G into a single list.
+A five-list version of \code{\link{NewOrl}}, constructed by combining
+the four smallest lists B, E, F and G into a single list, \code{BEFG}.
 }
 \keyword{datasets}

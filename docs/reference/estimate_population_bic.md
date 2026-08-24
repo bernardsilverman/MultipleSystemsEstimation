@@ -1,7 +1,16 @@
 # Population estimation using BIC model selection
 
-Constructs BCa confidence limits for population size while allowing for
-uncertainty arising from BIC-based model selection.
+Selects a model using the BIC criterion, accounting for sparse data and
+checking parameter identifiability and existence of the extended MLE.
+Hierarchical log-linear models are fitted to the observed data and
+ordered by increasing BIC. The point estimate is based on the model with
+the lowest BIC value.
+
+If requested, constructs bootstrap BCa confidence intervals for
+population size that allow for uncertainty arising from BIC-based model
+selection. To reduce the computational load to feasible levels, an
+approximation is used in which the bootstrap and jackknife calculations
+are restricted to a specified number of the best-ranked models.
 
 ## Usage
 
@@ -20,7 +29,7 @@ estimate_population_bic(
 
 - zdat:
 
-  A capture-history data matrix with \\t+1\\ columns. The first \\t\\
+  A capture history data matrix with \\t+1\\ columns. The first \\t\\
   columns correspond to the capture lists and contain zeros and ones
   defining the observed capture histories. The final column contains the
   number of cases having each capture history. Capture histories not
@@ -40,8 +49,8 @@ estimate_population_bic(
 
 - alpha:
 
-  Numeric vector of cumulative probability levels at which the BCa
-  confidence limits are to be evaluated. The default is
+  Numeric vector of cumulative probability levels at which the endpoints
+  of the BCa confidence intervals are to be evaluated. The default is
   `c(0.025, 0.1, 0.9, 0.975)`.
 
 - maxorder:
@@ -58,7 +67,8 @@ estimate_population_bic(
   `nboot > 0`: all available models for two or three lists, 20 models
   for four lists, and 100 models for five or six lists. This argument is
   irrelevant when `nboot = 0`, because no model subsetting is then
-  performed.
+  performed. If `ntopmodels` is greater than the total number of
+  available models, then all models are considered.
 
 ## Value
 
@@ -80,47 +90,34 @@ A list with components:
 - `bic_results`:
 
   The complete result of the original-data BIC enumeration, including
-  all models allowed by `maxorder`, ordered by BIC.
+  all eligible models permitted by `maxorder`, ordered by BIC.
 
 - `BCaquantiles`:
 
-  A matrix of BCa confidence limits for nested sets of the retained
-  top-BIC models when `nboot > 0`, and `NULL` when `nboot = 0`.
+  A named numeric vector containing the endpoints of the BCa confidence
+  intervals at the cumulative probability levels specified by `alpha`
+  when `nboot > 0`, and `NULL` when `nboot = 0`. Model selection within
+  each bootstrap and jackknife replication is restricted to all models
+  retained through `ntopmodels`.
 
 When `nboot > 0`, the `BCaquantiles` component gives BCa inference based
-on repeated BIC model selection. This is a numeric matrix of BCa
-confidence limits. The columns correspond to the cumulative probability
-levels supplied in `alpha`. The retained models are ordered by
-increasing BIC for the original data. Row \\k\\ gives the confidence
-limits obtained when model selection within each bootstrap replication
-is restricted to the first \\k\\ models in this ordering. Thus, the
-first row uses only the best-BIC model, the second row allows selection
-between the best two models, and the final row allows selection among
-all retained models. The row name identifies the model added when moving
-from \\k-1\\ to \\k\\ candidate models.
+on repeated BIC model selection among all retained models. The names
+correspond to the cumulative probability levels supplied in `alpha`.
 
 ## Details
 
-The routine enumerates the available hierarchical log-linear models and
-ranks them by BIC. If bootstrap inference is requested, a specified
-number of the best-ranked models is retained for bootstrap and jackknife
-calculations, after which BCa confidence limits are evaluated for nested
-sets of top-BIC models.
-
-This routine implements the bootstrap procedure described by Silverman,
-Chan and Vincent (2024). Hierarchical log-linear models are fitted to
-the observed data and ordered by increasing BIC.
-
-If `nboot > 0`, multinomial bootstrap samples are generated and the BIC
-model-selection procedure is repeated for each bootstrap sample.
-Bootstrap model selection is then repeated within nested sets of the
-best-ranked models.
+If `nboot > 0`, the routine implements the bootstrap procedure described
+by Silverman, Chan and Vincent (2024). Multinomial bootstrap samples are
+generated and the BIC model-selection procedure is repeated for each
+bootstrap sample, restricting consideration to a set of models having
+the smallest BIC values for the original data.
 
 With the default settings, all available models are retained for
 bootstrap inference for two- and three-list data. For four-list data,
 the 20 models with the smallest BIC values are retained, and for five-
 and six-list data the 100 models with the smallest BIC values are
-retained.
+retained. Focusing attention on a subset of all possible models enables
+considerable computational economies.
 
 The possible hierarchical models are drawn from an exhaustive model
 catalogue within the package. This contains all hierarchical models for
@@ -142,7 +139,7 @@ of bootstrap replications should be used for substantive inference.
 Silverman, B. W., Chan, L. and Vincent, K. (2024). Bootstrapping
 Multiple Systems Estimates to Account for Model Selection. *Statistics
 and Computing*, **34**, 44. Available from
-[\doi{10.1007/s11222-023-10346-9}](NA).
+[doi:10.1007/s11222-023-10346-9](https://doi.org/10.1007/s11222-023-10346-9).
 
 ## Examples
 

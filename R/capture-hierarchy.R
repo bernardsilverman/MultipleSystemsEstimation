@@ -1,17 +1,17 @@
 #' Decode capture history
 #'
-#' Given a capture history as a number and the number of lists, decode it into a logical vector giving
-#' presence or absence in the capture history.
+#' Converts an encoded capture history to a logical vector indicating
+#' membership of each list.
 #'
-#' @param k The capture history to be decoded
-#' @param nlists The number of lists
-#' @return A logical vector of length \code{nlists} giving presence or absence in the capture history
+#' @param k Integer encoding of a capture history.
+#' @param nlists Number of lists.
+#' @return A logical vector of length \code{nlists}.
 #'
-#'@references
+#' @references
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
-#' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+#' \emph{Statistics and Computing}, \strong{34}, 44,
+#' \href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 #'
 #' @keywords internal
 decode_capture = function(k, nlists) {
@@ -21,15 +21,16 @@ decode_capture = function(k, nlists) {
 
 #' Encode capture history
 #'
-#' Given a 0/1 capture history \eqn{S}, encode it as
+#' Encodes a binary capture history as the integer
 #' \deqn{1 + \sum_{i \in S} 2^{i-1},}
-#' where \eqn{S} is the set of list numbers. Thus 1 represents the
-#' intercept (the empty set), 2 and 3 represent the single list capture histories
-#' 1 and 2, and 4 represents the two-list history 12.
+#' where \eqn{S} is the set of lists containing the case. Thus 1 represents
+#' the intercept or empty set, 2 and 3 represent lists 1 and 2 respectively,
+#' and 4 represents the two-list history 12.
 #'
-#' @param z The capture history to be encoded, as a logical vector or a vector of 0s and 1s
+#' @param z Logical vector, or vector of zeros and ones, defining a capture
+#' history.
 #'
-#' @return The capture history encoded as a number that corresponds to the row number of the capture history data set
+#' @return The integer encoding of the capture history.
 #'
 #' @keywords internal
 encode_capture = function(z) {
@@ -38,13 +39,12 @@ encode_capture = function(z) {
   return(k)
 }
 
-#' Find the "parents" of a given capture history
+#' Find the parents of an encoded capture history
 #'
-#' Given any encoded capture history,
-#' find the encoded capture histories which are obtained by leaving out just one list in turn
+#' Finds the histories obtained by removing one included list in turn.
 #'
-#' @param k An encoded capture history
-#' @return a vector giving the encoded versions of the parents
+#' @param k An encoded capture history.
+#' @return A numeric vector containing its encoded parents.
 #'
 #'
 #' @keywords internal
@@ -59,20 +59,19 @@ parent_captures <- function(k) {
   k - 2^(which(z) - 1L)
 }
 
-#' Find the "children" of a given capture history
+#' Find the children of an encoded capture history
 #'
-#' Given any encoded capture history and the number of lists,
-#' find the encoded capture histories which are obtained by adding one more list in turn
+#' Finds the histories obtained by adding one previously absent list in turn.
 #'
-#' @param k An encoded capture history
-#' @param nlists The total number of lists
-#' @return a vector giving the encoded versions of the children
+#' @param k An encoded capture history.
+#' @param nlists Total number of lists.
+#' @return A numeric vector containing its encoded children.
 #'
-#'@references
+#' @references
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
-#' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+#' \emph{Statistics and Computing}, \strong{34}, 44,
+#' \href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 #'
 #' @keywords internal
 child_captures = function(k, nlists) {
@@ -81,19 +80,20 @@ child_captures = function(k, nlists) {
   return(k + kd)
 }
 
-#' Find the "ancestors" of a given capture history
+#' Find ancestors of encoded capture histories
 #'
-#' Given any encoded capture history, find all the encoded capture histories that are included in the original capture history
+#' Finds every encoded history contained in one or more supplied histories,
+#' including the supplied histories themselves.
 #'
-#' @param k An encoded capture history
+#' @param k Numeric vector of encoded capture histories.
 #'
-#' @return a vector giving the encoded versions of the ancestors
+#' @return A sorted numeric vector containing the encoded ancestors.
 #'
-#'@references
+#' @references
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
-#' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+#' \emph{Statistics and Computing}, \strong{34}, 44,
+#' \href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 #'
 #'
 #' @keywords internal
@@ -117,20 +117,20 @@ ancestors <- function(k) {
   sort(result)
 }
 
-#' Find the "descendants" of a given capture history
+#' Find descendants of an encoded capture history
 #'
-#' Given any encoded capture history, find all the encoded capture histories that include the original capture history and any other lists
+#' Finds all encoded histories that contain the supplied history.
 #'
-#' @param k An encoded capture history
-#' @param nlists The total number of lists
-#' @param omitk Determine whether the original capture history is included as a descendant of itself. If \code{omitk=TRUE} it is not.
-#' @return a vector giving the encoded versions of the descendants
+#' @param k An encoded capture history.
+#' @param nlists Total number of lists.
+#' @param omitk If \code{TRUE}, omit \code{k} itself from the result.
+#' @return A sorted numeric vector containing the encoded descendants.
 #'
-#'@references
+#' @references
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
-#' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+#' \emph{Statistics and Computing}, \strong{34}, 44,
+#' \href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 #'
 #'
 #' @keywords internal
@@ -148,23 +148,25 @@ descendants = function(k,nlists, omitk = FALSE) {
   return(sort(kd1))
 }
 
-#' Find the vector of captures corresponding to a given hierarchical model
+#' Convert a hierarchy string to encoded parameters
 #'
-#' Given a hierarchical model, find the vector of all the corresponding encoded captures
+#' Converts a hierarchical-model specification to its encoded generators or
+#' to the complete hierarchical closure.
 #'
-#' @param modelstr A given hierarchical model
-#' @param findancestors If TRUE then find all the captures.  If FALSE then just return the encoded defining histories of the hierarchy
+#' @param modelstr Character string specifying a hierarchical model.
+#' @param findancestors If \code{TRUE}, return the complete hierarchical
+#' closure. If \code{FALSE}, return only the encoded generators.
 #'
-#' @return The encoded capture histories requested
+#' @return A numeric vector containing the requested encoded parameters.
 #'
-#'@references
+#' @references
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
-#' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+#' \emph{Statistics and Computing}, \strong{34}, 44,
+#' \href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 #'
 #'
-#'@keywords internal
+#' @keywords internal
 convert_from_hierarchy = function(modelstr, findancestors=TRUE) {
   # first decode to numerical vectors of root capture histories to obtain a list of vectors
   #  each of which gives the captures in the capture history of the particular root
@@ -186,17 +188,17 @@ convert_from_hierarchy = function(modelstr, findancestors=TRUE) {
 #' The function reports an error rather than silently completing a
 #' nonhierarchical parameter set.
 #'
-#' @param kcap A numeric vector of encoded captures
+#' @param kcap Numeric vector of encoded parameters.
 #'
 #' @return A hierarchical representation of the vector of encoded captures.
 #'
-#'@references
+#' @references
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
-#' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+#' \emph{Statistics and Computing}, \strong{34}, 44,
+#' \href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 #'
-#'@keywords internal
+#' @keywords internal
 convert_to_hierarchy <- function(kcap) {
   kcap <- sort(unique(as.integer(kcap)))
 
@@ -254,24 +256,23 @@ convert_to_hierarchy <- function(kcap) {
   paste0("[", paste(rootdecode, collapse = ","), "]")
 }
 
-#' Given a vector of encoded captures, find those which are not in the vector but all of whose parents are
+#' Find boundary terms of a hierarchical model
 #'
-#' Call the resulting set the "boundary".  Supposing that the current set of captures is a hierarchical model,
-#' that property
-#' will be preserved if a capture in the boundary is added to it.
-#' The routine is called internally by \code{find_neighbour_hierarchies}.
+#' Finds encoded terms that are absent from the current hierarchical model but
+#' whose immediate parents are all present. Adding any returned term therefore
+#' preserves hierarchy.
 #'
+#' @param kcap Numeric vector containing the complete encoded parameter set of
+#' a hierarchical model.
+#' @param nlists Total number of lists.
 #'
-#' @param kcap An encoded capture history that corresponds to the row number of the capture history data set
-#' @param nlists The total number of lists
+#' @return A numeric vector containing the admissible encoded boundary terms.
 #'
-#' @return a vector giving the encoded versions of the descendants
-#'
-#'@references
+#' @references
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
-#' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+#' \emph{Statistics and Computing}, \strong{34}, 44,
+#' \href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 #'
 #'
 #' @keywords internal
@@ -294,14 +295,21 @@ boundary_captures = function(kcap, nlists) {
   return(kboundary)
 }
 
-#' Find neighbouring hierarchical models
+#' Find the neighbours of a hierarchical model
 #'
-#' Given a hierarchical model, find models obtained either by adding one
-#' admissible term or by removing one generator while preserving hierarchy.
+#' @description
+#' Given a hierarchical model, finds its outer neighbours, its inner
+#' neighbours, or both.
 #'
-#' Outer neighbours are obtained by adding a term for which all immediate
-#' parents are already present. Inner neighbours are obtained by removing one
-#' of the generators of the hierarchy. Main effects are not removed when
+#' @details
+#' An outer neighbour is obtained by adding an interaction term all of whose
+#' subsets are already in the model.
+#'
+#' An inner neighbour is obtained by removing one of the generators defining
+#' the hierarchical model. Removing a generator removes only the defining
+#' interaction term itself, not the lower-order terms that it implies. For
+#' example, removing the generator \code{123} from \code{[123,34]} yields
+#' \code{[12,13,23,34]}, not \code{[34]}. Main effects are not removed when
 #' \code{keepmaineffects = TRUE}.
 #'
 #' @param modelstr A model string written in hierarchical form.
@@ -322,8 +330,8 @@ boundary_captures = function(kcap, nlists) {
 #' @references
 #' Silverman, B. W., Chan, L. and Vincent, K. (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection.
-#' \emph{Statistics and Computing}, \strong{34}(44).
-#' \doi{10.1007/s11222-023-10346-9}.
+#' \emph{Statistics and Computing}, \strong{34}, 44.
+#' \href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 #'
 #' @examples
 #' modelstr <- "[12,23]"
@@ -427,16 +435,17 @@ find_neighbour_hierarchies <- function(
 #' This is the master design matrix which maps parameters to observations.
 #' Rows correspond to observations and columns to parameters.
 #'
-#'@param nlists The number of lists
+#' @param nlists Number of lists.
 #'
-#'@return A matrix whose  \eqn{(i,j)} element is 1 if the expected log of observation \eqn{i} depends on parameter \eqn{j},
-#' in other words if \eqn{j} is an ancestor of \eqn{i}.
+#' @return A binary matrix whose \eqn{(i,j)} element is 1 when the expected
+#' log count for history \eqn{i} depends on parameter \eqn{j}; equivalently,
+#' when \eqn{j} is an ancestor of \eqn{i}.
 #'
-#'@references
+#' @references
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
-#' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+#' \emph{Statistics and Computing}, \strong{34}, 44,
+#' \href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 #'
 #'
 #' @keywords internal

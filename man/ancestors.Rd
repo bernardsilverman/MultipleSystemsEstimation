@@ -2,23 +2,24 @@
 % Please edit documentation in R/capture-hierarchy.R
 \name{ancestors}
 \alias{ancestors}
-\title{Find the "ancestors" of a given capture history}
+\title{Find ancestors of encoded capture histories}
 \usage{
 ancestors(k)
 }
 \arguments{
-\item{k}{An encoded capture history}
+\item{k}{Numeric vector of encoded capture histories.}
 }
 \value{
-a vector giving the encoded versions of the ancestors
+A sorted numeric vector containing the encoded ancestors.
 }
 \description{
-Given any encoded capture history, find all the encoded capture histories that are included in the original capture history
+Finds every encoded history contained in one or more supplied histories,
+including the supplied histories themselves.
 }
 \references{
 Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 Bootstrapping Multiple Systems Estimates to Account for Model Selection
-\emph{Statistics and Computing}, \strong{34(44)},
-Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+\emph{Statistics and Computing}, \strong{34}, 44,
+\href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 }
 \keyword{internal}

@@ -1,6 +1,7 @@
 # Preliminary processing of a data matrix
 
-Perform various preprocessing tasks on the data
+Converts capture history data to the encoded representation used by the
+model-fitting and extended-MLE routines.
 
 ## Usage
 
@@ -12,47 +13,46 @@ ingest_data(xdat)
 
 - xdat:
 
-  Data matrix of the usual kind
+  Capture history data in the standard package format.
 
 ## Value
 
-A list with the following elements
+A list with components:
 
-- nobs:
+- `nobs`:
 
-  Numbers of observations indexed by encoded histories
+  Counts indexed by encoded capture history.
 
-- nstar:
+- `nstar`:
 
-  For each capture history, total number of observations for that
-  capture history and all its descendants
+  For each encoded history, the total count for that history and all its
+  descendants.
 
-- nlists:
+- `nlists`:
 
-  Total number of lists
+  Number of capture lists.
 
-- listnames:
+- `listnames`:
 
-  Names of the lists, constructed to be A, B, ... if necessary
+  List names, constructed as A, B, and so on if necessary.
 
-- data:
+- `data`:
 
-  The input data matrix
+  The input data.
 
-- notestimable:
+- `notestimable`:
 
-  A vector indicating which parameters are not estimable, because they
-  are strict descendants of parameters which would be already estimated
-  to be \\-\infty\\ if they are included in the model
+  Logical vector identifying parameters that are strict descendants of
+  parameters having zero sufficient statistic.
 
-- masterdesign:
+- `masterdesign`:
 
-  The inclusion matrix as constructed by
-  [`make_master_design`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/make_master_design.md)
+  The inclusion matrix constructed by
+  [`make_master_design()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/make_master_design.md).
 
 ## References
 
 Silverman, B. W., Chan, L. and Vincent, K., (2024). Bootstrapping
-Multiple Systems Estimates to Account for Model Selection *Statistics
-and Computing*, **34(44)**, Available from
-[\doi{10.1007/s11222-023-10346-9}](NA).
+Multiple Systems Estimates to Account for Model Selection. *Statistics
+and Computing*, **34**, 44.
+[doi:10.1007/s11222-023-10346-9](https://doi.org/10.1007/s11222-023-10346-9).

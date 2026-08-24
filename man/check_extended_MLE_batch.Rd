@@ -2,31 +2,37 @@
 % Please edit documentation in R/extended-MLE.R
 \name{check_extended_MLE_batch}
 \alias{check_extended_MLE_batch}
-\title{Carry out the Fienberg-Rinaldo procedure on an array of data vectors and a vector of models}
+\title{Check extended-MLE conditions for multiple data vectors and models}
 \usage{
 check_extended_MLE_batch(x, xcap, zmods)
 }
 \arguments{
-\item{x}{a matrix of data observations for a common capture matrix}
+\item{x}{Numeric matrix whose columns contain count vectors for a common
+set of capture histories.}
 
-\item{xcap}{the incidence matrix of the capture histories corresponding to the rows of x}
+\item{xcap}{Binary matrix defining the capture histories corresponding to
+the rows of \code{x}.}
 
-\item{zmods}{a vector of models}
+\item{zmods}{Character vector of hierarchical-model strings.}
 }
 \value{
-a matrix with rows corresponding to the models and columns to the columns of x, with elements
-taking the value TRUE if the FR linear program for a vector of 0s and 1s with the same zero pattern as the x data yields a strictly
-positive value
+A logical matrix with models in rows and data vectors in columns.
+An element is \code{TRUE} when both extended-MLE conditions are satisfied
+for that model and support pattern.
 }
 \description{
-Suppose we have a collection of different data outcomes on the same set of capture histories and a vector of models.
-Typically the data outcomes will be bootstrap replications. This routine finds the unique support patterns among the data
-and hence economises the task of finding which model/data combinations satisfy the Fienberg-Rinaldo condition
+Suppose we have a vector of models and a collection of different data
+outcomes on the same set of capture histories. Typically, these will be
+bootstrap replications. This routine carries out the extended-MLE checks
+for every combination of data outcome and model. It economises the task of
+determining which model/data combinations satisfy both the identifiability
+and Fienberg--Rinaldo conditions by first finding the unique support
+patterns among the data outcomes.
 }
 \references{
 Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 Bootstrapping Multiple Systems Estimates to Account for Model Selection
-\emph{Statistics and Computing}, \strong{34(44)},
-Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+\emph{Statistics and Computing}, \strong{34}, 44,
+\href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 }
 \keyword{internal}

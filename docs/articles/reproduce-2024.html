@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">MultipleSystemsEstimation</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -82,124 +82,28 @@ multiple systems estimates to account for model selection</em>,
 <p>There are two intended ways to use the vignette. In the version built
 with the package, <code>full_reproduction</code> is <code>FALSE</code>.
 This uses <code>nboot = 10</code> and restricts the more expensive
-five-list finite searches to modest values of <code>ntop</code>: 20 for
-the ordinary ranking and 10 for the degree-2 ranking. These settings are
+five-list finite searches to <code>ntop = 20</code>. These settings are
 enough to exercise the current code, produce the figures and tables in
 reduced-precision form, and keep an ordinary package or CRAN vignette
 build reasonably quick. They are not intended to reproduce the published
 Monte Carlo values exactly.</p>
-<p>For a closer numerical reproduction of the paper, change</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">full_reproduction</span> <span class="op">&lt;-</span> <span class="cn">TRUE</span></span></code></pre></div>
-<p>in the setup chunk. This uses <code>nboot = 1000</code>, the value
-used for the paper, and extends the finite five-list calculations to
-<code>ntop = 60</code>. Calculations requiring an exhaustive search over
-all five-list candidate models remain deliberately excluded from an
-ordinary vignette build; where those results are required, the published
-values are given and the code needed to recompute them is shown with
-<code>eval = FALSE</code>. Such exhaustive calculations can take
-substantially longer.</p>
+<p>For a closer numerical reproduction of the paper, change
+<code>full_reproduction &lt;- FALSE</code> to
+<code>full_reproduction &lt;- TRUE</code> near the beginning of
+<code>vignettes/reproduce-2024.Rmd</code>, and rebuild the vignette.
+This uses <code>nboot = 1000</code>, the value used for the paper, and
+extends the finite five-list calculations to <code>ntop = 60</code>.
+Calculations requiring an exhaustive search over all five-list candidate
+models remain deliberately excluded from an ordinary vignette build;
+where those results are required, the published values are given and the
+code needed to recompute them is shown with <code>eval = FALSE</code>.
+Such exhaustive calculations can take substantially longer.</p>
 <p>Table 1 of the paper is not reproduced. It illustrates the issue of
 existence of the extended maximum likelihood estimate rather than
 providing a numerical application. The package function
 <code><a href="../reference/check_extended_MLE.html">check_extended_MLE()</a></code> provides the corresponding
 diagnostic.</p>
-</div>
-<div class="section level2">
-<h2 id="helper-functions">Helper functions<a class="anchor" aria-label="anchor" href="#helper-functions"></a>
-</h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">pick_ntop</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">values</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">out</span> <span class="op">&lt;-</span> <span class="va">x</span><span class="op">$</span><span class="va">inference</span><span class="op">[</span><span class="va">x</span><span class="op">$</span><span class="va">inference</span><span class="op">$</span><span class="va">ntop</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">values</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
-<span>  <span class="va">out</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">values</span>, <span class="va">out</span><span class="op">$</span><span class="va">ntop</span><span class="op">)</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
-<span><span class="op">}</span></span>
-<span></span>
-<span><span class="va">ci_text</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">lo</span>, <span class="va">hi</span>, <span class="va">rounding</span> <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">lo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">lo</span> <span class="op">/</span> <span class="va">rounding</span><span class="op">)</span> <span class="op">*</span> <span class="va">rounding</span></span>
-<span>  <span class="va">hi</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">hi</span> <span class="op">/</span> <span class="va">rounding</span><span class="op">)</span> <span class="op">*</span> <span class="va">rounding</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"["</span>, <span class="va">lo</span>, <span class="st">", "</span>, <span class="va">hi</span>, <span class="st">"]"</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span></span>
-<span><span class="va">finite_at</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">max_ntop</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">5</span>, <span class="fl">10</span>, <span class="fl">20</span>, <span class="fl">50</span>, <span class="fl">60</span><span class="op">)</span></span>
-<span>  <span class="va">z</span><span class="op">[</span><span class="va">z</span> <span class="op">&lt;=</span> <span class="va">max_ntop</span><span class="op">]</span></span>
-<span><span class="op">}</span></span>
-<span></span>
-<span><span class="va">plot_ntop_set</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">at</span>, <span class="va">col</span>, <span class="va">pch</span>, <span class="va">lwd</span> <span class="op">=</span> <span class="fl">1.6</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">z</span> <span class="op">&lt;-</span> <span class="va">x</span><span class="op">[</span><span class="va">x</span><span class="op">$</span><span class="va">ntop</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">at</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
-<span>  <span class="va">z</span> <span class="op">&lt;-</span> <span class="va">z</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">at</span>, <span class="va">z</span><span class="op">$</span><span class="va">ntop</span><span class="op">)</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
-<span>  <span class="va">xx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">at</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">xx</span>, <span class="va">z</span><span class="op">[[</span><span class="st">"0.025"</span><span class="op">]</span><span class="op">]</span>, lty <span class="op">=</span> <span class="fl">1</span>, col <span class="op">=</span> <span class="va">col</span>, lwd <span class="op">=</span> <span class="va">lwd</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">xx</span>, <span class="va">z</span><span class="op">[[</span><span class="st">"0.975"</span><span class="op">]</span><span class="op">]</span>, lty <span class="op">=</span> <span class="fl">1</span>, col <span class="op">=</span> <span class="va">col</span>, lwd <span class="op">=</span> <span class="va">lwd</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">xx</span>, <span class="va">z</span><span class="op">[[</span><span class="st">"0.025"</span><span class="op">]</span><span class="op">]</span>, col <span class="op">=</span> <span class="va">col</span>, pch <span class="op">=</span> <span class="va">pch</span>, cex <span class="op">=</span> <span class="fl">0.75</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">xx</span>, <span class="va">z</span><span class="op">[[</span><span class="st">"0.975"</span><span class="op">]</span><span class="op">]</span>, col <span class="op">=</span> <span class="va">col</span>, pch <span class="op">=</span> <span class="va">pch</span>, cex <span class="op">=</span> <span class="fl">0.75</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"0.1"</span>, <span class="st">"0.9"</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">z</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">xx</span>, <span class="va">z</span><span class="op">[[</span><span class="st">"0.1"</span><span class="op">]</span><span class="op">]</span>, lty <span class="op">=</span> <span class="fl">2</span>, col <span class="op">=</span> <span class="va">col</span>, lwd <span class="op">=</span> <span class="va">lwd</span><span class="op">)</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">xx</span>, <span class="va">z</span><span class="op">[[</span><span class="st">"0.9"</span><span class="op">]</span><span class="op">]</span>, lty <span class="op">=</span> <span class="fl">2</span>, col <span class="op">=</span> <span class="va">col</span>, lwd <span class="op">=</span> <span class="va">lwd</span><span class="op">)</span></span>
-<span>  <span class="op">}</span></span>
-<span><span class="op">}</span></span>
-<span></span>
-<span><span class="va">plot_two_ntop_bands</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x2</span>, <span class="va">est2</span>, <span class="va">x4</span>, <span class="va">est4</span>, <span class="va">at</span>, <span class="va">main</span>,</span>
-<span>                                <span class="va">lwd2</span> <span class="op">=</span> <span class="fl">1.6</span>, <span class="va">lwd4</span> <span class="op">=</span> <span class="fl">1.6</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">z2</span> <span class="op">&lt;-</span> <span class="va">x2</span><span class="op">[</span><span class="va">x2</span><span class="op">$</span><span class="va">ntop</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">at</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
-<span>  <span class="va">z2</span> <span class="op">&lt;-</span> <span class="va">z2</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">at</span>, <span class="va">z2</span><span class="op">$</span><span class="va">ntop</span><span class="op">)</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
-<span></span>
-<span>  <span class="va">z4</span> <span class="op">&lt;-</span> <span class="va">x4</span><span class="op">[</span><span class="va">x4</span><span class="op">$</span><span class="va">ntop</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">at</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
-<span>  <span class="va">z4</span> <span class="op">&lt;-</span> <span class="va">z4</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">at</span>, <span class="va">z4</span><span class="op">$</span><span class="va">ntop</span><span class="op">)</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
-<span></span>
-<span>  <span class="va">ylim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span></span>
-<span>    <span class="va">z2</span><span class="op">[[</span><span class="st">"0.025"</span><span class="op">]</span><span class="op">]</span>, <span class="va">z2</span><span class="op">[[</span><span class="st">"0.975"</span><span class="op">]</span><span class="op">]</span>, <span class="va">est2</span>,</span>
-<span>    <span class="va">z4</span><span class="op">[[</span><span class="st">"0.025"</span><span class="op">]</span><span class="op">]</span>, <span class="va">z4</span><span class="op">[[</span><span class="st">"0.975"</span><span class="op">]</span><span class="op">]</span>, <span class="va">est4</span>,</span>
-<span>    finite <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span>  <span class="op">)</span></span>
-<span></span>
-<span>  <span class="va">xx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">at</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
-<span>    <span class="va">xx</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="cn">NA_real_</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">xx</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>    type <span class="op">=</span> <span class="st">"n"</span>,</span>
-<span>    xaxt <span class="op">=</span> <span class="st">"n"</span>,</span>
-<span>    xlab <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">n</span><span class="op">[</span><span class="va">top</span><span class="op">]</span><span class="op">)</span>,</span>
-<span>    ylab <span class="op">=</span> <span class="st">"Population estimate"</span>,</span>
-<span>    ylim <span class="op">=</span> <span class="va">ylim</span>,</span>
-<span>    main <span class="op">=</span> <span class="va">main</span>,</span>
-<span>    cex.main <span class="op">=</span> <span class="fl">1.05</span>,</span>
-<span>    cex.lab <span class="op">=</span> <span class="fl">1.05</span></span>
-<span>  <span class="op">)</span></span>
-<span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/axis.html" class="external-link">axis</a></span><span class="op">(</span><span class="fl">1</span>, at <span class="op">=</span> <span class="va">xx</span>, labels <span class="op">=</span> <span class="va">at</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/grid.html" class="external-link">grid</a></span><span class="op">(</span>nx <span class="op">=</span> <span class="cn">NA</span>, ny <span class="op">=</span> <span class="cn">NULL</span>, lty <span class="op">=</span> <span class="fl">3</span>, col <span class="op">=</span> <span class="st">"grey90"</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="fu">plot_ntop_set</span><span class="op">(</span><span class="va">x2</span>, <span class="va">at</span>, <span class="st">"steelblue4"</span>, <span class="fl">16</span>, lwd <span class="op">=</span> <span class="va">lwd2</span><span class="op">)</span></span>
-<span>  <span class="fu">plot_ntop_set</span><span class="op">(</span><span class="va">x4</span>, <span class="va">at</span>, <span class="st">"darkorange3"</span>, <span class="fl">17</span>, lwd <span class="op">=</span> <span class="va">lwd4</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>h <span class="op">=</span> <span class="va">est2</span>, lty <span class="op">=</span> <span class="fl">4</span>, col <span class="op">=</span> <span class="st">"steelblue4"</span>, lwd <span class="op">=</span> <span class="va">lwd2</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>h <span class="op">=</span> <span class="va">est4</span>, lty <span class="op">=</span> <span class="fl">4</span>, col <span class="op">=</span> <span class="st">"darkorange3"</span>, lwd <span class="op">=</span> <span class="va">lwd4</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span></span>
-<span><span class="va">legend_two_ntop_bands</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/frame.html" class="external-link">plot.new</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span></span>
-<span>    <span class="st">"center"</span>,</span>
-<span>    legend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>      <span class="st">"maximum order 2"</span>, <span class="st">"maximum order 4"</span>,</span>
-<span>      <span class="st">"95% limits"</span>, <span class="st">"80% limits"</span>, <span class="st">"point estimate"</span></span>
-<span>    <span class="op">)</span>,</span>
-<span>    col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>      <span class="st">"steelblue4"</span>, <span class="st">"darkorange3"</span>,</span>
-<span>      <span class="st">"black"</span>, <span class="st">"black"</span>, <span class="st">"black"</span></span>
-<span>    <span class="op">)</span>,</span>
-<span>    lty <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span>,</span>
-<span>    pch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">16</span>, <span class="fl">17</span>, <span class="cn">NA</span>, <span class="cn">NA</span>, <span class="cn">NA</span><span class="op">)</span>,</span>
-<span>    lwd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.6</span>, <span class="fl">1.6</span>, <span class="fl">1.6</span>, <span class="fl">1.6</span>, <span class="fl">1.6</span><span class="op">)</span>,</span>
-<span>    ncol <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>    cex <span class="op">=</span> <span class="fl">0.9</span>,</span>
-<span>    bty <span class="op">=</span> <span class="st">"n"</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="op">}</span></span></code></pre></div>
+<!-- # Helper functions -->
 </div>
 <div class="section level2">
 <h2 id="table-2-kosovo">Table 2: Kosovo<a class="anchor" aria-label="anchor" href="#table-2-kosovo"></a>
@@ -209,7 +113,7 @@ calculation over candidate models is manageable and is carried out
 directly. With the ordinary vignette settings the bootstrap uses only 10
 replications; set <code>full_reproduction &lt;- TRUE</code> to use the
 paper’s <code>nboot = 1000</code>.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">Kosovo</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">kos</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vary_ntop_bca.html">vary_ntop_bca</a></span><span class="op">(</span></span>
@@ -220,19 +124,7 @@ paper’s <code>nboot = 1000</code>.</p>
 <span>  nboot <span class="op">=</span> <span class="va">nboot_vignette</span>,</span>
 <span>  iseed <span class="op">=</span> <span class="fl">1234</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.025</span>, <span class="fl">0.1</span>, <span class="fl">0.9</span>, <span class="fl">0.975</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">kos_last</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">kos</span><span class="op">$</span><span class="va">inference</span><span class="op">$</span><span class="va">ntop</span><span class="op">)</span></span>
-<span><span class="va">kos_tab</span> <span class="op">&lt;-</span> <span class="fu">pick_ntop</span><span class="op">(</span><span class="va">kos</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span>, <span class="fl">10</span>, <span class="va">kos_last</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">table2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  ntop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"5"</span>, <span class="st">"10"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">kos_last</span>, <span class="st">" (Inf)"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  `80% CI` <span class="op">=</span> <span class="fu">ci_text</span><span class="op">(</span><span class="va">kos_tab</span><span class="op">[[</span><span class="st">"0.1"</span><span class="op">]</span><span class="op">]</span>, <span class="va">kos_tab</span><span class="op">[[</span><span class="st">"0.9"</span><span class="op">]</span><span class="op">]</span>, <span class="fl">100</span><span class="op">)</span>,</span>
-<span>  `95% CI` <span class="op">=</span> <span class="fu">ci_text</span><span class="op">(</span><span class="va">kos_tab</span><span class="op">[[</span><span class="st">"0.025"</span><span class="op">]</span><span class="op">]</span>, <span class="va">kos_tab</span><span class="op">[[</span><span class="st">"0.975"</span><span class="op">]</span><span class="op">]</span>, <span class="fl">100</span><span class="op">)</span>,</span>
-<span>  check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">table2</span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th align="left">ntop</th>
@@ -263,25 +155,6 @@ paper’s <code>nboot = 1000</code>.</p>
 </tbody>
 </table>
 <p>The published table, rounded to the nearest 100, is:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">table2_published</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  ntop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"5"</span>, <span class="st">"10"</span>, <span class="st">"113 (Inf)"</span><span class="op">)</span>,</span>
-<span>  `80% CI` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="st">"[9500, 11300]"</span>,</span>
-<span>    <span class="st">"[8500, 11500]"</span>,</span>
-<span>    <span class="st">"[7400, 12200]"</span>,</span>
-<span>    <span class="st">"[7400, 12200]"</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  `95% CI` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="st">"[9100, 12000]"</span>,</span>
-<span>    <span class="st">"[8500, 17000]"</span>,</span>
-<span>    <span class="st">"[6900, 18000]"</span>,</span>
-<span>    <span class="st">"[6900, 18000]"</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">table2_published</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th align="left">ntop</th>
@@ -317,9 +190,9 @@ paper’s <code>nboot = 1000</code>.</p>
 </h2>
 <p>There are only six admissible models after the existence check, so
 the exhaustive calculation is again run directly. As for Table 2,
-<code>full_reproduction &lt;- TRUE</code> changes the bootstrap from 20
+<code>full_reproduction &lt;- TRUE</code> changes the bootstrap from 10
 to 1000 replications.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">Korea</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">kor</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vary_ntop_bca.html">vary_ntop_bca</a></span><span class="op">(</span></span>
@@ -333,16 +206,7 @@ to 1000 replications.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">kor_last</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">kor</span><span class="op">$</span><span class="va">inference</span><span class="op">$</span><span class="va">ntop</span><span class="op">)</span></span>
-<span><span class="va">kor_tab</span> <span class="op">&lt;-</span> <span class="fu">pick_ntop</span><span class="op">(</span><span class="va">kor</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="va">kor_last</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">table3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  ntop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"2"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">kor_last</span>, <span class="st">" (Inf)"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  `80% CI` <span class="op">=</span> <span class="fu">ci_text</span><span class="op">(</span><span class="va">kor_tab</span><span class="op">[[</span><span class="st">"0.1"</span><span class="op">]</span><span class="op">]</span>, <span class="va">kor_tab</span><span class="op">[[</span><span class="st">"0.9"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>,</span>
-<span>  `95% CI` <span class="op">=</span> <span class="fu">ci_text</span><span class="op">(</span><span class="va">kor_tab</span><span class="op">[[</span><span class="st">"0.025"</span><span class="op">]</span><span class="op">]</span>, <span class="va">kor_tab</span><span class="op">[[</span><span class="st">"0.975"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>,</span>
-<span>  check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">table3</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">kor_tab</span> <span class="op">&lt;-</span> <span class="fu">pick_ntop</span><span class="op">(</span><span class="va">kor</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="va">kor_last</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th align="left">ntop</th>
@@ -368,15 +232,6 @@ to 1000 replications.</p>
 </tbody>
 </table>
 <p>The published intervals are:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">table3_published</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  ntop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"6 (Inf)"</span><span class="op">)</span>,</span>
-<span>  `80% CI` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"[136, 198]"</span>, <span class="st">"[135, 286]"</span>, <span class="st">"[135, 288]"</span><span class="op">)</span>,</span>
-<span>  `95% CI` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"[131, 248]"</span>, <span class="st">"[130, 348]"</span>, <span class="st">"[128, 349]"</span><span class="op">)</span>,</span>
-<span>  check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">table3_published</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th align="left">ntop</th>
@@ -411,7 +266,7 @@ an ordinary vignette build they are calculated through
 they are calculated through <code>ntop = 60</code>, with
 <code>nboot = 1000</code>, as used for the finite part of the paper’s
 figure.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">UKdat_5</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">uk2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vary_ntop_bca.html">vary_ntop_bca</a></span><span class="op">(</span></span>
@@ -438,27 +293,7 @@ figure.</p>
 all five-list models is deliberately omitted from an ordinary vignette
 build. The legend is placed in a separate strip below the plotting
 region so that it does not obscure the confidence-limit curves.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">at1</span> <span class="op">&lt;-</span> <span class="fu">finite_at</span><span class="op">(</span><span class="va">ntop_vignette</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">oldpar</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>no.readonly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/layout.html" class="external-link">layout</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>, heights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">1.6</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4.5</span>, <span class="fl">4.5</span>, <span class="fl">3</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">+</span> <span class="fl">0.1</span><span class="op">)</span></span>
-<span><span class="fu">plot_two_ntop_bands</span><span class="op">(</span></span>
-<span>  <span class="fu">pick_ntop</span><span class="op">(</span><span class="va">uk2</span>, <span class="va">at1</span><span class="op">)</span>, <span class="va">uk2</span><span class="op">$</span><span class="va">estimate</span>,</span>
-<span>  <span class="fu">pick_ntop</span><span class="op">(</span><span class="va">uk4</span>, <span class="va">at1</span><span class="op">)</span>, <span class="va">uk4</span><span class="op">$</span><span class="va">estimate</span>,</span>
-<span>  at <span class="op">=</span> <span class="va">at1</span>,</span>
-<span>  main <span class="op">=</span> <span class="st">"Five-list UK data"</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu">legend_two_ntop_bands</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reproduce-2024_files/figure-html/fig1-1.png" class="r-plt" alt="" width="672"></p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/layout.html" class="external-link">layout</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span><span class="va">oldpar</span><span class="op">)</span></span></code></pre></div>
 <p>The published exhaustive 95% intervals, from Table 6 of the paper,
 are <code>[11456, 43894]</code> for maximum order 2 and
 <code>[11168, 56052]</code> for maximum order 4. Those values may be
@@ -474,9 +309,17 @@ be substantially more expensive than the finite calculation.</p>
 </h2>
 <p>Again the finite calculations are performed directly, through
 <code>ntop = 20</code> for the ordinary vignette and through
-<code>ntop = 60</code> when
-<code>full_reproduction &lt;- TRUE</code>.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code>ntop = 60</code> when <code>full_reproduction &lt;- TRUE</code>.
+It should be noted that the New Orleans calculations reported in
+Silverman, Chan and Vincent (2024) used a 186-case version of the data
+obtained from Table 1 of Bales, Murphy and Silverman (2020), which
+contained a small error. The package data have now been corrected to the
+185-case version used in the original New Orleans analysis and also in
+the 2021 paper referenced elsewhere in this package. The calculations
+below use the corrected data and may therefore differ from the results
+published in 2024. Published figures and tables are reproduced as they
+appeared in that paper.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">NewOrl_5</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">no2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vary_ntop_bca.html">vary_ntop_bca</a></span><span class="op">(</span></span>
@@ -500,29 +343,7 @@ be substantially more expensive than the finite calculation.</p>
 <span><span class="op">)</span></span></code></pre></div>
 <p>The two sets of curves are essentially coincident for the finite
 values shown.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">at2</span> <span class="op">&lt;-</span> <span class="fu">finite_at</span><span class="op">(</span><span class="va">ntop_vignette</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">oldpar</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>no.readonly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/layout.html" class="external-link">layout</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>, heights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">1.6</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4.5</span>, <span class="fl">4.5</span>, <span class="fl">3</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">+</span> <span class="fl">0.1</span><span class="op">)</span></span>
-<span><span class="fu">plot_two_ntop_bands</span><span class="op">(</span></span>
-<span>  <span class="fu">pick_ntop</span><span class="op">(</span><span class="va">no2</span>, <span class="va">at2</span><span class="op">)</span>, <span class="va">no2</span><span class="op">$</span><span class="va">estimate</span>,</span>
-<span>  <span class="fu">pick_ntop</span><span class="op">(</span><span class="va">no4</span>, <span class="va">at2</span><span class="op">)</span>, <span class="va">no4</span><span class="op">$</span><span class="va">estimate</span>,</span>
-<span>  at <span class="op">=</span> <span class="va">at2</span>,</span>
-<span>  main <span class="op">=</span> <span class="st">"Five-list New Orleans data"</span>,</span>
-<span>  lwd2 <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  lwd4 <span class="op">=</span> <span class="fl">1</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu">legend_two_ntop_bands</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reproduce-2024_files/figure-html/fig2-1.png" class="r-plt" alt="" width="672"></p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/layout.html" class="external-link">layout</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span><span class="va">oldpar</span><span class="op">)</span></span></code></pre></div>
 <p>For <code>ntop = Inf</code>, the paper reports upper 97.5% limits of
 1544 for maximum order 2 and 1547 for maximum order 4. The exhaustive
 calculation is again not performed in an ordinary vignette build. To
@@ -538,7 +359,7 @@ intrinsically requires an exhaustive bootstrap search. The calculation
 is therefore shown but not evaluated in an ordinary vignette build.</p>
 <p>The following code carries out the calculation. It uses 1000
 bootstrap samples, as in the paper.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bootstrap_optimal_ranks</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">zdat</span>, <span class="va">maxorder</span>,</span>
 <span>                                    <span class="va">nboot</span> <span class="op">=</span> <span class="fl">1000</span>, <span class="va">iseed</span> <span class="op">=</span> <span class="fl">1234</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">z</span> <span class="op">&lt;-</span> <span class="fu">MultipleSystemsEstimation</span><span class="fu">:::</span><span class="fu"><a href="../reference/assemble_bic.html">assemble_bic</a></span><span class="op">(</span></span>
@@ -581,24 +402,6 @@ bootstrap samples, as in the paper.</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">ranks4</span>, <span class="va">rank_counts</span><span class="op">)</span></span></code></pre></div>
 <p>The published counts, out of 1000 bootstrap samples, are:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">table4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  dataset <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="st">"Kosovo"</span>,</span>
-<span>    <span class="st">"UK (maxorder 2)"</span>,</span>
-<span>    <span class="st">"UK (maxorder 4)"</span>,</span>
-<span>    <span class="st">"New Orleans (maxorder 2)"</span>,</span>
-<span>    <span class="st">"New Orleans (maxorder 4)"</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  `1` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">375</span>, <span class="fl">216</span>, <span class="fl">156</span>, <span class="fl">357</span>, <span class="fl">357</span><span class="op">)</span>,</span>
-<span>  `5` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">929</span>, <span class="fl">583</span>, <span class="fl">622</span>, <span class="fl">622</span>, <span class="fl">621</span><span class="op">)</span>,</span>
-<span>  `10` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">997</span>, <span class="fl">739</span>, <span class="fl">732</span>, <span class="fl">698</span>, <span class="fl">697</span><span class="op">)</span>,</span>
-<span>  `50` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1000</span>, <span class="fl">930</span>, <span class="fl">898</span>, <span class="fl">915</span>, <span class="fl">913</span><span class="op">)</span>,</span>
-<span>  `100` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1000</span>, <span class="fl">954</span>, <span class="fl">943</span>, <span class="fl">958</span>, <span class="fl">956</span><span class="op">)</span>,</span>
-<span>  check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">table4</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th align="left">dataset</th>
@@ -661,36 +464,6 @@ neighbourhood-based ordering from Section 5.1 of the paper is
 <p>Kosovo is small enough for both orderings to be calculated
 exhaustively. The ordinary vignette uses 10 bootstrap replications;
 <code>full_reproduction &lt;- TRUE</code> uses 1000.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">kos_d2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vary_ntop_bca.html">vary_ntop_bca</a></span><span class="op">(</span></span>
-<span>  <span class="va">Kosovo</span>,</span>
-<span>  maxorder <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">Kosovo</span><span class="op">)</span> <span class="op">-</span> <span class="fl">2</span>,</span>
-<span>  ntopmax <span class="op">=</span> <span class="cn">Inf</span>,</span>
-<span>  degree <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>  nboot <span class="op">=</span> <span class="va">nboot_vignette</span>,</span>
-<span>  iseed <span class="op">=</span> <span class="fl">1234</span>,</span>
-<span>  alpha <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.025</span>, <span class="fl">0.975</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">kos1_95</span> <span class="op">&lt;-</span> <span class="fu">pick_ntop</span><span class="op">(</span><span class="va">kos</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span>, <span class="fl">10</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">kos</span><span class="op">$</span><span class="va">inference</span><span class="op">$</span><span class="va">ntop</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">kos2_95</span> <span class="op">&lt;-</span> <span class="fu">pick_ntop</span><span class="op">(</span><span class="va">kos_d2</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span>, <span class="fl">10</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">kos_d2</span><span class="op">$</span><span class="va">inference</span><span class="op">$</span><span class="va">ntop</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">table5</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  ntop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"5"</span>, <span class="st">"5"</span>, <span class="st">"10"</span>, <span class="st">"10"</span>,</span>
-<span>           <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">kos</span><span class="op">$</span><span class="va">inference</span><span class="op">$</span><span class="va">ntop</span><span class="op">)</span>, <span class="st">" (Inf)"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  degree <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1, 2"</span>, <span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"1, 2"</span><span class="op">)</span>,</span>
-<span>  `95% CI` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="fu">ci_text</span><span class="op">(</span><span class="va">kos1_95</span><span class="op">[</span><span class="fl">1</span>, <span class="st">"0.025"</span><span class="op">]</span>, <span class="va">kos1_95</span><span class="op">[</span><span class="fl">1</span>, <span class="st">"0.975"</span><span class="op">]</span>, <span class="fl">100</span><span class="op">)</span>,</span>
-<span>    <span class="fu">ci_text</span><span class="op">(</span><span class="va">kos1_95</span><span class="op">[</span><span class="fl">2</span>, <span class="st">"0.025"</span><span class="op">]</span>, <span class="va">kos1_95</span><span class="op">[</span><span class="fl">2</span>, <span class="st">"0.975"</span><span class="op">]</span>, <span class="fl">100</span><span class="op">)</span>,</span>
-<span>    <span class="fu">ci_text</span><span class="op">(</span><span class="va">kos2_95</span><span class="op">[</span><span class="fl">2</span>, <span class="st">"0.025"</span><span class="op">]</span>, <span class="va">kos2_95</span><span class="op">[</span><span class="fl">2</span>, <span class="st">"0.975"</span><span class="op">]</span>, <span class="fl">100</span><span class="op">)</span>,</span>
-<span>    <span class="fu">ci_text</span><span class="op">(</span><span class="va">kos1_95</span><span class="op">[</span><span class="fl">3</span>, <span class="st">"0.025"</span><span class="op">]</span>, <span class="va">kos1_95</span><span class="op">[</span><span class="fl">3</span>, <span class="st">"0.975"</span><span class="op">]</span>, <span class="fl">100</span><span class="op">)</span>,</span>
-<span>    <span class="fu">ci_text</span><span class="op">(</span><span class="va">kos2_95</span><span class="op">[</span><span class="fl">3</span>, <span class="st">"0.025"</span><span class="op">]</span>, <span class="va">kos2_95</span><span class="op">[</span><span class="fl">3</span>, <span class="st">"0.975"</span><span class="op">]</span>, <span class="fl">100</span><span class="op">)</span>,</span>
-<span>    <span class="fu">ci_text</span><span class="op">(</span><span class="va">kos1_95</span><span class="op">[</span><span class="fl">4</span>, <span class="st">"0.025"</span><span class="op">]</span>, <span class="va">kos1_95</span><span class="op">[</span><span class="fl">4</span>, <span class="st">"0.975"</span><span class="op">]</span>, <span class="fl">100</span><span class="op">)</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">table5</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th align="left">ntop</th>
@@ -731,22 +504,6 @@ exhaustively. The ordinary vignette uses 10 bootstrap replications;
 </tbody>
 </table>
 <p>The published values are:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">table5_published</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  ntop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"5"</span>, <span class="st">"5"</span>, <span class="st">"10"</span>, <span class="st">"10"</span>, <span class="st">"113 (Inf)"</span><span class="op">)</span>,</span>
-<span>  degree <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1, 2"</span>, <span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"1, 2"</span><span class="op">)</span>,</span>
-<span>  `95% CI` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="st">"[9100, 12000]"</span>,</span>
-<span>    <span class="st">"[7900, 17400]"</span>,</span>
-<span>    <span class="st">"[8000, 13500]"</span>,</span>
-<span>    <span class="st">"[6900, 18000]"</span>,</span>
-<span>    <span class="st">"[8000, 17700]"</span>,</span>
-<span>    <span class="st">"[6900, 18000]"</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">table5_published</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th align="left">ntop</th>
@@ -807,7 +564,7 @@ five-list UK data; bottom: five-list New Orleans data. Reproduced from
 Silverman, Chan and Vincent (2024), Statistics and Computing 34:44,
 under CC BY 4.0.</em></p>
 <p>The corresponding calculation from scratch is:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">uk_d1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vary_ntop_bca.html">vary_ntop_bca</a></span><span class="op">(</span></span>
 <span>  <span class="va">UKdat_5</span>, maxorder <span class="op">=</span> <span class="fl">4</span>, ntopmax <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>  degree <span class="op">=</span> <span class="fl">1</span>, nboot <span class="op">=</span> <span class="va">nboot_paper</span>, iseed <span class="op">=</span> <span class="fl">1234</span>,</span>
@@ -830,10 +587,7 @@ under CC BY 4.0.</em></p>
 <span>  <span class="va">NewOrl_5</span>, maxorder <span class="op">=</span> <span class="fl">4</span>, ntopmax <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>  degree <span class="op">=</span> <span class="fl">2</span>, nboot <span class="op">=</span> <span class="va">nboot_paper</span>, iseed <span class="op">=</span> <span class="fl">1234</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.025</span>, <span class="fl">0.975</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co">## Plot ntop = 1,...,60 from the two inference data frames.</span></span>
-<span><span class="co">## The final row of each exhaustive result supplies ntop = Inf.</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -847,80 +601,6 @@ original-data orderings is recorded.</p>
 evaluated in an ordinary vignette build. The code below uses 1000
 bootstrap samples, as in the paper; it can be run explicitly by a reader
 who wants the full reproduction.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">bootstrap_rank_pair</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">zdat</span>, <span class="va">maxorder</span>,</span>
-<span>                                <span class="va">nboot</span> <span class="op">=</span> <span class="fl">1000</span>, <span class="va">iseed</span> <span class="op">=</span> <span class="fl">1234</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">z</span> <span class="op">&lt;-</span> <span class="fu">MultipleSystemsEstimation</span><span class="fu">:::</span><span class="fu"><a href="../reference/assemble_bic.html">assemble_bic</a></span><span class="op">(</span></span>
-<span>    <span class="va">zdat</span>, maxorder <span class="op">=</span> <span class="va">maxorder</span></span>
-<span>  <span class="op">)</span></span>
-<span></span>
-<span>  <span class="va">z</span> <span class="op">&lt;-</span> <span class="fu">MultipleSystemsEstimation</span><span class="fu">:::</span><span class="fu"><a href="../reference/bootstrapcal.html">bootstrapcal</a></span><span class="op">(</span></span>
-<span>    <span class="va">z</span>, nboot <span class="op">=</span> <span class="va">nboot</span>, iseed <span class="op">=</span> <span class="va">iseed</span></span>
-<span>  <span class="op">)</span></span>
-<span></span>
-<span>  <span class="va">r1_order</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">z</span><span class="op">$</span><span class="va">res</span><span class="op">[</span>, <span class="st">"BIC"</span><span class="op">]</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="va">r2_order</span> <span class="op">&lt;-</span> <span class="fu">MultipleSystemsEstimation</span><span class="fu">:::</span><span class="fu">.degree2_order</span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">z</span><span class="op">$</span><span class="va">res</span><span class="op">)</span>,</span>
-<span>    nlists <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">z</span><span class="op">$</span><span class="va">xdata</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span>,</span>
-<span>    maxorder <span class="op">=</span> <span class="va">z</span><span class="op">$</span><span class="va">maxorder</span></span>
-<span>  <span class="op">)</span></span>
-<span></span>
-<span>  <span class="va">r1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="cn">NA_integer_</span>, <span class="va">nboot</span><span class="op">)</span></span>
-<span>  <span class="va">r2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="cn">NA_integer_</span>, <span class="va">nboot</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">b</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">nboot</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="va">v</span> <span class="op">&lt;-</span> <span class="va">z</span><span class="op">$</span><span class="va">bootbic</span><span class="op">[</span>, <span class="va">b</span><span class="op">]</span></span>
-<span>    <span class="va">ok</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/is.finite.html" class="external-link">is.finite</a></span><span class="op">(</span><span class="va">v</span><span class="op">)</span><span class="op">)</span></span>
-<span>    <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">ok</span><span class="op">)</span><span class="op">)</span> <span class="kw">next</span></span>
-<span></span>
-<span>    <span class="va">best</span> <span class="op">&lt;-</span> <span class="va">ok</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.min</a></span><span class="op">(</span><span class="va">v</span><span class="op">[</span><span class="va">ok</span><span class="op">]</span><span class="op">)</span><span class="op">]</span></span>
-<span>    <span class="va">r1</span><span class="op">[</span><span class="va">b</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">best</span>, <span class="va">r1_order</span><span class="op">)</span></span>
-<span>    <span class="va">r2</span><span class="op">[</span><span class="va">b</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">best</span>, <span class="va">r2_order</span><span class="op">)</span></span>
-<span>  <span class="op">}</span></span>
-<span></span>
-<span>  <span class="va">keep</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/is.finite.html" class="external-link">is.finite</a></span><span class="op">(</span><span class="va">r1</span><span class="op">)</span> <span class="op">&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/is.finite.html" class="external-link">is.finite</a></span><span class="op">(</span><span class="va">r2</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">r1</span> <span class="op">&gt;</span> <span class="fl">1</span></span>
-<span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>    ordinary <span class="op">=</span> <span class="va">r1</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span>,</span>
-<span>    degree2 <span class="op">=</span> <span class="va">r2</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span></span>
-<span><span class="va">kos_rank</span> <span class="op">&lt;-</span> <span class="fu">bootstrap_rank_pair</span><span class="op">(</span></span>
-<span>  <span class="va">Kosovo</span>,</span>
-<span>  maxorder <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">Kosovo</span><span class="op">)</span> <span class="op">-</span> <span class="fl">2</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">no2_rank</span> <span class="op">&lt;-</span> <span class="fu">bootstrap_rank_pair</span><span class="op">(</span><span class="va">NewOrl_5</span>, maxorder <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="va">no4_rank</span> <span class="op">&lt;-</span> <span class="fu">bootstrap_rank_pair</span><span class="op">(</span><span class="va">NewOrl_5</span>, maxorder <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span><span class="va">uk2_rank</span> <span class="op">&lt;-</span> <span class="fu">bootstrap_rank_pair</span><span class="op">(</span><span class="va">UKdat_5</span>, maxorder <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="va">uk4_rank</span> <span class="op">&lt;-</span> <span class="fu">bootstrap_rank_pair</span><span class="op">(</span><span class="va">UKdat_5</span>, maxorder <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">rank_sets</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>  Kos <span class="op">=</span> <span class="va">kos_rank</span>,</span>
-<span>  NO2 <span class="op">=</span> <span class="va">no2_rank</span>,</span>
-<span>  NO4 <span class="op">=</span> <span class="va">no4_rank</span>,</span>
-<span>  UK2 <span class="op">=</span> <span class="va">uk2_rank</span>,</span>
-<span>  UK4 <span class="op">=</span> <span class="va">uk4_rank</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">oldpar</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>no.readonly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span>, mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="kw">for</span> <span class="op">(</span><span class="va">nm</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">rank_sets</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">x</span> <span class="op">&lt;-</span> <span class="va">rank_sets</span><span class="op">[[</span><span class="va">nm</span><span class="op">]</span><span class="op">]</span></span>
-<span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot</a></span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>BIC <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">ordinary</span>, degree2 <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">degree2</span><span class="op">)</span>,</span>
-<span>    log <span class="op">=</span> <span class="st">"y"</span>,</span>
-<span>    main <span class="op">=</span> <span class="va">nm</span>,</span>
-<span>    las <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>    ylab <span class="op">=</span> <span class="kw">if</span> <span class="op">(</span><span class="va">nm</span> <span class="op">==</span> <span class="st">"Kos"</span><span class="op">)</span> <span class="st">"BIC ranks"</span> <span class="kw">else</span> <span class="st">""</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span><span class="va">oldpar</span><span class="op">)</span></span></code></pre></div>
 <p>The published Figure 4 shows that the ordinary BIC ranking tends to
 place the bootstrap-optimal models substantially lower than the degree-2
 ordering. This supports the paper’s conclusion that the degree-2
@@ -937,7 +617,7 @@ it can be run directly. For example, the Korea calculation can be
 carried out with the current separate downhill routines as follows. The
 ordinary vignette uses 10 bootstrap replications; setting
 <code>full_reproduction &lt;- TRUE</code> uses 1000.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">downhill_korea</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  estimate <span class="op">=</span> <span class="fu"><a href="../reference/downhill_fit.html">downhill_fit</a></span><span class="op">(</span></span>
 <span>    counts <span class="op">=</span> <span class="va">Korea</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">Korea</span><span class="op">)</span><span class="op">]</span>,</span>
@@ -963,59 +643,6 @@ ordinary vignette uses 10 bootstrap replications; setting
 <span><span class="co">#&gt;      estimate  acceleration </span></span>
 <span><span class="co">#&gt; 157.166666667  -0.008783628</span></span></code></pre></div>
 <p>The published Table 6 is:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">table6</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  dataset <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="st">"UK5 all models"</span>,</span>
-<span>    <span class="st">"UK5 maxorder 2"</span>,</span>
-<span>    <span class="st">"UK all models"</span>,</span>
-<span>    <span class="st">"UK maxorder 2"</span>,</span>
-<span>    <span class="st">"NewOrl5 all models"</span>,</span>
-<span>    <span class="st">"NewOrl5 maxorder 2"</span>,</span>
-<span>    <span class="st">"NewOrl all models"</span>,</span>
-<span>    <span class="st">"NewOrl maxorder 2"</span>,</span>
-<span>    <span class="st">"Kosovo all lists"</span>,</span>
-<span>    <span class="st">"Kosovo maxorder 2"</span>,</span>
-<span>    <span class="st">"Korea"</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  `downhill estimate` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="fl">12262</span>, <span class="fl">12262</span>, <span class="fl">12350</span>, <span class="fl">12350</span>, <span class="fl">981</span>, <span class="fl">981</span>,</span>
-<span>    <span class="fl">1110</span>, <span class="fl">1110</span>, <span class="fl">10357</span>, <span class="fl">14342</span>, <span class="fl">157</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  `downhill 95% CI` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="st">"[9330, 32115]"</span>,</span>
-<span>    <span class="st">"[9332, 28954]"</span>,</span>
-<span>    <span class="st">"[9622, 27889]"</span>,</span>
-<span>    <span class="st">"[9643, 25508]"</span>,</span>
-<span>    <span class="st">"[397, 1564]"</span>,</span>
-<span>    <span class="st">"[397, 1564]"</span>,</span>
-<span>    <span class="st">"[586, 1512]"</span>,</span>
-<span>    <span class="st">"[586, 1512]"</span>,</span>
-<span>    <span class="st">"[7133, 18681]"</span>,</span>
-<span>    <span class="st">"[12525, 16477]"</span>,</span>
-<span>    <span class="st">"[128, 349]"</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  `all-model estimate` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="st">"25311"</span>, <span class="st">"22991"</span>, <span class="st">"six lists"</span>, <span class="st">""</span>, <span class="st">"981"</span>, <span class="st">"981"</span>,</span>
-<span>    <span class="st">"eight lists"</span>, <span class="st">""</span>, <span class="st">"10357"</span>, <span class="st">"14342"</span>, <span class="st">"157"</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  `all-model 95% CI` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="st">"[11168, 56052]"</span>,</span>
-<span>    <span class="st">"[11456, 43894]"</span>,</span>
-<span>    <span class="st">""</span>,</span>
-<span>    <span class="st">""</span>,</span>
-<span>    <span class="st">"[397, 1511]"</span>,</span>
-<span>    <span class="st">"[397, 1505]"</span>,</span>
-<span>    <span class="st">""</span>,</span>
-<span>    <span class="st">""</span>,</span>
-<span>    <span class="st">"[6947, 18010]"</span>,</span>
-<span>    <span class="st">"[12451, 16273]"</span>,</span>
-<span>    <span class="st">"[128, 349]"</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">table6</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
 <col width="21%">
@@ -1122,6 +749,9 @@ gives the paper-scale bootstrap calculation with
 scratch, particularly the specialised five-list UK calculation, is
 intentionally outside the computations run during an ordinary vignette
 build.</p>
+<p>The published New Orleans estimates of 981 for the five-list data and
+1110 for the eight-list data are based on the 186-case version.
+Calculations using the corrected 185-case package data will differ.</p>
 </div>
 <div class="section level2">
 <h2 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>

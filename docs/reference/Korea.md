@@ -1,6 +1,9 @@
-# Korea data
+# Korean military-sexual-slavery data
 
-Korean woman held in sexual slavery by the Japanese military
+Three-list capture-history data concerning Korean women held in sexual
+slavery by the Japanese military in Palembang, Indonesia. Further
+details are given in the data section and Figure 1 of Ball, Shin and
+Yang (2018).
 
 ## Usage
 
@@ -10,17 +13,13 @@ Korea
 
 ## Format
 
-An object of class `matrix` (inherits from `array`) with 7 rows and 4
-columns.
-
-## Details
-
-These data are collected into three lists. Full details are given in
-Figure 1 and the Data section of Ball et al. (2018)
+A numeric matrix with 7 rows and 4 columns. Columns `b`, `c` and `d` are
+binary list-membership indicators. Column `Count` gives the number of
+cases having each capture history.
 
 ## References
 
-Ball, P., Shin, E. H-S. and Yang, H. (2018). There may have been 14
+Ball, P., Shin, E. H.-S. and Yang, H. (2018). There may have been 14
 undocumented Korean "comfort women" in Palembang, Indonesia. Technical
-Report, Humans Rights Data Analysis Group. Available from
-<https://hrdag.org/wp-content/uploads/2018/12/KP-Palemban-ests.pdf>
+report, Human Rights Data Analysis Group.
+<https://hrdag.org/wp-content/uploads/2018/12/KP-Palemban-ests.pdf>.

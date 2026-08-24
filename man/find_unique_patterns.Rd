@@ -2,27 +2,32 @@
 % Please edit documentation in R/extended-MLE.R
 \name{find_unique_patterns}
 \alias{find_unique_patterns}
-\title{Find unique patterns in matrix columns}
+\title{Find unique support patterns}
 \usage{
 find_unique_patterns(x)
 }
 \arguments{
-\item{x}{a matrix}
+\item{x}{Numeric matrix whose columns are data vectors, typically bootstrap
+replications.}
 }
 \value{
-The original data \code{x} with the additional components {\describe{
-  \item{yuniq}{matrix of unique patterns of non-zeroes/zeroes in the columns of \code{x}}
-  \item{pointers}{vector of length dim(x)[2] giving the column of yuniq corresponding to each column of x}
-}}
+A list with components:
+\describe{
+  \item{\code{x}}{The original matrix.}
+  \item{\code{yuniq}}{A binary matrix containing the distinct support
+  patterns as columns.}
+  \item{\code{pointers}}{An integer vector mapping each column of \code{x}
+  to the corresponding column of \code{yuniq}.}
+}
 }
 \description{
-Given a matrix (for example of bootstrap replications) construct the matrix of unique patterns of non-zeroes,
-together with a vector of pointers back to that matrix.
+Finds the distinct zero and nonzero patterns among the columns of a matrix,
+together with indices mapping the original columns to those patterns.
 }
 \references{
 Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 Bootstrapping Multiple Systems Estimates to Account for Model Selection
-\emph{Statistics and Computing}, \strong{34(44)},
-Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+\emph{Statistics and Computing}, \strong{34}, 44,
+\href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 }
 \keyword{internal}

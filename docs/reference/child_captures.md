@@ -1,8 +1,7 @@
-# Find the "children" of a given capture history
+# Find the children of an encoded capture history
 
-Given any encoded capture history that corresponds to the row number of
-the capture history data set and the number of lists, find the encoded
-capture histories which are obtained by adding one more list in turn
+Finds the histories obtained by adding one previously absent list in
+turn.
 
 ## Usage
 
@@ -14,20 +13,19 @@ child_captures(k, nlists)
 
 - k:
 
-  An encoded capture history that corresponds to the row number of the
-  capture history data set
+  An encoded capture history.
 
 - nlists:
 
-  The total number of lists
+  Total number of lists.
 
 ## Value
 
-a vector giving the encoded versions of the children
+A numeric vector containing its encoded children.
 
 ## References
 
 Silverman, B. W., Chan, L. and Vincent, K., (2024). Bootstrapping
 Multiple Systems Estimates to Account for Model Selection *Statistics
-and Computing*, **34(44)**, Available from
-[\doi{10.1007/s11222-023-10346-9}](NA).
+and Computing*, **34**, 44,
+[doi:10.1007/s11222-023-10346-9](https://doi.org/10.1007/s11222-023-10346-9).

@@ -1,6 +1,8 @@
-# Conduct downhill search among hierarchical models starting from the main effects only.
+# Downhill search among hierarchical models
 
-Find a local optimum by downhill search among hierarchical models
+Starting from the main-effects model, repeatedly moves to the
+neighbouring hierarchical model with the smallest BIC until no
+improvement is available or the iteration limit is reached.
 
 ## Usage
 
@@ -19,55 +21,56 @@ downhill_fit(
 
 - counts:
 
-  Observed counts for the capture histories defined by desmat
+  Numeric vector of observed counts.
 
 - desmat:
 
-  Incidence matrix defining the capture histories observed with counts
-  given by counts
+  Binary matrix defining the corresponding capture histories.
 
 - maxorder:
 
-  Maximum order of models to be included
+  Maximum interaction order considered.
 
 - checkid:
 
-  If it is TRUE, then `check_extended_MLE` is called and it performs the
-  Fienberg-Rinaldo linear program check for the existence of the
-  estimates
+  If `TRUE`, check parameter identifiability and existence of the
+  extended MLE before fitting each model.
 
 - niter:
 
-  Number of iterations
+  Maximum number of downhill iterations.
 
 - verbose:
 
-  Specifies the output, if FALSE then only returns the best value, if
-  TRUE, returns a more detailed list of objects
+  If `FALSE`, return only the selected population estimate. If `TRUE`,
+  return detailed search results.
 
 ## Value
 
-A list with the following components
+If `verbose = FALSE`, the population estimate from the selected model,
+or `NA` if the main-effects model has no valid fit. If `verbose = TRUE`,
+a list with components:
 
-- optimum_hierarchy:
+- `optimum_hierarchy`:
 
-  Optimal hierarchical model
+  Selected hierarchical model.
 
-- minimum_value:
+- `minimum_value`:
 
-  hierarchical model with the minimum value
+  Named vector containing its BIC and population estimate.
 
-- hierarchies_considered:
+- `hierarchies_considered`:
 
-  hierarhical models considered
+  Character vector of models examined.
 
-- function_values:
+- `function_values`:
 
-  Values of function
+  Matrix containing the BIC and population estimate for each model
+  examined.
 
 ## References
 
 Silverman, B. W., Chan, L. and Vincent, K., (2024). Bootstrapping
 Multiple Systems Estimates to Account for Model Selection *Statistics
-and Computing*, **34(44)**, Available from
-[\doi{10.1007/s11222-023-10346-9}](NA).
+and Computing*, **34**, 44.
+[doi:10.1007/s11222-023-10346-9](https://doi.org/10.1007/s11222-023-10346-9).

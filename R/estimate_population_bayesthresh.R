@@ -2,7 +2,7 @@
 #'
 #' @description
 #' Fits the Bayesian-threshold estimator of Silverman (2020), based on a
-#' Poisson log-linear model for the capture-pattern counts.
+#' Poisson log-linear model for the capture history counts.
 #'
 #' The intercept and main effects have independent improper flat priors.
 #' For the interaction parameters, a proper normal prior is used by default;
@@ -11,8 +11,8 @@
 #' \code{MCMCpack::MCMCpoisson()}.
 #'
 #' The method begins by including all two-list interactions. The interactions
-#' are then thresholded by discarding those whose posterior mean to posterior
-#' standard deviation ratio has absolute value below \code{threshold}. The
+#' are then thresholded by discarding those for which the absolute ratio of
+#' posterior mean to posterior standard deviation is below \code{threshold}. The
 #' model containing the retained interactions is then re-estimated, and the
 #' posterior distribution of the total population is obtained by adding the
 #' observed population to the posterior estimate of the unobserved cell.
@@ -37,21 +37,22 @@
 #'
 #' When improper priors are used for the interaction parameters, the model
 #' containing all two-list interactions is checked for identifiability and
-#' for the Fienberg-Rinaldo existence criterion before thresholding begins.
+#' for the Fienberg--Rinaldo existence criterion before thresholding begins.
 #' If it fails, the procedure stops. With \code{maxorder = 3}, the model
 #' containing the retained two-list interactions and all eligible three-list
-#' interactions is also checked. If this model fails the Fienberg-Rinaldo
+#' interactions is also checked. If this model fails the Fienberg--Rinaldo
 #' criterion, the proposed three-list extension is not carried out and the
 #' completed two-list analysis is returned, together with the eligible triples.
 #'
 #' The reason for this check is that, with improper priors on the interaction
-#' parameters, any model which does not have a maximum likelihood estimate will
-#' not have a proper posterior either. However, results of Forster (2010)
+#' parameters, a model without a finite maximum-likelihood estimate will not
+#' have a proper posterior either. However, results of Forster (2010)
 #' show that proper priors on the interaction parameters can yield a proper
-#' posterior even when the corresponding maximum likelihood estimate does not exist.
+#' posterior even when the corresponding finite maximum-likelihood estimate
+#' does not exist.
 #' Therefore these checks are not required when proper priors are used for the
 #' interaction parameters, and the Bayesian fitting and thresholding
-#' proceed without applying the Fienberg-Rinaldo criterion.
+#' proceed without applying the Fienberg--Rinaldo criterion.
 #'
 #' When proper priors are used for the interaction parameters, the improper
 #' priors on the intercept and main effects are approximated internally by
@@ -60,14 +61,13 @@
 #' specifies its prior distribution, rather than a change to the underlying
 #' prior specification.
 #'
-#' @param zdat Multiple systems data in the usual
-#'   MultipleSystemsEstimation format.
+#' @param zdat Capture history data in the standard package format.
 #' @param prior Either \code{"proper"} (the default) or \code{"improper"},
 #'   specifying the prior for the interaction parameters.
 #' @param prior_variance Prior variance for interaction parameters when a
 #'   proper prior is used.
-#' @param threshold Threshold applied to the absolute posterior mean to
-#'   posterior standard deviation ratio for interaction parameters.
+#' @param threshold Threshold applied to the absolute ratio of posterior mean
+#'   to posterior standard deviation for interaction parameters.
 #' @param maxorder Maximum interaction order, either 2 or 3.
 #' @param return_posterior Logical. If \code{TRUE}, include the full posterior
 #'   sample of the total population in the returned object. The default is
@@ -103,7 +103,7 @@
 #'       estimated by MCMC.
 #'     }
 #'     \item{\code{threshold_statistics}}{
-#'       Absolute posterior mean to posterior standard deviation ratios for
+#'       Absolute ratios of posterior mean to posterior standard deviation for
 #'       the two-list interactions considered in the initial thresholding
 #'       step.
 #'     }

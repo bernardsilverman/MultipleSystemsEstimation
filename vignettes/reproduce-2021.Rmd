@@ -136,7 +136,7 @@ fit <- estimate_population_stepwise(
 )
 
 fit$popest
-fit$MSEfit
+fit$MSEfit$hiermod
 ```
 
 The same method is also available from the overall package interface:
@@ -205,10 +205,10 @@ The bootstrap samples are obtained by multinomial resampling of the observed cap
 
 The current implementation is:
 
-```{r eval=FALSE}
+```{r Korea_boot_1 }
 fit_boot <- estimate_population_stepwise(
   Korea,
-  nboot = 1000,
+  nboot = 100,
   pthresh = 0.02,
   maxorder = 2,
   iseed = 1234
@@ -218,13 +218,13 @@ fit_boot$popest
 fit_boot$BCaquantiles
 ```
 
-A large number of bootstrap replications should be used for substantive inference. Smaller values are useful when checking code.
+To keep the vignette quick, the bootstrap calculations run below use only 100 replications.  The resulting BCa confidence intervals are included only to demonstrate the operation of the code and may differ considerably from the published intervals quoted in the text, which are based on 1000 replications. A substantially larger number of bootstrap replications should be used for substantive inference. The bootstrap code for the full eight-list New Orleans data is displayed but not run at all, because even a small value of `nboot` leads to slow computation.
 
 # New Orleans: Section 4.1
 
 The New Orleans dataset in Section 4.1 contains eight lists.
 
-```{r}
+```{r NewOrl_boot_1}
 data(NewOrl)
 
 ncol(NewOrl) - 1
@@ -243,7 +243,7 @@ NewOrl_fit <- estimate_population_stepwise(
 )
 
 NewOrl_fit$popest
-NewOrl_fit$MSEfit
+NewOrl_fit$MSEfit$hiermod
 ```
 
 The paper reports that the selected model contains the two-list effect DE and gives a total population estimate of **1184**.
@@ -252,7 +252,7 @@ The published BCa 95% confidence interval, based on 1000 bootstrap replications,
 
 The corresponding calculation with the current package is:
 
-```{r eval=FALSE}
+```{r NewOrl_boot2, eval = FALSE}
 NewOrl_boot <- estimate_population_stepwise(
   NewOrl,
   pthresh = 0.02,
@@ -267,7 +267,7 @@ The paper also considers the main-effects-only model, obtained when the threshol
 
 This can be examined by setting the threshold to zero:
 
-```{r eval=FALSE}
+```{r NewOrl_boot_3, eval=FALSE}
 NewOrl_main <- estimate_population_stepwise(
   NewOrl,
   pthresh = 0,
@@ -283,7 +283,7 @@ NewOrl_main$BCaquantiles
 
 Because several individual lists in the New Orleans data are very small, the paper also combines the four smallest lists to obtain a five-list version. This is supplied as `NewOrl_5`.
 
-```{r}
+```{r NewOrl_boot_4}
 data(NewOrl_5)
 
 NewOrl5_fit <- estimate_population_stepwise(
@@ -293,19 +293,19 @@ NewOrl5_fit <- estimate_population_stepwise(
 )
 
 NewOrl5_fit$popest
-NewOrl5_fit$MSEfit
+NewOrl5_fit$MSEfit$hiermod
 ```
 
 The paper reports that no two-list parameter is significant even at the 5% level. The point estimate is **1034**, with BCa 95% confidence interval **(589, 1703)**.
 
 The bootstrap calculation is:
 
-```{r eval=FALSE}
+```{r NewOrl_boot_6}
 NewOrl5_boot <- estimate_population_stepwise(
   NewOrl_5,
   pthresh = 0.02,
   maxorder = 2, 
-  nboot = 1000
+  nboot = 100
 )
 
 NewOrl5_boot$BCaquantiles
@@ -315,7 +315,7 @@ NewOrl5_boot$BCaquantiles
 
 The Western site data contain five lists.
 
-```{r}
+```{r Western_boot_7}
 data(Western)
 
 Western_fit <- estimate_population_stepwise(
@@ -325,7 +325,7 @@ Western_fit <- estimate_population_stepwise(
 )
 
 Western_fit$popest
-Western_fit$MSEfit
+Western_fit$MSEfit$hiermod
 ```
 
 The paper reports that the selected model contains the two-list effect AE and that the resulting point estimate is **2483**.
@@ -334,12 +334,12 @@ The reported BCa 95% confidence interval is **(1293, 3670)**.
 
 It can be recalculated using:
 
-```{r eval=FALSE}
+```{r Western_boot_9}
 Western_boot <- estimate_population_stepwise(
   Western,
   pthresh = 0.02,
   maxorder = 2, 
-  nboot = 1000
+  nboot = 100
 )
 
 Western_boot$BCaquantiles
@@ -413,19 +413,19 @@ The original `SparseMSE` package accompanied Chan, Silverman and Vincent (2021).
 
 For a new analysis using the 2021 method, the recommended call is now
 
-```{r}
-estimate_population(
+```{r Korea_fit_10}
+fit_current <- estimate_population(
   Korea,
   method = "stepwise",
   maxorder = 2
 )
+
+fit_current$popest
+fit_current$MSEfit$hiermod
 ```
 
-or, equivalently,
-
-```{r}
-estimate_population_stepwise(Korea, maxorder = 2)
-```
+or, equivalently, by calling
+`estimate_population_stepwise(Korea, maxorder = 2)` directly.
 
 The default package interface is `estimate_population(..., method = "auto")`; this uses the BIC-based approach for up to five lists and the stepwise approach for six or more. The main user guide discusses the current choice of methods in detail.
 

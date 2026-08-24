@@ -3,23 +3,25 @@
 \docType{data}
 \name{NewOrl}
 \alias{NewOrl}
-\title{New Orleans data}
+\title{Greater New Orleans human-trafficking data}
 \format{
-An object of class \code{data.frame} with 19 rows and 9 columns.
+A data frame with 19 rows and 9 columns. Columns \code{A} to
+\code{H} are binary indicators of inclusion in the eight lists. Column
+\code{n} gives the number of cases having each observed capture history.
 }
 \usage{
 NewOrl
 }
 \description{
-Victims related to human trafficking in Greater New Orleans
-}
-\details{
-These data are collected into 8 lists.  For reasons of confidentiality the lists are only labelled as A, B, ..., H.
- Full details are given in Bales, Murphy and Silverman (2020).
+Capture-history data for identified victims of human trafficking in
+Greater New Orleans. The data comprise eight confidentially labelled
+lists, denoted A to H. Further details are given by Bales, Murphy and
+Silverman (2020).
 }
 \references{
-K. Bales, L. Murphy and B. W. Silverman (2020). How many trafficked people are there in Greater New Orleans?
-\emph{Journal of Human Trafficking}, \strong{6(4)}, 375-384, available from
-\url{https://www.tandfonline.com/doi/full/10.1080/23322705.2019.1634936}
+Bales, K., Murphy, L. and Silverman, B. W. (2020).
+How many trafficked people are there in Greater New Orleans?
+\emph{Journal of Human Trafficking}, \strong{6}(4), 375--384.
+\href{https://doi.org/10.1080/23322705.2019.1634936}{doi:10.1080/23322705.2019.1634936}.
 }
 \keyword{datasets}

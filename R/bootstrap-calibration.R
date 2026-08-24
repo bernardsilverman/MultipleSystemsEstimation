@@ -1,32 +1,36 @@
 #' BCa confidence intervals
 #'
-#' The BCa confidence intervals use percentiles of the bootstrap distribution of the population size
-#' , but adjust the percentile actually used. The adjusted percentiles depend on an
-#' estimated bias parameter, and the quantile function of the estimated bias parameter is the proportion
-#' of the bootstrap estimates that fall below the estimate from the original data, and an
-#' estimated acceleration factor, which derivation depends on a jackknife approach. This routine is called internally
-#' by \code{estimatepopulation}.
+#' Calculates bias-corrected and accelerated (BCa) confidence intervals from
+#' bootstrap estimates of population size. The percentile levels are adjusted
+#' using the proportion of bootstrap estimates below the original-data
+#' estimate and an acceleration parameter obtained by jackknife.
 #'
+#' @param bootreps Numeric vector of population estimates from the bootstrap
+#' samples.
+#' @param popest Population estimate from the original data.
+#' @param ahat Estimated BCa acceleration parameter.
+#' @param alpha Cumulative probability levels at which the interval endpoints
+#' are required.
 #'
-#' @param bootreps Point estimates of total population sizes from each bootstrap sample.
+#' @return A named numeric vector containing the requested BCa confidence
+#' interval endpoints.
 #'
-#' @param popest A point estimate of the total population of the original data set.
-#'
-#'@param ahat the estimated acceleration factor
-#'
-#'@param alpha Bootstrap quantiles of interests
-#'
-#'@return BCa confidence intervals
-#'
-#'@references
+#' @references
 #' Chan, L., Silverman, B. W., and Vincent, K. (2021).
-#'  Multiple Systems Estimation for Sparse Capture Data: Inferential Challenges when there are Non-Overlapping Lists.
-#' \emph{Journal of the American Statistical Association}, \strong{116(535)}, 1297-1306,
-#' Available from \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2019.1708748}.
+#' Multiple Systems Estimation for Sparse Capture Data: Inferential Challenges
+#' When There Are Nonoverlapping Lists.
+#' \emph{Journal of the American Statistical Association},
+#' \strong{116}(535), 1297--1306.
+#' \href{https://doi.org/10.1080/01621459.2019.1708748}{doi:10.1080/01621459.2019.1708748}.
 #'
-#' DiCiccio, T. J. and Efron, B. (1996). Bootstrap Confidence Intervals. \emph{Statistical Science}, \strong{40(3)}, 189-228.
+#' DiCiccio, T. J. and Efron, B. (1996).
+#' Bootstrap confidence intervals.
+#' \emph{Statistical Science}, \strong{11}(3), 189--228.
 #'
-#' Efron, B. (1987). Better Bootstrap Confidence Intervals. \emph{Journal of the American Statistical Association}, \strong{82(397)}, 171-185.
+#' Efron, B. (1987). Better bootstrap confidence intervals.
+#' \emph{Journal of the American Statistical Association},
+#' \strong{82}(397), 171--185.
+#'
 #' @keywords internal
 bcaconfvalues<-function(bootreps, popest, ahat, alpha=c(0.025, 0.05, 0.1, 0.16, 0.84, 0.9, 0.95, 0.975) ) {
   # find BCA critical values
@@ -39,37 +43,38 @@ bcaconfvalues<-function(bootreps, popest, ahat, alpha=c(0.025, 0.05, 0.1, 0.16, 
   return(bcac)
 }
 
-#' Bootstrap abundance and bic
+#' Bootstrap abundance and BIC values
 #'
-#' This routine takes the output from \code{assemble_bic} or \code{subsetmat} and returns bootstrap
-#' abundance matrix and BIC matrix.
-#' This version makes use of \code{check_extended_MLE_batch}.
+#' Generates multinomial bootstrap samples and fits every retained
+#' hierarchical model to each sample. When requested, model-data combinations
+#' are screened using \code{check_extended_MLE_batch()} before fitting.
 #'
-#' @param z Results from \code{assemble_bic} or \code{subsetmat}
-#' @param nboot The number of bootstrap replications.
-#' @param iseed Integer seed to allow for replicability.
-#' @param checkexist If \code{checkexist=TRUE}, check for existence, else it does
-#' not check for existence.
-#' @param saveinterval If this is set to a finite value, the output list \code{z}
-#' will be saved every time the number of replications is a multiple of it. A message
-#' will be printed every time it is saved.
-#' @param savefile The file to which the output will be saved if \code{saveinterval}
-#' is set to a finite value.
+#' @param z A result from \code{assemble_bic()} or \code{subsetmat()}.
+#' @param nboot Number of bootstrap replications.
+#' @param iseed Integer random-number seed.
+#' @param checkexist If \code{TRUE}, check identifiability and existence of the
+#' extended MLE for each model and support pattern before fitting.
+#' @param saveinterval If finite, save the accumulating result whenever the
+#' replication number is a multiple of this value.
+#' @param savefile File used when \code{saveinterval} is finite.
 #'
-#'
-#' @return The original input list \code{z} with the additional components
+#' @return The input list \code{z}, with the following components added or
+#' replaced:
 #' \describe{
-#'   \item{bootabund}{Bootstrap abundance matrix}
-#'   \item{bootbic}{Bootstrap BIC matrix}
+#'   \item{\code{countsobserved}}{Counts for the complete set of observable
+#'   capture histories.}
+#'   \item{\code{bootreplications}}{A matrix whose columns contain the
+#'   bootstrap counts.}
+#'   \item{\code{bootabund}}{A matrix of population estimates, with models
+#'   in rows and bootstrap replications in columns.}
+#'   \item{\code{bootbic}}{A corresponding matrix of BIC values.}
 #' }
-#' If there are already components with these names they will be overwritten.
 #'
-#'
-#'@references
+#' @references
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
-#' Bootstrapping Multiple Systems Estimates to Account for Model Selection
-#' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+#' Bootstrapping Multiple Systems Estimates to Account for Model Selection.
+#' \emph{Statistics and Computing}, \strong{34}, 44.
+#' \href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 #'
 #' @keywords internal
 bootstrapcal <- function(z,
@@ -125,28 +130,33 @@ bootstrapcal <- function(z,
   return (z)
 }
 
-#' Jackknife abundance and Jackknife bic
+#' Jackknife abundance and BIC values
 #'
-#' This routine takes the output from \code{subsetmat} or from \code{assemble_bic} and returns the jackknife
-#' abundance matrix and jackknife BIC matrix.
+#' Constructs the delete-one jackknife fits needed for BCa acceleration.
+#' Each distinct positive-count capture history is reduced by one individual
+#' in turn, and every retained hierarchical model is fitted to the resulting
+#' data.
 #'
-#' @param z Results from \code{assemble_bic} or \code{subsetmat}.
-#' @param checkexist If \code{checkexist=TRUE}, check for existence in cases where the jackknife introduces an additional zero, else it does
-#' not check for existence.  Note that in the current version it is assume that models for which the fit doesn't exist for the original data
-#' have already been excluded.
+#' @param z A result from \code{assemble_bic()} or \code{subsetmat()}.
+#' @param checkexist If \code{TRUE}, check identifiability and existence of the
+#' extended MLE when a deletion creates an additional zero count. Models that
+#' fail on the original data are assumed to have been removed already.
 #'
-#' @return A list with the following components
+#' @return The input list \code{z}, with the following components added or
+#' replaced:
 #' \describe{
-#'   \item{jackabund}{Jackknife abundance matrix}
-#'   \item{jackbic}{Jackknife BIC matrix}
-#'   \item{countsobserved}{Capture counts in the same order as the columns of \code{jackabund} and \code{jackbic}}
+#'   \item{\code{jackabund}}{A matrix of jackknife population estimates,
+#'   with models in rows and capture histories in columns.}
+#'   \item{\code{jackbic}}{A corresponding matrix of BIC values.}
+#'   \item{\code{countsobserved}}{Capture counts in the same order as the
+#'   columns of \code{jackabund} and \code{jackbic}.}
 #' }
 #'
-#'@references
+#' @references
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
-#' Bootstrapping Multiple Systems Estimates to Account for Model Selection
-#' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+#' Bootstrapping Multiple Systems Estimates to Account for Model Selection.
+#' \emph{Statistics and Computing}, \strong{34}, 44.
+#' \href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 #'
 #' @keywords internal
 jackknifecal <- function(z, checkexist = TRUE) {

@@ -101,7 +101,7 @@ parent of `123`, while `1235` is a child of `123`.
 An *outer neighbour* of a hierarchical model is obtained by adding an element all of whose immediate
 parents are already in the model. 
 
-An *inner neighbour* is obtained by removing a single maximal element of the model—that is, an element having no children within the model. These maximal elements are the generators displayed in the hierarchical-model notation. Only the generator itself is removed; all its lower-order elements remain. For example, removing `123` from `[123]` gives `[12,13,23]`. By default, main effects are protected from removal. By default, main effects are protected from removal.
+An *inner neighbour* is obtained by removing a single maximal element of the model—that is, an element having no children within the model. These maximal elements are the generators displayed in the hierarchical-model notation. Only the generator itself is removed; all its lower-order elements remain. For example, removing `123` from `[123]` gives `[12,13,23]`. By default, main effects are protected from removal.
 
 The function `find_neighbour_hierarchies()` can return all neighbours or restrict the
 search to one direction:

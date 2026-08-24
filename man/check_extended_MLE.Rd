@@ -7,7 +7,7 @@
 check_extended_MLE(data, model)
 }
 \arguments{
-\item{data}{Capture-history data in the standard package format, with one
+\item{data}{Capture history data in the standard package format, with one
 indicator column for each list followed by a count column.}
 
 \item{model}{A character string specifying a hierarchical model, such as
@@ -65,5 +65,5 @@ Multiple Systems Estimation for Sparse Capture Data: Inferential
 Challenges When There Are Nonoverlapping Lists.
 \emph{Journal of the American Statistical Association},
 \strong{116}(535), 1297--1306.
-\doi{10.1080/01621459.2019.1708748}.
+\href{https://doi.org/10.1080/01621459.2019.1708748}{doi:10.1080/01621459.2019.1708748}.
 }

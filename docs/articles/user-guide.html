@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">MultipleSystemsEstimation</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -96,8 +96,9 @@ existence and identifiability issues build on Chan, Silverman and
 Vincent (2021). The package also implements the Bayesian thresholding
 approach of Section 6 of Silverman (2020).</p>
 <p>This vignette is intended as a guide to analysing data with the
-package. Separate vignettes describe how to reproduce specific results
-from the two papers.</p>
+package. A separate vignette describes how hierarchical models are
+handled, and others discuss specific results from the three papers as
+well as subsequent methodological extensions.</p>
 </div>
 <div class="section level2">
 <h2 id="data-format">Data format<a class="anchor" aria-label="anchor" href="#data-format"></a>
@@ -245,11 +246,9 @@ enumeration for the original data:</p>
 <div class="section level3">
 <h3 id="which-models-are-considered">Which models are considered?<a class="anchor" aria-label="anchor" href="#which-models-are-considered"></a>
 </h3>
-<p>Unlike the stepwise procedure, which considers only two-list
-interactions, the BIC method can consider higher-order interactions. The
-argument <code>maxorder</code> controls the maximum order of
-interactions considered. If it is left at its default <code>NULL</code>,
-the package chooses:</p>
+<p>The argument <code>maxorder</code> controls the maximum order of
+interactions considered by the method. If it is left at its default
+<code>NULL</code>, the package chooses:</p>
 <table class="table">
 <thead><tr class="header">
 <th align="right">Number of lists</th>
@@ -293,15 +292,25 @@ though that model had been fixed in advance ignores uncertainty arising
 from the model-selection step. The bootstrap approach of Silverman, Chan
 and Vincent (2024) addresses this by repeating BIC model selection
 within bootstrap samples.</p>
-<p>Bootstrap inference is requested through <code>nboot</code>:</p>
+<p>Bootstrap inference is requested through <code>nboot</code>; to keep
+the vignette quick, the examples below use only 100 bootstrap
+replications. A substantially larger number should be used for
+substantive inference.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_bic_boot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_population.html">estimate_population</a></span><span class="op">(</span></span>
 <span>  <span class="va">Korea</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"bic"</span>,</span>
-<span>  nboot <span class="op">=</span> <span class="fl">1000</span></span>
+<span>  nboot <span class="op">=</span> <span class="fl">100</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">fit_bic_boot</span><span class="op">$</span><span class="va">BCaquantiles</span></span></code></pre></div>
+<span><span class="va">fit_bic_boot</span><span class="op">$</span><span class="va">BCaquantiles</span></span>
+<span><span class="co">#&gt;            0.025      0.1      0.9    0.975</span></span>
+<span><span class="co">#&gt; [12,23] 133.2116 136.9897 199.7547 303.2850</span></span>
+<span><span class="co">#&gt; [12,3]  133.1861 136.8837 282.6830 409.4789</span></span>
+<span><span class="co">#&gt; [13,23] 133.1861 136.8837 282.6830 409.4789</span></span>
+<span><span class="co">#&gt; [23,1]  129.5471 136.0981 285.0565 417.0102</span></span>
+<span><span class="co">#&gt; [13,2]  129.5471 136.0981 285.0565 417.0102</span></span>
+<span><span class="co">#&gt; [1,2,3] 129.5471 136.0981 285.0565 417.0102</span></span></code></pre></div>
 <p>A small value of <code>nboot</code> is useful for checking code, but
 substantive inference should use substantially more bootstrap
 replications.</p>
@@ -338,22 +347,24 @@ original-data point estimate is always based on the minimum-BIC model
 from the full candidate set allowed by <code>maxorder</code>.</p>
 <p>The number retained can be specified directly, for example:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fit_bic_50</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_population.html">estimate_population</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">fit_bic_5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_population.html">estimate_population</a></span><span class="op">(</span></span>
 <span>  <span class="va">Korea</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"bic"</span>,</span>
-<span>  nboot <span class="op">=</span> <span class="fl">1000</span>,</span>
-<span>  ntopmodels <span class="op">=</span> <span class="fl">50</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p>For each retained set, the package calculates bias-corrected and
-accelerated (BCa) confidence limits. The rows of
-<code>BCaquantiles</code> correspond to nested sets of the models ranked
-by original-data BIC. Row 1 allows only the best-BIC model; row 2 allows
-selection between the best two; and so on. The final row therefore shows
-the inference obtained when selection is allowed among all models
-retained for the bootstrap calculation.</p>
-<p>This makes it possible not only to obtain a confidence interval but
-also to see whether the inference has stabilised as additional candidate
-models are admitted.</p>
+<span>  nboot <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  ntopmodels <span class="op">=</span> <span class="fl">5</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">fit_bic_5</span><span class="op">$</span><span class="va">BCaquantiles</span></span>
+<span><span class="co">#&gt;            0.025      0.1      0.9    0.975</span></span>
+<span><span class="co">#&gt; [12,23] 133.2116 136.9897 199.7547 303.2850</span></span>
+<span><span class="co">#&gt; [12,3]  133.1861 136.8837 282.6830 409.4789</span></span>
+<span><span class="co">#&gt; [13,23] 133.1861 136.8837 282.6830 409.4789</span></span>
+<span><span class="co">#&gt; [23,1]  129.5471 136.0981 285.0565 417.0102</span></span>
+<span><span class="co">#&gt; [13,2]  129.5471 136.0981 285.0565 417.0102</span></span></code></pre></div>
+<p>The <code>BCaquantiles</code> component gives the endpoints of the
+bias-corrected and accelerated (BCa) confidence intervals obtained when
+model selection is allowed among all models retained for the bootstrap
+calculation.</p>
 </div>
 </div>
 <div class="section level2">
@@ -419,19 +430,22 @@ procedures.</p>
 <div class="section level2">
 <h2 id="the-stepwise-method">The stepwise method<a class="anchor" aria-label="anchor" href="#the-stepwise-method"></a>
 </h2>
-<p>The second principal model-selection method is the forward stepwise
-procedure of Chan, Silverman and Vincent (2021). It can be requested
-explicitly for any supported number of lists and is selected
-automatically when there are six or more lists. In the present
-implementation it only considers models with two-list interactions.</p>
-<p>The procedure starts with a main-effects model. At each stage it
-considers candidate two-list interactions not yet included in the model,
-subject to the existence and identifiability checks described above. The
-interaction with the smallest p-value is added if that p-value does not
-exceed the threshold <code>pthresh</code>; otherwise the procedure
-stops.</p>
+<p>The second principal model-selection method is an extension of the
+forward stepwise procedure of Chan, Silverman and Vincent (2021). It can
+be requested explicitly for any supported number of lists and is
+selected automatically when there are six or more lists.</p>
+<p>The procedure starts with the main-effects model. At each stage it
+considers interactions that can be added while preserving the
+hierarchical structure of the model. Candidates that fail the existence
+or identifiability checks described above are discarded. Among the
+remaining candidates, the interaction with the smallest p-value is added
+if that p-value is below the threshold <code>pthresh</code>; otherwise
+the procedure stops.</p>
 <p>The default is <code>pthresh = 0.02</code>, following the simulation
-study reported by Chan, Silverman and Vincent (2021).</p>
+study reported by Chan, Silverman and Vincent (2021). Setting
+<code>maxorder = 2</code> means that only two-list interactions are
+considered and the procedure agrees with the method studied in that
+paper.</p>
 <p>For example:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_step</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_population.html">estimate_population</a></span><span class="op">(</span></span>
@@ -441,127 +455,8 @@ study reported by Chan, Silverman and Vincent (2021).</p>
 <span></span>
 <span><span class="va">fit_step</span><span class="op">$</span><span class="va">popest</span></span>
 <span><span class="co">#&gt; [1] 268.7778</span></span>
-<span><span class="va">fit_step</span><span class="op">$</span><span class="va">MSEfit</span></span>
-<span><span class="co">#&gt; $fit</span></span>
-<span><span class="co">#&gt; $fit$coefficients</span></span>
-<span><span class="co">#&gt;         1         2         3         4         5 </span></span>
-<span><span class="co">#&gt;  4.982083 -2.832024 -3.620482  5.412241 -1.268511 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $fit$residuals</span></span>
-<span><span class="co">#&gt;             2             3             4             5             6 </span></span>
-<span><span class="co">#&gt; -4.176136e-01  2.812500e-01  4.829545e-02 -1.733031e-16  1.484848e+00 </span></span>
-<span><span class="co">#&gt;             7             8 </span></span>
-<span><span class="co">#&gt; -1.000000e+00 -1.717172e-01 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $fit$fitted.values</span></span>
-<span><span class="co">#&gt;         2         3         4         5         6         7         8 </span></span>
-<span><span class="co">#&gt;  8.585366  3.902439 51.512195 41.000000  2.414634  1.097561 14.487805 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $fit$effects</span></span>
-<span><span class="co">#&gt;           1           2           3           4           5             </span></span>
-<span><span class="co">#&gt; -37.8739059  -0.1087053  -1.3877657  -7.6927803   4.7545965  -1.7833522 </span></span>
-<span><span class="co">#&gt;             </span></span>
-<span><span class="co">#&gt;  -2.3652222 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $fit$R</span></span>
-<span><span class="co">#&gt;           1         2         3         4          5</span></span>
-<span><span class="co">#&gt; 1 -11.09054 -6.942856 -6.401854 -5.951020 -5.3198508</span></span>
-<span><span class="co">#&gt; 2   0.00000  5.366260  4.016362  4.599652 -3.7330505</span></span>
-<span><span class="co">#&gt; 3   0.00000  0.000000 -3.726271 -2.530297  0.9334429</span></span>
-<span><span class="co">#&gt; 4   0.00000  0.000000  0.000000 -1.739589 -1.3577277</span></span>
-<span><span class="co">#&gt; 5   0.00000  0.000000  0.000000  0.000000 -3.7481703</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $fit$rank</span></span>
-<span><span class="co">#&gt; [1] 5</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $fit$qr</span></span>
-<span><span class="co">#&gt; $qr</span></span>
-<span><span class="co">#&gt;              1           2          3           4          5</span></span>
-<span><span class="co">#&gt; 2 -11.09053653 -6.94285621 -6.4018544 -5.95101958 -5.3198508</span></span>
-<span><span class="co">#&gt; 3   0.17812116  5.36626016  4.0163624  4.59965154 -3.7330505</span></span>
-<span><span class="co">#&gt; 4   0.64714630 -0.39565940 -3.7262707 -2.53029702  0.9334429</span></span>
-<span><span class="co">#&gt; 5   0.57735027  0.84023239 -0.2576296 -1.73958866 -1.3577277</span></span>
-<span><span class="co">#&gt; 6   0.14011129 -0.08566277 -0.2441369 -0.20535175 -3.7481703</span></span>
-<span><span class="co">#&gt; 7   0.09446301  0.13747440  0.2389992 -0.29265174  0.3022582</span></span>
-<span><span class="co">#&gt; 8   0.34320115 -0.20983008  0.4234623  0.06809711  0.9058907</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $rank</span></span>
-<span><span class="co">#&gt; [1] 5</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $qraux</span></span>
-<span><span class="co">#&gt; [1] 1.264196 1.259224 1.798488 1.931423 1.296651</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $pivot</span></span>
-<span><span class="co">#&gt; [1] 1 2 3 4 5</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $tol</span></span>
-<span><span class="co">#&gt; [1] 1e-11</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; attr(,"class")</span></span>
-<span><span class="co">#&gt; [1] "qr"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $fit$family</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Family: poisson </span></span>
-<span><span class="co">#&gt; Link function: log </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $fit$linear.predictors</span></span>
-<span><span class="co">#&gt;          2          3          4          5          6          7          8 </span></span>
-<span><span class="co">#&gt; 2.15005911 1.36160175 3.94181858 3.71357207 0.88154778 0.09309042 2.67330725 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $fit$deviance</span></span>
-<span><span class="co">#&gt; [1] 8.566946</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $fit$aic</span></span>
-<span><span class="co">#&gt; [1] 44.90767</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $fit$null.deviance</span></span>
-<span><span class="co">#&gt; [1] 143.5474</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $fit$iter</span></span>
-<span><span class="co">#&gt; [1] 5</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $fit$weights</span></span>
-<span><span class="co">#&gt;         2         3         4         5         6         7         8 </span></span>
-<span><span class="co">#&gt;  8.585366  3.902439 51.512195 41.000000  2.414634  1.097561 14.487805 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $fit$prior.weights</span></span>
-<span><span class="co">#&gt; 2 3 4 5 6 7 8 </span></span>
-<span><span class="co">#&gt; 1 1 1 1 1 1 1 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $fit$df.residual</span></span>
-<span><span class="co">#&gt; [1] 2</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $fit$df.null</span></span>
-<span><span class="co">#&gt; [1] 6</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $fit$y</span></span>
-<span><span class="co">#&gt;  2  3  4  5  6  7  8 </span></span>
-<span><span class="co">#&gt;  5  5 54 41  6  0 12 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $fit$converged</span></span>
-<span><span class="co">#&gt; [1] TRUE</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $fit$boundary</span></span>
-<span><span class="co">#&gt; [1] FALSE</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $fit$abundance</span></span>
-<span><span class="co">#&gt;        1 </span></span>
-<span><span class="co">#&gt; 268.7778 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $fit$bic</span></span>
-<span><span class="co">#&gt; [1] 58.9686</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $fit$neginfpars</span></span>
-<span><span class="co">#&gt; numeric(0)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $hiermod</span></span>
-<span><span class="co">#&gt; [1] "[12,3]"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $selected</span></span>
-<span><span class="co">#&gt; [1]  TRUE FALSE FALSE</span></span></code></pre></div>
+<span><span class="va">fit_step</span><span class="op">$</span><span class="va">MSEfit</span><span class="op">$</span><span class="va">hiermod</span></span>
+<span><span class="co">#&gt; [1] "[12,3]"</span></span></code></pre></div>
 <p>The threshold can be varied explicitly:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_step_01</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_population.html">estimate_population</a></span><span class="op">(</span></span>
@@ -572,33 +467,75 @@ study reported by Chan, Silverman and Vincent (2021).</p>
 <span></span>
 <span><span class="va">fit_step_01</span><span class="op">$</span><span class="va">popest</span></span>
 <span><span class="co">#&gt; [1] 268.7778</span></span></code></pre></div>
+<p>Higher-order interactions can be allowed by increasing
+<code>maxorder</code>. Setting <code>maxorder = Inf</code> allows
+interactions of any order to be considered. A higher-order interaction
+becomes eligible only when its lower-order terms are already present, so
+every model considered by the procedure is hierarchical.</p>
+<p>For the Kosovo data, allowing interactions of any order changes both
+the selected model and the population estimate:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fit_step_pairwise</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_population.html">estimate_population</a></span><span class="op">(</span></span>
+<span>  <span class="va">Kosovo</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"stepwise"</span>,</span>
+<span>  maxorder <span class="op">=</span> <span class="fl">2</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">fit_step_unrestricted</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_population.html">estimate_population</a></span><span class="op">(</span></span>
+<span>  <span class="va">Kosovo</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"stepwise"</span>,</span>
+<span>  maxorder <span class="op">=</span> <span class="cn">Inf</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  pairwise <span class="op">=</span> <span class="va">fit_step_pairwise</span><span class="op">$</span><span class="va">popest</span>,</span>
+<span>  unrestricted <span class="op">=</span> <span class="va">fit_step_unrestricted</span><span class="op">$</span><span class="va">popest</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt;     pairwise unrestricted </span></span>
+<span><span class="co">#&gt;     14341.66     18393.31</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  pairwise <span class="op">=</span> <span class="va">fit_step_pairwise</span><span class="op">$</span><span class="va">MSEfit</span><span class="op">$</span><span class="va">hiermod</span>,</span>
+<span>  unrestricted <span class="op">=</span> <span class="va">fit_step_unrestricted</span><span class="op">$</span><span class="va">MSEfit</span><span class="op">$</span><span class="va">hiermod</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt;           pairwise       unrestricted </span></span>
+<span><span class="co">#&gt; "[12,13,14,23,34]"      "[134,12,23]"</span></span></code></pre></div>
+<p>The pairwise search selects <code>[12,13,14,23,34]</code>, whereas
+the unrestricted search selects <code>[134,12,23]</code>. The latter
+hierarchy includes interactions 13, 14 and 34 implicitly and adds the
+three-list interaction 134. The corresponding population estimates are
+approximately 14,342 and 18,393.</p>
 <p>The stepwise method is not merely a computational fallback. It can be
-chosen deliberately when the 2021 model-selection procedure is
-scientifically preferred or when sensitivity to the threshold is of
-interest.</p>
-</div>
-<div class="section level2">
-<h2 id="bootstrap-inference-after-stepwise-selection">Bootstrap inference after stepwise selection<a class="anchor" aria-label="anchor" href="#bootstrap-inference-after-stepwise-selection"></a>
-</h2>
+chosen deliberately when the 2021 pairwise procedure is scientifically
+preferred, when sensitivity to <code>pthresh</code> is of interest, or
+when a forward search over higher-order hierarchical models is desired.
+The 2021 reproducibility vignette describes the published pairwise
+procedure in more detail. # Bootstrap inference after stepwise
+selection</p>
 <p>As with the BIC approach, bootstrap inference repeats the complete
 model-selection procedure for every bootstrap sample rather than
 conditioning on the model selected from the original data.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_step_boot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_population.html">estimate_population</a></span><span class="op">(</span></span>
 <span>  <span class="va">Korea</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"stepwise"</span>,</span>
-<span>  nboot <span class="op">=</span> <span class="fl">1000</span></span>
+<span>  nboot <span class="op">=</span> <span class="fl">100</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">fit_step_boot</span><span class="op">$</span><span class="va">BCaquantiles</span></span></code></pre></div>
+<span><span class="va">fit_step_boot</span><span class="op">$</span><span class="va">BCaquantiles</span></span>
+<span><span class="co">#&gt;    0.025      0.1      0.9    0.975 </span></span>
+<span><span class="co">#&gt; 123.3274 193.8215 358.3031 399.8280</span></span></code></pre></div>
 <p>The bootstrap samples are generated by multinomial resampling of the
 observed capture-history counts. A delete-one jackknife calculation
-supplies the acceleration term for the BCa confidence limits.</p>
+supplies the acceleration term for the BCa confidence intervals.</p>
 <p>The result also contains the bootstrap population estimates and the
 estimated acceleration parameter:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fit_step_boot</span><span class="op">$</span><span class="va">bootreps</span></span>
-<span><span class="va">fit_step_boot</span><span class="op">$</span><span class="va">ahat</span></span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_step_boot</span><span class="op">$</span><span class="va">bootreps</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></span>
+<span><span class="co">#&gt;   123.1   197.1   247.8   235.9   287.0   400.7</span></span>
+<span><span class="va">fit_step_boot</span><span class="op">$</span><span class="va">ahat</span></span>
+<span><span class="co">#&gt; [1] -0.02877338</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="the-bayesian-thresholding-method">The Bayesian thresholding method<a class="anchor" aria-label="anchor" href="#the-bayesian-thresholding-method"></a>
@@ -619,7 +556,7 @@ although improper priors can also be specified. The method requires the
 suggested package <code>MCMCpack</code>, but only when
 <code>bayesthresh</code> is actually used.</p>
 <p>For example:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/estimate_population.html">estimate_population</a></span><span class="op">(</span></span>
 <span>  <span class="va">Kosovo</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"bayesthresh"</span>,</span>
@@ -685,35 +622,42 @@ estimation</em>.</p>
 either automatic model-selection procedure. In that case use
 <code>method = "fixed"</code>.</p>
 <p>For example:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_fixed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_population.html">estimate_population</a></span><span class="op">(</span></span>
 <span>  <span class="va">Korea</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"fixed"</span>,</span>
-<span>  hiermod <span class="op">=</span> <span class="st">"[12,23]"</span></span>
+<span>  model <span class="op">=</span> <span class="st">"[12,23]"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">fit_fixed</span><span class="op">$</span><span class="va">popest</span></span>
 <span><span class="co">#&gt; [1] 157.1667</span></span>
-<span><span class="va">fit_fixed</span><span class="op">$</span><span class="va">hiermod</span></span>
+<span><span class="va">fit_fixed</span><span class="op">$</span><span class="va">model</span></span>
 <span><span class="co">#&gt; [1] "[12,23]"</span></span></code></pre></div>
-<p>Bootstrap inference for a fixed model is requested in the same
-way:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<p>Bootstrap inference for a fixed model is requested in the same way.
+In contrast to the BIC and stepwise procedures, the same specified model
+is fitted to every bootstrap and jackknife sample. There is no
+model-selection step inside the resampling procedure.</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_fixed_boot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_population.html">estimate_population</a></span><span class="op">(</span></span>
 <span>  <span class="va">Korea</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"fixed"</span>,</span>
-<span>  hiermod <span class="op">=</span> <span class="st">"[12,23]"</span>,</span>
-<span>  nboot <span class="op">=</span> <span class="fl">1000</span></span>
+<span>  model <span class="op">=</span> <span class="st">"[12,23]"</span>,</span>
+<span>  nboot <span class="op">=</span> <span class="fl">100</span></span>
 <span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: 3 of 100 bootstrap replications did not produce a finite</span></span>
+<span><span class="co">#&gt; population-size estimate under the specified fixed hierarchical model and were</span></span>
+<span><span class="co">#&gt; omitted.</span></span>
 <span></span>
-<span><span class="va">fit_fixed_boot</span><span class="op">$</span><span class="va">BCaquantiles</span></span></code></pre></div>
-<p>Here the distinction from BIC and stepwise inference is important:
-the same specified model is fitted to every bootstrap and jackknife
-sample. There is no model-selection step inside the resampling
-procedure.</p>
+<span><span class="va">fit_fixed_boot</span><span class="op">$</span><span class="va">BCaquantiles</span></span>
+<span><span class="co">#&gt;    0.025      0.1      0.9    0.975 </span></span>
+<span><span class="co">#&gt; 131.7082 135.6852 208.5624 244.9442</span></span></code></pre></div>
+<p>Three bootstrap replications failed to produce a finite estimate
+under the specified fixed model and were omitted. With only 100
+replications, the resulting interval is included to demonstrate the
+calculation and should not be used for substantive inference.</p>
 </div>
 <div class="section level2">
-<h2 id="bootstrap-and-bca-inference-for-likelihood-based-methods-a-common-view">Bootstrap and BCa inference for likelihood based methods: a common
+<h2 id="bootstrap-and-bca-inference-for-likelihood-based-methods-a-common-view">Bootstrap and BCa inference for likelihood-based methods: a common
 view<a class="anchor" aria-label="anchor" href="#bootstrap-and-bca-inference-for-likelihood-based-methods-a-common-view"></a>
 </h2>
 <p>The BIC, stepwise and fixed routes can be used for point estimation
@@ -736,7 +680,7 @@ estimate the acceleration term required for BCa inference. The
 set to make bootstrap results reproducible.</p>
 <p>By default, confidence limits are returned at cumulative probability
 levels</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.025</span>, <span class="fl">0.1</span>, <span class="fl">0.9</span>, <span class="fl">0.975</span><span class="op">)</span></span></code></pre></div>
 <p>corresponding to the endpoints of 95% and 80% intervals. Other
 probabilities can be supplied through <code>alpha</code>.</p>
@@ -745,7 +689,7 @@ probabilities can be supplied through <code>alpha</code>.</p>
 <h2 id="which-method-should-i-use">Which method should I use?<a class="anchor" aria-label="anchor" href="#which-method-should-i-use"></a>
 </h2>
 <p>For most users the answer is simple: begin with</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/estimate_population.html">estimate_population</a></span><span class="op">(</span><span class="va">zdat</span><span class="op">)</span></span></code></pre></div>
 <p>and therefore allow <code>method = "auto"</code> to select the
 route.</p>
@@ -775,7 +719,7 @@ available.</p>
 </h2>
 <p>The exact components returned depend on the method selected.</p>
 <p>For BIC fitting:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">fit_bic</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "popest"       "model"        "BIC"          "bic_results"  "BCaquantiles"</span></span></code></pre></div>
 <p>The most important components are:</p>
@@ -793,7 +737,7 @@ available.</p>
 requested.</li>
 </ul>
 <p>For stepwise fitting:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">fit_step</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "popest"       "MSEfit"       "bootreps"     "ahat"         "BCaquantiles"</span></span></code></pre></div>
 <p><code>MSEfit</code> contains the selected fitted model, while
@@ -804,47 +748,31 @@ requested.</p>
 options chosen and on the result of the analysis. See the individual
 documentation for details.</p>
 <p>For fixed fitting:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">fit_fixed</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "popest"       "MSEfit"       "hiermod"      "bootreps"     "ahat"        </span></span>
+<span><span class="co">#&gt; [1] "popest"       "MSEfit"       "model"        "bootreps"     "ahat"        </span></span>
 <span><span class="co">#&gt; [6] "BCaquantiles"</span></span></code></pre></div>
-<p><code>hiermod</code> records the model that was fitted and
+<p><code>model</code> records the model that was fitted and
 <code>MSEfit</code> contains the detailed fitted object.</p>
 <p>The individual help pages give the complete definitions of returned
 components:</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="op">?</span><span class="va">estimate_population</span></span>
 <span><span class="op">?</span><span class="va">estimate_population_bic</span></span>
 <span><span class="op">?</span><span class="va">estimate_population_stepwise</span></span>
 <span><span class="op">?</span><span class="va">estimate_population_fixed</span></span>
 <span><span class="op">?</span><span class="va">estimate_population_bayesthresh</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="lower-level-tools">Lower-level tools<a class="anchor" aria-label="anchor" href="#lower-level-tools"></a>
-</h2>
-<p>The high-level interface is sufficient for most analyses, but the
-package also exposes tools for inspecting and constructing the
-model-fitting machinery. Among these are:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/get_hierarchical_models.html">get_hierarchical_models</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/find_neighbour_hierarchies.html">find_neighbour_hierarchies</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">convert_to_hierarchy</span></span>
-<span><span class="va">convert_from_hierarchy</span></span>
-<span><span class="fu"><a href="../reference/encode_capture.html">encode_capture</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/decode_capture.html">decode_capture</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/ancestors.html">ancestors</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/descendants.html">descendants</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>These functions are useful when models need to be constructed or
-inspected directly, but they are not required for a standard population
-estimate.</p>
-</div>
-<div class="section level2">
-<h2 id="where-next">Where next?<a class="anchor" aria-label="anchor" href="#where-next"></a>
-</h2>
+<div class="section level3">
+<h3 id="where-next">Where next?<a class="anchor" aria-label="anchor" href="#where-next"></a>
+</h3>
 <p>This vignette has described the package as a tool for current
-analysis. Three companion vignettes give further details and, in some
+analysis. Four companion vignettes give further details and, in some
 cases, paper-specific workflows:</p>
 <ul>
+<li>
+<em>Working with hierarchical models and capture histories</em>:
+hierarchy notation, model enumeration and navigation, and the package’s
+internal encoding;</li>
 <li>
 <em>Reproducing Silverman, Chan and Vincent (2024)</em>: the
 BIC/bootstrap methodology and selected published results;</li>
@@ -857,8 +785,9 @@ and</li>
 Bayesian thresholding method, prior specification, three-list
 interactions, and sparse-data edge cases.</li>
 </ul>
-<p>These reproducibility vignettes may use lower-level or historically
+<p>The reproducibility vignettes may use lower-level or historically
 oriented functions that are not part of the normal user workflow.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

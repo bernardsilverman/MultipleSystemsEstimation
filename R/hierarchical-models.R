@@ -1,26 +1,27 @@
 utils::globalVariables("hiermodels")
 
-#'Models BICS, abundance and maxorder.
+#' Enumerate and rank hierarchical models by BIC
 #'
-#'This routine sorts the models in increasing order according to their BICs, returns the sorted models with their
-#'corresponding BICs and abundance. The original data as well as the maxorder of the models
-#'considered are returned as well.
+#' Fits the hierarchical models permitted by the specified number of lists and
+#' maximum interaction order, and orders the valid fits by increasing BIC.
 #'
-#'@param xdata The original data matrix with capture histories and counts.
-#'@param maxorder Maximum order of models to be included
-#'@param checkexist If TRUE then the Fienberg-Rinaldo condition is checked for each model
-#'@param removeFRfail If checkexist is TRUE then models which fail the FR condition are removed from the results
-#' @param ... Parameters to be fed to \code{get_hierarchical_models}.
+#' @param xdata Capture history data in the standard package format.
+#' @param maxorder Maximum interaction order to be included.
+#' @param checkexist If \code{TRUE}, check parameter identifiability and
+#' existence of the extended MLE for each model.
+#' @param removeFRfail If \code{TRUE}, remove models without a valid fit from
+#' the results.
+#' @param ... Additional arguments passed to \code{fit_hier_model()}.
 #'
-#'@return A list with the following components
-#'\describe{
-#' \item{res}{A matrix with the models considered, their abundance, BIC and their order, sorted
-#'  into increasing order of BIC}
-#'   \item{xdata}{The original data matrix with capture histories and counts.}
-#'   \item{maxorder}{Order parameter that was feed into \code{get_hierarchical_models}}
-#'   }
-#'
-#'
+#' @return A list with components:
+#' \describe{
+#'   \item{\code{res}}{A matrix containing the population estimate, BIC and
+#'   maximum interaction order for each retained model, ordered by increasing
+#'   BIC. Model strings are used as row names.}
+#'   \item{\code{xdata}}{The original capture history data.}
+#'   \item{\code{maxorder}}{The largest interaction order among the retained
+#'   models, or 0 if no model is retained.}
+#' }
 #'
 #' @keywords internal
 assemble_bic <-
@@ -78,36 +79,33 @@ assemble_bic <-
     ))
   }
 
-#' Subset matrix
+#' Restrict a set of fitted hierarchical models
 #'
-#' The idea of this routine is to reduce either or both of \code{ntopmodels} and \code{maxorder} without the need to recalculate
-#' any actual model fits.
+#' Restricts previously calculated model fits by maximum interaction order
+#' and original-data BIC rank, without repeating any fits. Bootstrap and
+#' jackknife matrices already present in the input are subsetted in parallel.
 #'
-#' The routine subsets the results matrix as part of the output given by \code{assemble_bic}
-#' based on specified parameters \code{ntopmodels} and \code{maxorder}. It returns the subsetted matrix,
-#' original data matrix with capture histories and counts and the new actual value of \code{maxorder} (reducing it
-#' from the input value if necessary or if the default input value of \eqn{\infty} is used).
+#' @param z A result from \code{assemble_bic()}, optionally augmented by
+#' \code{bootstrapcal()} and \code{jackknifecal()}.
+#' @param ntopmodels Maximum number of models to retain after applying the
+#' interaction-order restriction. The default \code{Inf} retains all
+#' available models.
+#' @param maxorder Maximum interaction order to retain. The default \code{Inf}
+#' imposes no additional restriction.
 #'
-#'
-#' @param z output from \code{assemble_bic} or a list output from applying \code{assemble_bic}, \code{jackknifecal} and \code{bootstrapcal}.
-#' @param ntopmodels number of top models.  If (taking into account any change in the maximum order of models) there are fewer than
-#' \code{ntopmodels} in the data supplied, then it will be reduced to that value.  If it is not specified then there will be no
-#' reduction in the number.
-#' @param maxorder the maximum order of the models to be considered.  If not specified, it will be set to the corresponding
-#'  value in the input data.
-#'
-#'@return  A list with the following components
+#' @return The input list \code{z}, subsetted to the retained models. Its
+#' possible components are:
 #' \describe{
-#'   \item{res}{a matrix containing models being considered, abundance, BIC and their ordered after being subsetted by maxorder and ntopmodels}
-#'   \item{xdata}{Original data matrix with counts and capture histories}
-#'   \item{maxorder}{The maximum order of models considered after subsetting}
-#'   \item{jackabund}{Jackknife abundance matrix, subsetted by maxorder and ntopmodels}
-#'   \item{jackbic}{Jackknife BIC matrix, subsetted by maxorder and ntopmodels}
-#'   \item{countsobserved}{Capture counts in the same order as the columns of \code{jackabund} and \code{jackbic}}
-#'   \item{bootabund}{Bootstrap abundance matrix, subsetted by maxorder and ntopmodels}
-#'   \item{bootbic}{Bootstrap BIC matrix, subsetted by maxorder and ntopmodels}
-#'   } If the input only has the output from \code{assemble_bic}, the last five items of the list
-#'   do not appear.
+#'   \item{\code{res}}{The original-data model results.}
+#'   \item{\code{xdata}}{The original capture history data.}
+#'   \item{\code{maxorder}}{The largest retained interaction order.}
+#'   \item{\code{jackabund}, \code{jackbic}}{Jackknife population estimates
+#'   and BIC values, if present in the input.}
+#'   \item{\code{countsobserved}}{Capture history counts, if present in the
+#'   input.}
+#'   \item{\code{bootabund}, \code{bootbic}}{Bootstrap population estimates
+#'   and BIC values, if present in the input.}
+#' }
 #'
 #' @keywords internal
 subsetmat <- function(z,
@@ -141,32 +139,42 @@ subsetmat <- function(z,
   return(z)
 }
 
-#' Get a list of all hierarchical models for given number of lists and maximum order
+#' Extract hierarchical models from a catalogue
 #'
-#' Extracts from a larger vector of hierarchical models the ones satisfying the given criterion
+#' Selects all hierarchical models for a specified number of lists and
+#' maximum interaction order from a catalogue of model strings.
 #'
-#' @param nlists Number of lists
-#' @param maxorder Maximum order of models to be returned (defaults to nlists-1)
-#' @param modelvec vector of hierarchical models (defaults to hiermodels)
+#' @param nlists Number of lists.
+#' @param maxorder Maximum interaction order. The default is
+#' \code{nlists - 1}.
+#' @param modelvec A character vector containing the catalogue of
+#' hierarchical-model strings from which models are selected. The default is
+#' the precomputed package catalogue \code{hiermodels}. An alternative
+#' catalogue using the same hierarchy-string notation may be supplied.
+#' The default catalogue contains all hierarchical models for two to five
+#' lists, and all six-list hierarchical models with interaction order at
+#' most 2.
 #'
-#' @return A list of models satisfying the given criteria
+#' @return A character vector containing the models satisfying the specified
+#' number-of-lists and maximum-interaction-order restrictions.
 #'
-#'
-#'@references
-#' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
-#' Bootstrapping Multiple Systems Estimates to Account for Model Selection
-#' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+#' @references
+#' Silverman, B. W., Chan, L. and Vincent, K. (2024).
+#' Bootstrapping Multiple Systems Estimates to Account for Model Selection.
+#' \emph{Statistics and Computing}, \strong{34}, 44.
+#' \href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 #'
 #' @examples
-#' data(hiermodels)
-#' # Five lists with maximum order of 4
-#' get_hierarchical_models(nlists=5,maxorder=4)
-#' # Five lists with maximum order of 2
-#' get_hierarchical_models(nlists=5, maxorder=2)
+#' # Three lists, all interaction orders
+#' get_hierarchical_models(nlists = 3, maxorder = Inf)
 #'
-#'@importFrom stats glm.fit na.omit splinefun
-#'@export
+#' # Three lists with the default maximum interaction order of 2
+#' get_hierarchical_models(nlists = 3)
+#'
+#' # Number of five-list models with maximum interaction order 3
+#' length(get_hierarchical_models(nlists = 5, maxorder = 3))
+#' @importFrom stats glm.fit na.omit splinefun
+#' @export
 get_hierarchical_models=function(nlists, maxorder=nlists-1, modelvec=hiermodels){
   # define extraction functions
   nlistfind = function(x) {
@@ -184,16 +192,32 @@ get_hierarchical_models=function(nlists, maxorder=nlists-1, modelvec=hiermodels)
 
 #' Fit a hierarchical model taking account of possible sparsity
 #'
-#' @param xdatin data obtained using \code{ingest_data}
-#' @param hiermod hierarchical model to fit
-#' @param bicRcap  if TRUE then use the Rcapture convention that the BIC sample size is the number of cases observed.  Otherwise use the number of cells in the Poisson log linear model.
-#' @param checkid if TRUE then \code{.check_extended_MLE} is called inside the routine
+#' Fits a Poisson log-linear model on the appropriate face of the parameter
+#' space. Parameters whose sufficient statistics are zero are fixed at minus
+#' infinity and their descendant cells are removed before fitting.
 #'
-#'@references
+#' @param xdatin Data prepared by \code{ingest_data()}.
+#' @param hiermod Character string specifying the hierarchical model.
+#' @param bicRcap If \code{TRUE}, use the number of observed cases as the BIC
+#' sample size. Otherwise use the number of fitted cells in the Poisson
+#' log-linear model.
+#' @param checkid If \code{TRUE}, check parameter identifiability and existence
+#' of the extended MLE before fitting.
+#'
+#' @return An object returned by \code{stats::glm.fit()}, augmented by:
+#' \describe{
+#'   \item{\code{abundance}}{Estimated total population size, or \code{NA} if
+#'   the model has no valid fit.}
+#'   \item{\code{bic}, \code{aic}}{BIC and AIC values, where available.}
+#'   \item{\code{neginfpars}}{Encoded parameters whose extended-MLE values
+#'   are minus infinity.}
+#' }
+#'
+#' @references
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
-#' Bootstrapping Multiple Systems Estimates to Account for Model Selection
-#' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+#' Bootstrapping Multiple Systems Estimates to Account for Model Selection.
+#' \emph{Statistics and Computing}, \strong{34}, 44.
+#' \href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 #'
 #' @importFrom stats glm.fit na.omit pnorm poisson qnorm quantile rmultinom splinefun
 #' @keywords internal

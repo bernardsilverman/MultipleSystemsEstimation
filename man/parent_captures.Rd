@@ -2,18 +2,17 @@
 % Please edit documentation in R/capture-hierarchy.R
 \name{parent_captures}
 \alias{parent_captures}
-\title{Find the "parents" of a given capture history}
+\title{Find the parents of an encoded capture history}
 \usage{
 parent_captures(k)
 }
 \arguments{
-\item{k}{An encoded capture history}
+\item{k}{An encoded capture history.}
 }
 \value{
-a vector giving the encoded versions of the parents
+A numeric vector containing its encoded parents.
 }
 \description{
-Given any encoded capture history,
-find the encoded capture histories which are obtained by leaving out just one list in turn
+Finds the histories obtained by removing one included list in turn.
 }
 \keyword{internal}

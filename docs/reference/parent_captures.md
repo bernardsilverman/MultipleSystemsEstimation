@@ -1,7 +1,6 @@
-# Find the "parents" of a given capture history
+# Find the parents of an encoded capture history
 
-Given any encoded capture history, find the encoded capture histories
-which are obtained by leaving out just one list in turn
+Finds the histories obtained by removing one included list in turn.
 
 ## Usage
 
@@ -13,9 +12,8 @@ parent_captures(k)
 
 - k:
 
-  An encoded capture history that corresponds to the row number of the
-  capture history data set
+  An encoded capture history.
 
 ## Value
 
-a vector giving the encoded versions of the parents
+A numeric vector containing its encoded parents.

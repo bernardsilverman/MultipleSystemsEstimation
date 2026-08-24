@@ -1,7 +1,9 @@
-# Jackknife abundance and Jackknife bic
+# Jackknife abundance and BIC values
 
-This routine takes the output from `subsetmat` or from `assemble_bic`
-and returns the jackknife abundance matrix and jackknife BIC matrix.
+Constructs the delete-one jackknife fits needed for BCa acceleration.
+Each distinct positive-count capture history is reduced by one
+individual in turn, and every retained hierarchical model is fitted to
+the resulting data.
 
 ## Usage
 
@@ -13,36 +15,38 @@ jackknifecal(z, checkexist = TRUE)
 
 - z:
 
-  Results from `assemble_bic` or `subsetmat`.
+  A result from
+  [`assemble_bic()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/assemble_bic.md)
+  or
+  [`subsetmat()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/subsetmat.md).
 
 - checkexist:
 
-  If `checkexist=TRUE`, check for existence in cases where the jackknife
-  introduces an additional zero, else it does not check for existence.
-  Note that in the current version it is assume that models for which
-  the fit doesn't exist for the original data have already been
-  excluded.
+  If `TRUE`, check identifiability and existence of the extended MLE
+  when a deletion creates an additional zero count. Models that fail on
+  the original data are assumed to have been removed already.
 
 ## Value
 
-A list with the following components
+The input list `z`, with the following components added or replaced:
 
-- jackabund:
+- `jackabund`:
 
-  Jackknife abundance matrix
+  A matrix of jackknife population estimates, with models in rows and
+  capture histories in columns.
 
-- jackbic:
+- `jackbic`:
 
-  Jackknife BIC matrix
+  A corresponding matrix of BIC values.
 
-- countsobserved:
+- `countsobserved`:
 
   Capture counts in the same order as the columns of `jackabund` and
-  `jackbic`
+  `jackbic`.
 
 ## References
 
 Silverman, B. W., Chan, L. and Vincent, K., (2024). Bootstrapping
-Multiple Systems Estimates to Account for Model Selection *Statistics
-and Computing*, **34(44)**, Available from
-[\doi{10.1007/s11222-023-10346-9}](NA).
+Multiple Systems Estimates to Account for Model Selection. *Statistics
+and Computing*, **34**, 44.
+[doi:10.1007/s11222-023-10346-9](https://doi.org/10.1007/s11222-023-10346-9).

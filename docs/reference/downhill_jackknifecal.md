@@ -1,7 +1,7 @@
 # Jackknife downhill
 
-It uses the downhill approach to calculate the jackknife abundance and
-returns the estimated acceleration factor
+Applies the downhill search to the required delete-one data sets and
+calculates the BCa acceleration parameter.
 
 ## Usage
 
@@ -13,25 +13,24 @@ downhill_jackknifecal(xdata, checkid = TRUE, maxorder = dim(xdata)[2] - 2)
 
 - xdata:
 
-  original data matrix
+  Capture history data in the standard package format.
 
 - checkid:
 
-  If it is TRUE, then `check_extended_MLE` is called and it performs the
-  Fienberg-Rinaldo linear program check for the existence of the
-  estimates
+  Passed to
+  [`downhill_fit()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/downhill_fit.md).
 
 - maxorder:
 
-  Maximum order of models to be included
+  Maximum interaction order considered.
 
 ## Value
 
-the estimated acceleration factor
+The estimated BCa acceleration parameter.
 
 ## References
 
 Silverman, B. W., Chan, L. and Vincent, K., (2024). Bootstrapping
 Multiple Systems Estimates to Account for Model Selection *Statistics
-and Computing*, **34(44)**, Available from
-[\doi{10.1007/s11222-023-10346-9}](NA).
+and Computing*, **34**, 44.
+[doi:10.1007/s11222-023-10346-9](https://doi.org/10.1007/s11222-023-10346-9).

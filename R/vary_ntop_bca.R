@@ -34,7 +34,7 @@
 #'   \pkg{MultipleSystemsEstimation}.
 #'
 #' @param maxorder The maximum order of interaction allowed in the
-#'   hierarchical loglinear models considered. Must be at least 2.
+#'   hierarchical log-linear models considered. Must be at least 2.
 #'
 #' @param ntopmax The largest value of \code{ntop} to be considered.
 #'   Inference is calculated for every integer value of \code{ntop}
@@ -52,8 +52,8 @@
 #'
 #' @param iseed The random-number seed used for the bootstrap.
 #'
-#' @param alpha The probabilities at which BCa confidence limits are
-#'   required.
+#' @param alpha The cumulative probability levels at which the endpoints of
+#'   the BCa confidence intervals are required.
 #'
 #' @return A list with two components:
 #' \describe{
@@ -61,7 +61,7 @@
 #'     by minimizing BIC over the full set of candidate models.}
 #'   \item{\code{inference}}{A data frame with one row for each value of
 #'     \code{ntop} considered. The first column gives \code{ntop}; the
-#'     remaining columns give the requested BCa confidence limits. If
+#'     remaining columns give the requested BCa confidence interval endpoints. If
 #'     \code{ntopmax = Inf}, rows are returned for every value of
 #'     \code{ntop} up to the total number of candidate models.}
 #' }
@@ -104,7 +104,7 @@
 #'   \item Silverman, B. W., Chan, L. and Vincent, K. (2024).
 #'   Bootstrapping multiple systems estimates to account for model
 #'   selection. \emph{Statistics and Computing}, \strong{34}, 44.
-#'   \doi{10.1007/s11222-023-10346-9}.
+#'   \href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 #'
 #'   \item Efron, B. and Tibshirani, R. (1986).
 #'   Bootstrap methods for standard errors, confidence intervals,
@@ -228,7 +228,7 @@ vary_ntop_bca <- function(
     z$countsobserved
   )
 
-  ## Calculate BCa confidence limits
+  ## Calculate BCa confidence interval endpoints
 
   bcamat <- matrix(
     NA_real_,

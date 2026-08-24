@@ -3,18 +3,19 @@
 \docType{data}
 \name{hiermodels}
 \alias{hiermodels}
-\title{Hierarchical models}
+\title{Catalogue of hierarchical models}
 \format{
-An object of class \code{character} of length 39783.
+A character vector of length 39,783 containing model
+specifications written in the package's hierarchy-string notation.
 }
 \usage{
 hiermodels
 }
 \description{
-Hierarchical models from two lists to six lists
-}
-\details{
-These data provide hierarchical models constructed
-from two lists to six lists of maximal order 2.
+A precomputed catalogue of hierarchical-model strings used by
+\code{\link{get_hierarchical_models}}. It contains all hierarchical
+models with maximum interaction order at most one less than the number
+of lists for two to five lists. For six lists, it contains all
+hierarchical models with interaction order at most 2.
 }
 \keyword{internal}

@@ -7,21 +7,21 @@
 decode_capture(k, nlists)
 }
 \arguments{
-\item{k}{The capture history to be decoded}
+\item{k}{Integer encoding of a capture history.}
 
-\item{nlists}{The number of lists}
+\item{nlists}{Number of lists.}
 }
 \value{
-A logical vector of length \code{nlists} giving presence or absence in the capture history
+A logical vector of length \code{nlists}.
 }
 \description{
-Given a capture history as a number and the number of lists, decode it into a logical vector giving
-presence or absence in the capture history.
+Converts an encoded capture history to a logical vector indicating
+membership of each list.
 }
 \references{
 Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 Bootstrapping Multiple Systems Estimates to Account for Model Selection
-\emph{Statistics and Computing}, \strong{34(44)},
-Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+\emph{Statistics and Computing}, \strong{34}, 44,
+\href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 }
 \keyword{internal}

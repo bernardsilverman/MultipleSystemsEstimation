@@ -3,18 +3,19 @@
 \docType{data}
 \name{UKdat_5}
 \alias{UKdat_5}
-\title{UK data five list version}
+\title{Five-list version of the United Kingdom data}
 \format{
-An object of class \code{data.frame} with 18 rows and 6 columns.
+A data frame with 18 rows and 6 columns. Columns \code{LA},
+\code{NG}, \code{PFNCA}, \code{GO} and \code{GP} are binary
+list-membership indicators. Column \code{count} gives the number of cases
+having each observed capture history.
 }
 \usage{
 UKdat_5
 }
 \description{
-UK data consolidated into five lists
-}
-\details{
-This reduces the UK data \code{\link{UKdat}} into five lists, constructed by combining
- the PF and NCA lists into a single PFNCA list
+A five-list version of \code{\link{UKdat}}, constructed by combining the
+police-force and National Crime Agency lists into a single list,
+\code{PFNCA}.
 }
 \keyword{datasets}

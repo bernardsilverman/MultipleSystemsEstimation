@@ -1,6 +1,9 @@
-# New Orleans data five list version
+# Five-list version of the Greater New Orleans data
 
-New Orleans data consolidated into five lists
+A five-list version of
+[`NewOrl`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/NewOrl.md),
+constructed by combining the four smallest lists B, E, F and G into a
+single list, `BEFG`.
 
 ## Usage
 
@@ -10,11 +13,6 @@ NewOrl_5
 
 ## Format
 
-An object of class `data.frame` with 14 rows and 6 columns.
-
-## Details
-
-This reduces the New Orleans data
-[`NewOrl`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/NewOrl.md)
-into five lists, constructed by combining the four smallest lists B, E,
-F and G into a single list.
+A data frame with 14 rows and 6 columns. Columns `A`, `BEFG`, `C`, `D`
+and `H` are binary list-membership indicators. Column `n` gives the
+number of cases having each observed capture history.

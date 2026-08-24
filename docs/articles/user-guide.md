@@ -34,8 +34,9 @@ package also implements the Bayesian thresholding approach of Section 6
 of Silverman (2020).
 
 This vignette is intended as a guide to analysing data with the package.
-Separate vignettes describe how to reproduce specific results from the
-two papers.
+A separate vignette describes how hierarchical models are handled, and
+others discuss specific results from the three papers as well as
+subsequent methodological extensions.
 
 ## Data format
 
@@ -188,10 +189,9 @@ head(fit_bic$bic_results$res)
 
 ### Which models are considered?
 
-Unlike the stepwise procedure, which considers only two-list
-interactions, the BIC method can consider higher-order interactions. The
-argument `maxorder` controls the maximum order of interactions
-considered. If it is left at its default `NULL`, the package chooses:
+The argument `maxorder` controls the maximum order of interactions
+considered by the method. If it is left at its default `NULL`, the
+package chooses:
 
 | Number of lists | Automatic `maxorder` |
 |----------------:|---------------------:|
@@ -217,17 +217,26 @@ from the model-selection step. The bootstrap approach of Silverman, Chan
 and Vincent (2024) addresses this by repeating BIC model selection
 within bootstrap samples.
 
-Bootstrap inference is requested through `nboot`:
+Bootstrap inference is requested through `nboot`; to keep the vignette
+quick, the examples below use only 100 bootstrap replications. A
+substantially larger number should be used for substantive inference.
 
 ``` r
 
 fit_bic_boot <- estimate_population(
   Korea,
   method = "bic",
-  nboot = 1000
+  nboot = 100
 )
 
 fit_bic_boot$BCaquantiles
+#>            0.025      0.1      0.9    0.975
+#> [12,23] 133.2116 136.9897 199.7547 303.2850
+#> [12,3]  133.1861 136.8837 282.6830 409.4789
+#> [13,23] 133.1861 136.8837 282.6830 409.4789
+#> [23,1]  129.5471 136.0981 285.0565 417.0102
+#> [13,2]  129.5471 136.0981 285.0565 417.0102
+#> [1,2,3] 129.5471 136.0981 285.0565 417.0102
 ```
 
 A small value of `nboot` is useful for checking code, but substantive
@@ -256,25 +265,25 @@ The number retained can be specified directly, for example:
 
 ``` r
 
-fit_bic_50 <- estimate_population(
+fit_bic_5 <- estimate_population(
   Korea,
   method = "bic",
-  nboot = 1000,
-  ntopmodels = 50
+  nboot = 100,
+  ntopmodels = 5
 )
+
+fit_bic_5$BCaquantiles
+#>            0.025      0.1      0.9    0.975
+#> [12,23] 133.2116 136.9897 199.7547 303.2850
+#> [12,3]  133.1861 136.8837 282.6830 409.4789
+#> [13,23] 133.1861 136.8837 282.6830 409.4789
+#> [23,1]  129.5471 136.0981 285.0565 417.0102
+#> [13,2]  129.5471 136.0981 285.0565 417.0102
 ```
 
-For each retained set, the package calculates bias-corrected and
-accelerated (BCa) confidence limits. The rows of `BCaquantiles`
-correspond to nested sets of the models ranked by original-data BIC. Row
-1 allows only the best-BIC model; row 2 allows selection between the
-best two; and so on. The final row therefore shows the inference
-obtained when selection is allowed among all models retained for the
-bootstrap calculation.
-
-This makes it possible not only to obtain a confidence interval but also
-to see whether the inference has stabilised as additional candidate
-models are admitted.
+The `BCaquantiles` component gives the endpoints of the bias-corrected
+and accelerated (BCa) confidence intervals obtained when model selection
+is allowed among all models retained for the bootstrap calculation.
 
 ## Sparse capture data
 
@@ -350,20 +359,23 @@ procedures.
 
 ## The stepwise method
 
-The second principal model-selection method is the forward stepwise
-procedure of Chan, Silverman and Vincent (2021). It can be requested
-explicitly for any supported number of lists and is selected
-automatically when there are six or more lists. In the present
-implementation it only considers models with two-list interactions.
+The second principal model-selection method is an extension of the
+forward stepwise procedure of Chan, Silverman and Vincent (2021). It can
+be requested explicitly for any supported number of lists and is
+selected automatically when there are six or more lists.
 
-The procedure starts with a main-effects model. At each stage it
-considers candidate two-list interactions not yet included in the model,
-subject to the existence and identifiability checks described above. The
-interaction with the smallest p-value is added if that p-value does not
-exceed the threshold `pthresh`; otherwise the procedure stops.
+The procedure starts with the main-effects model. At each stage it
+considers interactions that can be added while preserving the
+hierarchical structure of the model. Candidates that fail the existence
+or identifiability checks described above are discarded. Among the
+remaining candidates, the interaction with the smallest p-value is added
+if that p-value is below the threshold `pthresh`; otherwise the
+procedure stops.
 
 The default is `pthresh = 0.02`, following the simulation study reported
-by Chan, Silverman and Vincent (2021).
+by Chan, Silverman and Vincent (2021). Setting `maxorder = 2` means that
+only two-list interactions are considered and the procedure agrees with
+the method studied in that paper.
 
 For example:
 
@@ -376,127 +388,8 @@ fit_step <- estimate_population(
 
 fit_step$popest
 #> [1] 268.7778
-fit_step$MSEfit
-#> $fit
-#> $fit$coefficients
-#>         1         2         3         4         5 
-#>  4.982083 -2.832024 -3.620482  5.412241 -1.268511 
-#> 
-#> $fit$residuals
-#>             2             3             4             5             6 
-#> -4.176136e-01  2.812500e-01  4.829545e-02 -1.733031e-16  1.484848e+00 
-#>             7             8 
-#> -1.000000e+00 -1.717172e-01 
-#> 
-#> $fit$fitted.values
-#>         2         3         4         5         6         7         8 
-#>  8.585366  3.902439 51.512195 41.000000  2.414634  1.097561 14.487805 
-#> 
-#> $fit$effects
-#>           1           2           3           4           5             
-#> -37.8739059  -0.1087053  -1.3877657  -7.6927803   4.7545965  -1.7833522 
-#>             
-#>  -2.3652222 
-#> 
-#> $fit$R
-#>           1         2         3         4          5
-#> 1 -11.09054 -6.942856 -6.401854 -5.951020 -5.3198508
-#> 2   0.00000  5.366260  4.016362  4.599652 -3.7330505
-#> 3   0.00000  0.000000 -3.726271 -2.530297  0.9334429
-#> 4   0.00000  0.000000  0.000000 -1.739589 -1.3577277
-#> 5   0.00000  0.000000  0.000000  0.000000 -3.7481703
-#> 
-#> $fit$rank
-#> [1] 5
-#> 
-#> $fit$qr
-#> $qr
-#>              1           2          3           4          5
-#> 2 -11.09053653 -6.94285621 -6.4018544 -5.95101958 -5.3198508
-#> 3   0.17812116  5.36626016  4.0163624  4.59965154 -3.7330505
-#> 4   0.64714630 -0.39565940 -3.7262707 -2.53029702  0.9334429
-#> 5   0.57735027  0.84023239 -0.2576296 -1.73958866 -1.3577277
-#> 6   0.14011129 -0.08566277 -0.2441369 -0.20535175 -3.7481703
-#> 7   0.09446301  0.13747440  0.2389992 -0.29265174  0.3022582
-#> 8   0.34320115 -0.20983008  0.4234623  0.06809711  0.9058907
-#> 
-#> $rank
-#> [1] 5
-#> 
-#> $qraux
-#> [1] 1.264196 1.259224 1.798488 1.931423 1.296651
-#> 
-#> $pivot
-#> [1] 1 2 3 4 5
-#> 
-#> $tol
-#> [1] 1e-11
-#> 
-#> attr(,"class")
-#> [1] "qr"
-#> 
-#> $fit$family
-#> 
-#> Family: poisson 
-#> Link function: log 
-#> 
-#> 
-#> $fit$linear.predictors
-#>          2          3          4          5          6          7          8 
-#> 2.15005911 1.36160175 3.94181858 3.71357207 0.88154778 0.09309042 2.67330725 
-#> 
-#> $fit$deviance
-#> [1] 8.566946
-#> 
-#> $fit$aic
-#> [1] 44.90767
-#> 
-#> $fit$null.deviance
-#> [1] 143.5474
-#> 
-#> $fit$iter
-#> [1] 5
-#> 
-#> $fit$weights
-#>         2         3         4         5         6         7         8 
-#>  8.585366  3.902439 51.512195 41.000000  2.414634  1.097561 14.487805 
-#> 
-#> $fit$prior.weights
-#> 2 3 4 5 6 7 8 
-#> 1 1 1 1 1 1 1 
-#> 
-#> $fit$df.residual
-#> [1] 2
-#> 
-#> $fit$df.null
-#> [1] 6
-#> 
-#> $fit$y
-#>  2  3  4  5  6  7  8 
-#>  5  5 54 41  6  0 12 
-#> 
-#> $fit$converged
-#> [1] TRUE
-#> 
-#> $fit$boundary
-#> [1] FALSE
-#> 
-#> $fit$abundance
-#>        1 
-#> 268.7778 
-#> 
-#> $fit$bic
-#> [1] 58.9686
-#> 
-#> $fit$neginfpars
-#> numeric(0)
-#> 
-#> 
-#> $hiermod
+fit_step$MSEfit$hiermod
 #> [1] "[12,3]"
-#> 
-#> $selected
-#> [1]  TRUE FALSE FALSE
 ```
 
 The threshold can be varied explicitly:
@@ -513,12 +406,55 @@ fit_step_01$popest
 #> [1] 268.7778
 ```
 
-The stepwise method is not merely a computational fallback. It can be
-chosen deliberately when the 2021 model-selection procedure is
-scientifically preferred or when sensitivity to the threshold is of
-interest.
+Higher-order interactions can be allowed by increasing `maxorder`.
+Setting `maxorder = Inf` allows interactions of any order to be
+considered. A higher-order interaction becomes eligible only when its
+lower-order terms are already present, so every model considered by the
+procedure is hierarchical.
 
-## Bootstrap inference after stepwise selection
+For the Kosovo data, allowing interactions of any order changes both the
+selected model and the population estimate:
+
+``` r
+
+fit_step_pairwise <- estimate_population(
+  Kosovo,
+  method = "stepwise",
+  maxorder = 2
+)
+
+fit_step_unrestricted <- estimate_population(
+  Kosovo,
+  method = "stepwise",
+  maxorder = Inf
+)
+
+c(
+  pairwise = fit_step_pairwise$popest,
+  unrestricted = fit_step_unrestricted$popest
+)
+#>     pairwise unrestricted 
+#>     14341.66     18393.31
+
+c(
+  pairwise = fit_step_pairwise$MSEfit$hiermod,
+  unrestricted = fit_step_unrestricted$MSEfit$hiermod
+)
+#>           pairwise       unrestricted 
+#> "[12,13,14,23,34]"      "[134,12,23]"
+```
+
+The pairwise search selects `[12,13,14,23,34]`, whereas the unrestricted
+search selects `[134,12,23]`. The latter hierarchy includes interactions
+13, 14 and 34 implicitly and adds the three-list interaction 134. The
+corresponding population estimates are approximately 14,342 and 18,393.
+
+The stepwise method is not merely a computational fallback. It can be
+chosen deliberately when the 2021 pairwise procedure is scientifically
+preferred, when sensitivity to `pthresh` is of interest, or when a
+forward search over higher-order hierarchical models is desired. The
+2021 reproducibility vignette describes the published pairwise procedure
+in more detail. \# Bootstrap inference after stepwise selection
 
 As with the BIC approach, bootstrap inference repeats the complete
 model-selection procedure for every bootstrap sample rather than
@@ -529,23 +465,28 @@ conditioning on the model selected from the original data.
 fit_step_boot <- estimate_population(
   Korea,
   method = "stepwise",
-  nboot = 1000
+  nboot = 100
 )
 
 fit_step_boot$BCaquantiles
+#>    0.025      0.1      0.9    0.975 
+#> 123.3274 193.8215 358.3031 399.8280
 ```
 
 The bootstrap samples are generated by multinomial resampling of the
 observed capture-history counts. A delete-one jackknife calculation
-supplies the acceleration term for the BCa confidence limits.
+supplies the acceleration term for the BCa confidence intervals.
 
 The result also contains the bootstrap population estimates and the
 estimated acceleration parameter:
 
 ``` r
 
-fit_step_boot$bootreps
+summary(fit_step_boot$bootreps)
+#>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#>   123.1   197.1   247.8   235.9   287.0   400.7
 fit_step_boot$ahat
+#> [1] -0.02877338
 ```
 
 ## The Bayesian thresholding method
@@ -644,34 +585,43 @@ For example:
 fit_fixed <- estimate_population(
   Korea,
   method = "fixed",
-  hiermod = "[12,23]"
+  model = "[12,23]"
 )
 
 fit_fixed$popest
 #> [1] 157.1667
-fit_fixed$hiermod
+fit_fixed$model
 #> [1] "[12,23]"
 ```
 
-Bootstrap inference for a fixed model is requested in the same way:
+Bootstrap inference for a fixed model is requested in the same way. In
+contrast to the BIC and stepwise procedures, the same specified model is
+fitted to every bootstrap and jackknife sample. There is no
+model-selection step inside the resampling procedure.
 
 ``` r
 
 fit_fixed_boot <- estimate_population(
   Korea,
   method = "fixed",
-  hiermod = "[12,23]",
-  nboot = 1000
+  model = "[12,23]",
+  nboot = 100
 )
+#> Warning: 3 of 100 bootstrap replications did not produce a finite
+#> population-size estimate under the specified fixed hierarchical model and were
+#> omitted.
 
 fit_fixed_boot$BCaquantiles
+#>    0.025      0.1      0.9    0.975 
+#> 131.7082 135.6852 208.5624 244.9442
 ```
 
-Here the distinction from BIC and stepwise inference is important: the
-same specified model is fitted to every bootstrap and jackknife sample.
-There is no model-selection step inside the resampling procedure.
+Three bootstrap replications failed to produce a finite estimate under
+the specified fixed model and were omitted. With only 100 replications,
+the resulting interval is included to demonstrate the calculation and
+should not be used for substantive inference.
 
-## Bootstrap and BCa inference for likelihood based methods: a common view
+## Bootstrap and BCa inference for likelihood-based methods: a common view
 
 The BIC, stepwise and fixed routes can be used for point estimation with
 `nboot = 0`, which is the default.
@@ -771,11 +721,11 @@ For fixed fitting:
 ``` r
 
 names(fit_fixed)
-#> [1] "popest"       "MSEfit"       "hiermod"      "bootreps"     "ahat"        
+#> [1] "popest"       "MSEfit"       "model"        "bootreps"     "ahat"        
 #> [6] "BCaquantiles"
 ```
 
-`hiermod` records the model that was fitted and `MSEfit` contains the
+`model` records the model that was fitted and `MSEfit` contains the
 detailed fitted object.
 
 The individual help pages give the complete definitions of returned
@@ -790,34 +740,15 @@ components:
 ?estimate_population_bayesthresh
 ```
 
-## Lower-level tools
-
-The high-level interface is sufficient for most analyses, but the
-package also exposes tools for inspecting and constructing the
-model-fitting machinery. Among these are:
-
-``` r
-
-get_hierarchical_models()
-find_neighbour_hierarchies()
-convert_to_hierarchy
-convert_from_hierarchy
-encode_capture()
-decode_capture()
-ancestors()
-descendants()
-```
-
-These functions are useful when models need to be constructed or
-inspected directly, but they are not required for a standard population
-estimate.
-
-## Where next?
+### Where next?
 
 This vignette has described the package as a tool for current analysis.
-Three companion vignettes give further details and, in some cases,
+Four companion vignettes give further details and, in some cases,
 paper-specific workflows:
 
+- *Working with hierarchical models and capture histories*: hierarchy
+  notation, model enumeration and navigation, and the package’s internal
+  encoding;
 - *Reproducing Silverman, Chan and Vincent (2024)*: the BIC/bootstrap
   methodology and selected published results;
 - *Reproducing Chan, Silverman and Vincent (2021)*: the sparse-data and
@@ -826,7 +757,7 @@ paper-specific workflows:
   thresholding method, prior specification, three-list interactions, and
   sparse-data edge cases.
 
-These reproducibility vignettes may use lower-level or historically
+The reproducibility vignettes may use lower-level or historically
 oriented functions that are not part of the normal user workflow.
 
 ## References

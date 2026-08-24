@@ -1,8 +1,8 @@
-# Victims related to sex trafficking in a U.S. Western site
+# Western-site sex-trafficking data
 
-These data are collected into 5 lists. For reasons of confidentiality
-the lists are only labelled as A, B, C, D and E. Full details are given
-in Farrell, Dank, Kfafian, Lockwood, Pfeffer, Hughes and Vincent (2019).
+Capture-history data for identified victims of sex trafficking at a
+western United States site. The five source lists are confidentially
+labelled A to E. Further details are given by Farrell et al. (2018).
 
 ## Usage
 
@@ -12,12 +12,14 @@ Western
 
 ## Format
 
-An object of class `data.frame` with 13 rows and 6 columns.
+A data frame with 13 rows and 6 columns. Columns `A` to `E` are binary
+list-membership indicators. Column `n` gives the number of cases having
+each observed capture history.
 
 ## References
 
-Farrell, A., Dank, M., Kfafian, M., Lockwood, S., Pfeffer, R., Hughes,
-A., and Vincent, K. (2019). Capturing human trafficking victimization
+Farrell, A., Dank, M., Kafafian, M., Lockwood, S., Pfeffer, R., Hughes,
+A. and Vincent, K. (2018). Capturing human trafficking victimization
 through crime reporting. Technical Report 2015-VF-GX-0105, National
-Institute of Justice. Available from
-<https://www.ncjrs.gov/pdffiles1/nij/grants/252520.pdf>.
+Institute of Justice.
+<https://www.ojp.gov/pdffiles1/nij/grants/252520.pdf>.

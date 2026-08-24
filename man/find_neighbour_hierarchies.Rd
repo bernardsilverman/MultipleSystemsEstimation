@@ -2,7 +2,7 @@
 % Please edit documentation in R/capture-hierarchy.R
 \name{find_neighbour_hierarchies}
 \alias{find_neighbour_hierarchies}
-\title{Find neighbouring hierarchical models}
+\title{Find the neighbours of a hierarchical model}
 \usage{
 find_neighbour_hierarchies(
   modelstr,
@@ -34,13 +34,18 @@ A character vector containing the requested neighbouring
   hierarchical models.
 }
 \description{
-Given a hierarchical model, find models obtained either by adding one
-admissible term or by removing one generator while preserving hierarchy.
+Given a hierarchical model, finds its outer neighbours, its inner
+neighbours, or both.
 }
 \details{
-Outer neighbours are obtained by adding a term for which all immediate
-parents are already present. Inner neighbours are obtained by removing one
-of the generators of the hierarchy. Main effects are not removed when
+An outer neighbour is obtained by adding an interaction term all of whose
+subsets are already in the model.
+
+An inner neighbour is obtained by removing one of the generators defining
+the hierarchical model. Removing a generator removes only the defining
+interaction term itself, not the lower-order terms that it implies. For
+example, removing the generator \code{123} from \code{[123,34]} yields
+\code{[12,13,23,34]}, not \code{[34]}. Main effects are not removed when
 \code{keepmaineffects = TRUE}.
 }
 \examples{
@@ -54,6 +59,6 @@ find_neighbour_hierarchies(modelstr, type = "inner")
 \references{
 Silverman, B. W., Chan, L. and Vincent, K. (2024).
 Bootstrapping Multiple Systems Estimates to Account for Model Selection.
-\emph{Statistics and Computing}, \strong{34}(44).
-\doi{10.1007/s11222-023-10346-9}.
+\emph{Statistics and Computing}, \strong{34}, 44.
+\href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 }

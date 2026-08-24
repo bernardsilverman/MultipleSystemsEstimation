@@ -3,18 +3,18 @@
 \docType{data}
 \name{Ned_5}
 \alias{Ned_5}
-\title{Netherlands data five list version}
+\title{Five-list version of the Netherlands data}
 \format{
-An object of class \code{data.frame} with 17 rows and 6 columns.
+A data frame with 17 rows and 6 columns. Columns \code{IO},
+\code{K}, \code{P}, \code{R} and \code{Z} are binary list-membership
+indicators. Column \code{frequency} gives the number of cases having each
+observed capture history.
 }
 \usage{
 Ned_5
 }
 \description{
-Netherlands data consolidated into five lists
-}
-\details{
-This reduces the Netherlands data \code{\link{Ned}} into five lists, constructed by combining
- the two smallest lists I and O into a single list.
+A five-list version of \code{\link{Ned}}, constructed by combining lists
+I and O into a single list, \code{IO}.
 }
 \keyword{datasets}

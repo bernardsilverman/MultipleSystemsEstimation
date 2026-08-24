@@ -11,7 +11,7 @@ estimate_population(
 )
 }
 \arguments{
-\item{zdat}{Capture-pattern data. The first columns identify list
+\item{zdat}{Capture history data. The first columns identify list
 membership and the final column contains the observed counts.}
 
 \item{method}{Estimation method. One of \code{"auto"}, \code{"bic"},

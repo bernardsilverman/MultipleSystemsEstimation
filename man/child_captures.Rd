@@ -2,26 +2,25 @@
 % Please edit documentation in R/capture-hierarchy.R
 \name{child_captures}
 \alias{child_captures}
-\title{Find the "children" of a given capture history}
+\title{Find the children of an encoded capture history}
 \usage{
 child_captures(k, nlists)
 }
 \arguments{
-\item{k}{An encoded capture history}
+\item{k}{An encoded capture history.}
 
-\item{nlists}{The total number of lists}
+\item{nlists}{Total number of lists.}
 }
 \value{
-a vector giving the encoded versions of the children
+A numeric vector containing its encoded children.
 }
 \description{
-Given any encoded capture history and the number of lists,
-find the encoded capture histories which are obtained by adding one more list in turn
+Finds the histories obtained by adding one previously absent list in turn.
 }
 \references{
 Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 Bootstrapping Multiple Systems Estimates to Account for Model Selection
-\emph{Statistics and Computing}, \strong{34(44)},
-Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+\emph{Statistics and Computing}, \strong{34}, 44,
+\href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 }
 \keyword{internal}

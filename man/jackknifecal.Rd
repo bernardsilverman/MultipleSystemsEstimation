@@ -2,33 +2,38 @@
 % Please edit documentation in R/bootstrap-calibration.R
 \name{jackknifecal}
 \alias{jackknifecal}
-\title{Jackknife abundance and Jackknife bic}
+\title{Jackknife abundance and BIC values}
 \usage{
 jackknifecal(z, checkexist = TRUE)
 }
 \arguments{
-\item{z}{Results from \code{assemble_bic} or \code{subsetmat}.}
+\item{z}{A result from \code{assemble_bic()} or \code{subsetmat()}.}
 
-\item{checkexist}{If \code{checkexist=TRUE}, check for existence in cases where the jackknife introduces an additional zero, else it does
-not check for existence.  Note that in the current version it is assume that models for which the fit doesn't exist for the original data
-have already been excluded.}
+\item{checkexist}{If \code{TRUE}, check identifiability and existence of the
+extended MLE when a deletion creates an additional zero count. Models that
+fail on the original data are assumed to have been removed already.}
 }
 \value{
-A list with the following components
+The input list \code{z}, with the following components added or
+replaced:
 \describe{
-  \item{jackabund}{Jackknife abundance matrix}
-  \item{jackbic}{Jackknife BIC matrix}
-  \item{countsobserved}{Capture counts in the same order as the columns of \code{jackabund} and \code{jackbic}}
+  \item{\code{jackabund}}{A matrix of jackknife population estimates,
+  with models in rows and capture histories in columns.}
+  \item{\code{jackbic}}{A corresponding matrix of BIC values.}
+  \item{\code{countsobserved}}{Capture counts in the same order as the
+  columns of \code{jackabund} and \code{jackbic}.}
 }
 }
 \description{
-This routine takes the output from \code{subsetmat} or from \code{assemble_bic} and returns the jackknife
-abundance matrix and jackknife BIC matrix.
+Constructs the delete-one jackknife fits needed for BCa acceleration.
+Each distinct positive-count capture history is reduced by one individual
+in turn, and every retained hierarchical model is fitted to the resulting
+data.
 }
 \references{
 Silverman, B. W., Chan, L. and  Vincent, K., (2024).
-Bootstrapping Multiple Systems Estimates to Account for Model Selection
-\emph{Statistics and Computing}, \strong{34(44)},
-Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+Bootstrapping Multiple Systems Estimates to Account for Model Selection.
+\emph{Statistics and Computing}, \strong{34}, 44.
+\href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 }
 \keyword{internal}

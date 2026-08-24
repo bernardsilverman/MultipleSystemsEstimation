@@ -1,7 +1,9 @@
-# Subset matrix
+# Restrict a set of fitted hierarchical models
 
-The idea of this routine is to reduce either or both of `ntopmodels` and
-`maxorder` without the need to recalculate any actual model fits.
+Restricts previously calculated model fits by maximum interaction order
+and original-data BIC rank, without repeating any fits. Bootstrap and
+jackknife matrices already present in the input are subsetted in
+parallel.
 
 ## Usage
 
@@ -13,67 +15,51 @@ subsetmat(z, ntopmodels = Inf, maxorder = Inf)
 
 - z:
 
-  output from `assemble_bic` or a list output from applying
-  `assemble_bic`, `jackknifecal` and `bootstrapcal`.
+  A result from
+  [`assemble_bic()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/assemble_bic.md),
+  optionally augmented by
+  [`bootstrapcal()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/bootstrapcal.md)
+  and
+  [`jackknifecal()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/jackknifecal.md).
 
 - ntopmodels:
 
-  number of top models. If (taking into account any change in the
-  maximum order of models) there are fewer than `ntopmodels` in the data
-  supplied, then it will be reduced to that value. If it is not
-  specified then there will be no reduction in the number.
+  Maximum number of models to retain after applying the
+  interaction-order restriction. The default `Inf` retains all available
+  models.
 
 - maxorder:
 
-  the maximum order of the models to be considered. If not specified, it
-  will be set to the corresponding value in the input data.
+  Maximum interaction order to retain. The default `Inf` imposes no
+  additional restriction.
 
 ## Value
 
-A list with the following components
+The input list `z`, subsetted to the retained models. Its possible
+components are:
 
-- res:
+- `res`:
 
-  a matrix containing models being considered, abundance, BIC and their
-  ordered after being subsetted by maxorder and ntopmodels
+  The original-data model results.
 
-- xdata:
+- `xdata`:
 
-  Original data matrix with counts and capture histories
+  The original capture history data.
 
-- maxorder:
+- `maxorder`:
 
-  The maximum order of models considered after subsetting
+  The largest retained interaction order.
 
-- jackabund:
+- `jackabund`, `jackbic`:
 
-  Jackknife abundance matrix, subsetted by maxorder and ntopmodels
+  Jackknife population estimates and BIC values, if present in the
+  input.
 
-- jackbic:
+- `countsobserved`:
 
-  Jackknife BIC matrix, subsetted by maxorder and ntopmodels
+  Capture history counts, if present in the input.
 
-- countsobserved:
+- `bootabund`, `bootbic`:
 
-  Capture counts in the same order as the columns of `jackabund` and
-  `jackbic`
-
-- bootabund:
-
-  Bootstrap abundance matrix, subsetted by maxorder and ntopmodels
-
-- bootbic:
-
-  Bootstrap BIC matrix, subsetted by maxorder and ntopmodels
-
-If the input only has the output from `assemble_bic`, the last five
-items of the list do not appear.
-
-## Details
-
-The routine subsets the results matrix as part of the output given by
-`assemble_bic` based on specified parameters `ntopmodels` and
-`maxorder`. It returns the subsetted matrix, original data matrix with
-capture histories and counts and the new actual value of `maxorder`
-(reducing it from the input value if necessary or if the default input
-value of \\\infty\\ is used).
+  Bootstrap population estimates and BIC values, if present in the
+  input.

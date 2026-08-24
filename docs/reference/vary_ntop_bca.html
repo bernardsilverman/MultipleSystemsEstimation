@@ -53,7 +53,7 @@ also available; see Details."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">MultipleSystemsEstimation</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -136,7 +136,7 @@ also available; see Details.</p>
 
 <dt id="arg-maxorder">maxorder<a class="anchor" aria-label="anchor" href="#arg-maxorder"></a></dt>
 <dd><p>The maximum order of interaction allowed in the
-hierarchical loglinear models considered. Must be at least 2.</p></dd>
+hierarchical log-linear models considered. Must be at least 2.</p></dd>
 
 
 <dt id="arg-ntopmax">ntopmax<a class="anchor" aria-label="anchor" href="#arg-ntopmax"></a></dt>
@@ -164,8 +164,8 @@ Silverman, Chan and Vincent (2024).</p></dd>
 
 
 <dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
-<dd><p>The probabilities at which BCa confidence limits are
-required.</p></dd>
+<dd><p>The cumulative probability levels at which the endpoints of
+the BCa confidence intervals are required.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -177,7 +177,7 @@ required.</p></dd>
   <dt><code>inference</code></dt>
 <dd><p>A data frame with one row for each value of
     <code>ntop</code> considered. The first column gives <code>ntop</code>; the
-    remaining columns give the requested BCa confidence limits. If
+    remaining columns give the requested BCa confidence interval endpoints. If
     <code>ntopmax = Inf</code>, rows are returned for every value of
     <code>ntop</code> up to the total number of candidate models.</p></dd>
 
@@ -219,8 +219,7 @@ without materially changing the resulting confidence intervals.</p>
 <ul><li><p>Silverman, B. W., Chan, L. and Vincent, K. (2024).
   Bootstrapping multiple systems estimates to account for model
   selection. <em>Statistics and Computing</em>, <strong>34</strong>, 44.
-  <a href="https://doi.org/10.1007/s11222-023-10346-9" class="external-link">doi:10.1007/s11222-023-10346-9</a>
-.</p></li>
+  <a href="https://doi.org/10.1007/s11222-023-10346-9" class="external-link">doi:10.1007/s11222-023-10346-9</a>.</p></li>
 <li><p>Efron, B. and Tibshirani, R. (1986).
   Bootstrap methods for standard errors, confidence intervals,
   and other measures of statistical accuracy.

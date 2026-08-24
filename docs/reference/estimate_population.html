@@ -9,7 +9,7 @@ methods in MultipleSystemsEstimation."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">MultipleSystemsEstimation</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,7 +60,7 @@ methods in <span class="pkg">MultipleSystemsEstimation</span>.</p>
 
 
 <dl><dt id="arg-zdat">zdat<a class="anchor" aria-label="anchor" href="#arg-zdat"></a></dt>
-<dd><p>Capture-pattern data. The first columns identify list
+<dd><p>Capture history data. The first columns identify list
 membership and the final column contains the observed counts.</p></dd>
 
 
@@ -104,9 +104,9 @@ method for six-list data and issues an informational message.</p>
 <code>method = "bic"</code>, <code>"stepwise"</code>, <code>"bayesthresh"</code>, or
 <code>"fixed"</code>. The <code>"bayesthresh"</code> method requires the suggested
 package <span class="pkg">MCMCpack</span>.</p>
-<p>The stepwise method considers two-list interactions only. The BIC and
-Bayesian-threshold methods can consider higher-order interactions,
-subject to their respective `maxorder` settings.</p>
+<p>Through their respective <code>maxorder</code> arguments,
+the stepwise, BIC and Bayesian-threshold methods can all be restricted to
+two-list interactions, or consider higher-order interactions.</p>
 <p>Method-specific arguments are passed through <code>...</code> to the selected
 estimation function. See the documentation for the individual methods
 for details of the available arguments and their defaults.</p>
@@ -402,7 +402,7 @@ for details of the available arguments and their defaults.</p>
 <span class="r-in"><span><span class="fu">estimate_population</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="va">Korea</span>,</span></span>
 <span class="r-in"><span>  method <span class="op">=</span> <span class="st">"fixed"</span>,</span></span>
-<span class="r-in"><span>  hiermod <span class="op">=</span> <span class="st">"[12,23]"</span></span></span>
+<span class="r-in"><span>  model <span class="op">=</span> <span class="st">"[12,23]"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $popest</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 157.1667</span>
@@ -523,7 +523,7 @@ for details of the available arguments and their defaults.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> numeric(0)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $hiermod</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $model</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "[12,23]"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $bootreps</span>

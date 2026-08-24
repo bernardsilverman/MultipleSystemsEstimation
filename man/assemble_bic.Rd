@@ -2,7 +2,7 @@
 % Please edit documentation in R/hierarchical-models.R
 \name{assemble_bic}
 \alias{assemble_bic}
-\title{Models BICS, abundance and maxorder.}
+\title{Enumerate and rank hierarchical models by BIC}
 \usage{
 assemble_bic(
   xdata,
@@ -13,28 +13,31 @@ assemble_bic(
 )
 }
 \arguments{
-\item{xdata}{The original data matrix with capture histories and counts.}
+\item{xdata}{Capture history data in the standard package format.}
 
-\item{maxorder}{Maximum order of models to be included}
+\item{maxorder}{Maximum interaction order to be included.}
 
-\item{checkexist}{If TRUE then the Fienberg-Rinaldo condition is checked for each model}
+\item{checkexist}{If \code{TRUE}, check parameter identifiability and
+existence of the extended MLE for each model.}
 
-\item{removeFRfail}{If checkexist is TRUE then models which fail the FR condition are removed from the results}
+\item{removeFRfail}{If \code{TRUE}, remove models without a valid fit from
+the results.}
 
-\item{...}{Parameters to be fed to \code{get_hierarchical_models}.}
+\item{...}{Additional arguments passed to \code{fit_hier_model()}.}
 }
 \value{
-A list with the following components
+A list with components:
 \describe{
-\item{res}{A matrix with the models considered, their abundance, BIC and their order, sorted
- into increasing order of BIC}
-  \item{xdata}{The original data matrix with capture histories and counts.}
-  \item{maxorder}{Order parameter that was feed into \code{get_hierarchical_models}}
-  }
+  \item{\code{res}}{A matrix containing the population estimate, BIC and
+  maximum interaction order for each retained model, ordered by increasing
+  BIC. Model strings are used as row names.}
+  \item{\code{xdata}}{The original capture history data.}
+  \item{\code{maxorder}}{The largest interaction order among the retained
+  models, or 0 if no model is retained.}
+}
 }
 \description{
-This routine sorts the models in increasing order according to their BICs, returns the sorted models with their
-corresponding BICs and abundance. The original data as well as the maxorder of the models
-considered are returned as well.
+Fits the hierarchical models permitted by the specified number of lists and
+maximum interaction order, and orders the valid fits by increasing BIC.
 }
 \keyword{internal}

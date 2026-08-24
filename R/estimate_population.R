@@ -25,8 +25,8 @@
 #' estimation function. See the documentation for the individual methods
 #' for details of the available arguments and their defaults.
 #'
-#' @param zdat Capture-pattern data. The first columns identify list
-#'   membership and the final column contains the observed counts.
+#' @param zdat Capture history data. The first columns identify list
+#' membership and the final column contains the observed counts.
 #'
 #' @param method Estimation method. One of \code{"auto"}, \code{"bic"},
 #'   \code{"stepwise"}, \code{"bayesthresh"}, or \code{"fixed"}. The

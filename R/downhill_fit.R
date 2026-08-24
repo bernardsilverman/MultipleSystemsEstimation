@@ -1,28 +1,35 @@
-#' Conduct downhill search among hierarchical models starting
-#'   from the main effects only.
+#' Downhill search among hierarchical models
 #'
-#' Find a local optimum by downhill search among hierarchical models
+#' Starting from the main-effects model, repeatedly moves to the neighbouring
+#' hierarchical model with the smallest BIC until no improvement is available
+#' or the iteration limit is reached.
 #'
-#' @param counts  Observed counts for the capture histories defined by desmat
-#' @param desmat  Incidence matrix defining the capture histories observed with counts given by counts
-#' @param maxorder Maximum order of models to be included
-#' @param checkid If it is TRUE, then \code{check_extended_MLE} is called and it performs the Fienberg-Rinaldo linear program check for the existence of the estimates
-#' @param niter Number of iterations
-#' @param verbose Specifies the output, if FALSE then only returns the best value, if TRUE, returns a more detailed list of objects
+#' @param counts Numeric vector of observed counts.
+#' @param desmat Binary matrix defining the corresponding capture histories.
+#' @param maxorder Maximum interaction order considered.
+#' @param checkid If \code{TRUE}, check parameter identifiability and existence
+#' of the extended MLE before fitting each model.
+#' @param niter Maximum number of downhill iterations.
+#' @param verbose If \code{FALSE}, return only the selected population
+#' estimate. If \code{TRUE}, return detailed search results.
 #'
-#' @return A list with the following components
-#'\describe{
-#' \item{optimum_hierarchy}{Optimal hierarchical model}
-#'   \item{minimum_value}{hierarchical model with the minimum value}
-#'   \item{hierarchies_considered}{hierarhical models considered}
-#'   \item{function_values}{Values of function}
-#'  }
+#' @return If \code{verbose = FALSE}, the population estimate from the selected
+#' model, or \code{NA} if the main-effects model has no valid fit. If
+#' \code{verbose = TRUE}, a list with components:
+#' \describe{
+#'   \item{\code{optimum_hierarchy}}{Selected hierarchical model.}
+#'   \item{\code{minimum_value}}{Named vector containing its BIC and population
+#'   estimate.}
+#'   \item{\code{hierarchies_considered}}{Character vector of models examined.}
+#'   \item{\code{function_values}}{Matrix containing the BIC and population
+#'   estimate for each model examined.}
+#' }
 #'
-#'@references
+#' @references
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
-#' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+#' \emph{Statistics and Computing}, \strong{34}, 44.
+#' \href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 #'
 #' @importFrom stats setNames
 #' @keywords internal
@@ -91,22 +98,25 @@ downhill_fit = function(counts, desmat, maxorder=dim(desmat)[2]-1, checkid=TRUE,
 }
 #' Bootstrap downhill
 #'
-#' Construct bootstrap replications and use the downhill fit method to obtain point estimates of total population sizes from each bootstrap sample.
+#' Generates multinomial bootstrap samples and applies \code{downhill_fit()}
+#' to each one.
 #'
-#' @param xdata original data matrix
-#' @param nboot number of bootstrap replicates
-#' @param iseed random seed
-#' @param checkid If it is TRUE, then \code{check_extended_MLE} is called and it performs the Fienberg-Rinaldo linear program check for the existence of the estimates
-#' @param verbose If TRUE, return the list of extra output from \code{downhill_fit}
-#' @param maxorder Maximum order of models to be included
+#' @param xdata Capture history data in the standard package format.
+#' @param nboot Number of bootstrap replications.
+#' @param iseed Integer random-number seed.
+#' @param checkid Passed to \code{downhill_fit()}.
+#' @param verbose Passed to \code{downhill_fit()}.
+#' @param maxorder Maximum interaction order considered.
 #'
-#' @return Point estimates of total population sizes from each bootstrap sample.
+#' @return If \code{verbose = FALSE}, a numeric vector of bootstrap population
+#' estimates. If \code{verbose = TRUE}, the detailed results returned by
+#' \code{downhill_fit()} for each replication.
 #'
-#'@references
+#' @references
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
-#' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+#' \emph{Statistics and Computing}, \strong{34}, 44.
+#' \href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 #'
 #' @keywords internal
 downhill_bootstrapcal <- function(xdata, nboot = 1000, iseed = 1234,
@@ -125,22 +135,20 @@ downhill_bootstrapcal <- function(xdata, nboot = 1000, iseed = 1234,
 }
 #' Jackknife downhill
 #'
-#'It uses the downhill approach to calculate the jackknife abundance and returns the estimated
-#'acceleration factor
+#' Applies the downhill search to the required delete-one data sets and
+#' calculates the BCa acceleration parameter.
 #'
-#'@param xdata original data matrix
-#'@param checkid If it is TRUE, then \code{check_extended_MLE} is called and it performs the Fienberg-Rinaldo linear program check for the existence of the estimates
-#'@param maxorder Maximum order of models to be included
+#' @param xdata Capture history data in the standard package format.
+#' @param checkid Passed to \code{downhill_fit()}.
+#' @param maxorder Maximum interaction order considered.
 #'
-#'@return the estimated acceleration factor
+#' @return The estimated BCa acceleration parameter.
 #'
-#'
-#'
-#'@references
+#' @references
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection
-#' \emph{Statistics and Computing}, \strong{34(44)},
-#' Available from \url{\doi{10.1007/s11222-023-10346-9}}.
+#' \emph{Statistics and Computing}, \strong{34}, 44.
+#' \href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
 #'
 #' @keywords internal
 downhill_jackknifecal <- function(xdata,checkid = TRUE, maxorder=dim(xdata)[2]-2) {

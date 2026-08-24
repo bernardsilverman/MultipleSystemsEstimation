@@ -12,12 +12,11 @@ The calculations use the current `MultipleSystemsEstimation` interface.
 
 There are two intended ways to use the vignette. In the version built
 with the package, `full_reproduction` is `FALSE`. This uses `nboot = 10`
-and restricts the more expensive five-list finite searches to modest
-values of `ntop`: 20 for the ordinary ranking and 10 for the degree-2
-ranking. These settings are enough to exercise the current code, produce
-the figures and tables in reduced-precision form, and keep an ordinary
-package or CRAN vignette build reasonably quick. They are not intended
-to reproduce the published Monte Carlo values exactly.
+and restricts the more expensive five-list finite searches to
+`ntop = 20`. These settings are enough to exercise the current code,
+produce the figures and tables in reduced-precision form, and keep an
+ordinary package or CRAN vignette build reasonably quick. They are not
+intended to reproduce the published Monte Carlo values exactly.
 
 For a closer numerical reproduction of the paper, change
 
@@ -214,7 +213,7 @@ knitr::kable(table2_published)
 
 There are only six admissible models after the existence check, so the
 exhaustive calculation is again run directly. As for Table 2,
-`full_reproduction <- TRUE` changes the bootstrap from 20 to 1000
+`full_reproduction <- TRUE` changes the bootstrap from 10 to 1000
 replications.
 
 ``` r
@@ -350,7 +349,15 @@ finite calculation.
 
 Again the finite calculations are performed directly, through
 `ntop = 20` for the ordinary vignette and through `ntop = 60` when
-`full_reproduction <- TRUE`.
+`full_reproduction <- TRUE`. It should be noted that the New Orleans
+calculations reported in Silverman, Chan and Vincent (2024) used a
+186-case version of the data obtained from Table 1 of Bales, Murphy and
+Silverman (2020), which contained a small error. The package data have
+now been corrected to the 185-case version used in the original New
+Orleans analysis and also in the 2021 paper referenced elsewhere in this
+package. The calculations below use the corrected data and may therefore
+differ from the results published in 2024. Published figures and tables
+are reproduced as they appeared in that paper.
 
 ``` r
 
@@ -852,6 +859,10 @@ paper-scale bootstrap calculation with `nboot = 1000`. Reproducing every
 row of Table 6 from scratch, particularly the specialised five-list UK
 calculation, is intentionally outside the computations run during an
 ordinary vignette build.
+
+The published New Orleans estimates of 981 for the five-list data and
+1110 for the eight-list data are based on the 186-case version.
+Calculations using the corrected 185-case package data will differ.
 
 ## Summary
 
