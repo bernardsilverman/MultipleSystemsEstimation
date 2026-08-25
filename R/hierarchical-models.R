@@ -170,7 +170,7 @@ subsetmat <- function(z,
 #' Silverman, B. W., Chan, L. and Vincent, K. (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection.
 #' \emph{Statistics and Computing}, \strong{34}, 44.
-#' \href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
+#' \doi{10.1007/s11222-023-10346-9}.
 #'
 #' @examples
 #' # Three lists, all interaction orders
@@ -225,7 +225,7 @@ get_hierarchical_models=function(nlists, maxorder=nlists-1, modelvec=hiermodels)
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection.
 #' \emph{Statistics and Computing}, \strong{34}, 44.
-#' \href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
+#' \doi{10.1007/s11222-023-10346-9}.
 #'
 #' @importFrom stats glm.fit na.omit pnorm poisson qnorm quantile rmultinom splinefun
 #' @keywords internal

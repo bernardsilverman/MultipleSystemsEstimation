@@ -21,4 +21,4 @@ the number of cases having each observed capture history.
 Silverman, B. W. (2020). Multiple-systems analysis for the
 quantification of modern slavery: classical and Bayesian approaches.
 *Journal of the Royal Statistical Society: Series A*, **183**(3),
-691–736. [doi:10.1111/rssa.12505](https://doi.org/10.1111/rssa.12505).
+691–736. [doi:10.1111/rssa.12505](https://doi.org/10.1111/rssa.12505) .

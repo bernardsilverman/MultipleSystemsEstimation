@@ -138,7 +138,8 @@ without materially changing the resulting confidence intervals.
 - Silverman, B. W., Chan, L. and Vincent, K. (2024). Bootstrapping
   multiple systems estimates to account for model selection. *Statistics
   and Computing*, **34**, 44.
-  [doi:10.1007/s11222-023-10346-9](https://doi.org/10.1007/s11222-023-10346-9).
+  [doi:10.1007/s11222-023-10346-9](https://doi.org/10.1007/s11222-023-10346-9)
+  .
 
 - Efron, B. and Tibshirani, R. (1986). Bootstrap methods for standard
   errors, confidence intervals, and other measures of statistical

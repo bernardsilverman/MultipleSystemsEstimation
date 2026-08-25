@@ -13,7 +13,7 @@
 #' Bales, K., Murphy, L. and Silverman, B. W. (2020).
 #' How many trafficked people are there in Greater New Orleans?
 #' \emph{Journal of Human Trafficking}, \strong{6}(4), 375--384.
-#' \href{https://doi.org/10.1080/23322705.2019.1634936}{doi:10.1080/23322705.2019.1634936}.
+#' \doi{10.1080/23322705.2019.1634936}.
 #'
 "NewOrl"
 
@@ -55,7 +55,7 @@
 #' Challenges When There Are Nonoverlapping Lists.
 #' \emph{Journal of the American Statistical Association},
 #' \strong{116}(535), 1297--1306.
-#' \href{https://doi.org/10.1080/01621459.2019.1708748}{doi:10.1080/01621459.2019.1708748}.
+#' \doi{10.1080/01621459.2019.1708748}.
 #'
 "Artificial_3"
 
@@ -96,7 +96,7 @@
 #' classical and Bayesian approaches.
 #' \emph{Journal of the Royal Statistical Society: Series A},
 #' \strong{183}(3), 691--736.
-#' \href{https://doi.org/10.1111/rssa.12505}{doi:10.1111/rssa.12505}.
+#' \doi{10.1111/rssa.12505}.
 #'
 "Ned"
 

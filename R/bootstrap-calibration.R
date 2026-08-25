@@ -21,7 +21,7 @@
 #' When There Are Nonoverlapping Lists.
 #' \emph{Journal of the American Statistical Association},
 #' \strong{116}(535), 1297--1306.
-#' \href{https://doi.org/10.1080/01621459.2019.1708748}{doi:10.1080/01621459.2019.1708748}.
+#' \doi{10.1080/01621459.2019.1708748}.
 #'
 #' DiCiccio, T. J. and Efron, B. (1996).
 #' Bootstrap confidence intervals.
@@ -74,7 +74,7 @@ bcaconfvalues<-function(bootreps, popest, ahat, alpha=c(0.025, 0.05, 0.1, 0.16, 
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection.
 #' \emph{Statistics and Computing}, \strong{34}, 44.
-#' \href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
+#' \doi{10.1007/s11222-023-10346-9}.
 #'
 #' @keywords internal
 bootstrapcal <- function(z,
@@ -156,7 +156,7 @@ bootstrapcal <- function(z,
 #' Silverman, B. W., Chan, L. and  Vincent, K., (2024).
 #' Bootstrapping Multiple Systems Estimates to Account for Model Selection.
 #' \emph{Statistics and Computing}, \strong{34}, 44.
-#' \href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
+#' \doi{10.1007/s11222-023-10346-9}.
 #'
 #' @keywords internal
 jackknifecal <- function(z, checkexist = TRUE) {

@@ -68,7 +68,8 @@ Chan, L., Silverman, B. W. and Vincent, K. (2021). Multiple Systems
 Estimation for Sparse Capture Data: Inferential Challenges When There
 Are Nonoverlapping Lists. *Journal of the American Statistical
 Association*, **116**(535), 1297–1306.
-[doi:10.1080/01621459.2019.1708748](https://doi.org/10.1080/01621459.2019.1708748).
+[doi:10.1080/01621459.2019.1708748](https://doi.org/10.1080/01621459.2019.1708748)
+.
 
 ## Examples
 

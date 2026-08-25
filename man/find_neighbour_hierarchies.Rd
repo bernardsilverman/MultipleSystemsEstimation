@@ -60,5 +60,5 @@ find_neighbour_hierarchies(modelstr, type = "inner")
 Silverman, B. W., Chan, L. and Vincent, K. (2024).
 Bootstrapping Multiple Systems Estimates to Account for Model Selection.
 \emph{Statistics and Computing}, \strong{34}, 44.
-\href{https://doi.org/10.1007/s11222-023-10346-9}{doi:10.1007/s11222-023-10346-9}.
+\doi{10.1007/s11222-023-10346-9}.
 }

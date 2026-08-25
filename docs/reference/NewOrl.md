@@ -22,4 +22,5 @@ of cases having each observed capture history.
 Bales, K., Murphy, L. and Silverman, B. W. (2020). How many trafficked
 people are there in Greater New Orleans? *Journal of Human Trafficking*,
 **6**(4), 375–384.
-[doi:10.1080/23322705.2019.1634936](https://doi.org/10.1080/23322705.2019.1634936).
+[doi:10.1080/23322705.2019.1634936](https://doi.org/10.1080/23322705.2019.1634936)
+.

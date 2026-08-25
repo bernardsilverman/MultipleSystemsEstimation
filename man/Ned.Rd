@@ -23,6 +23,6 @@ Multiple-systems analysis for the quantification of modern slavery:
 classical and Bayesian approaches.
 \emph{Journal of the Royal Statistical Society: Series A},
 \strong{183}(3), 691--736.
-\href{https://doi.org/10.1111/rssa.12505}{doi:10.1111/rssa.12505}.
+\doi{10.1111/rssa.12505}.
 }
 \keyword{datasets}

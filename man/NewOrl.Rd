@@ -22,6 +22,6 @@ Silverman (2020).
 Bales, K., Murphy, L. and Silverman, B. W. (2020).
 How many trafficked people are there in Greater New Orleans?
 \emph{Journal of Human Trafficking}, \strong{6}(4), 375--384.
-\href{https://doi.org/10.1080/23322705.2019.1634936}{doi:10.1080/23322705.2019.1634936}.
+\doi{10.1080/23322705.2019.1634936}.
 }
 \keyword{datasets}

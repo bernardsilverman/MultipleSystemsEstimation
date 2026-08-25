@@ -32,6 +32,6 @@ Multiple Systems Estimation for Sparse Capture Data: Inferential
 Challenges When There Are Nonoverlapping Lists.
 \emph{Journal of the American Statistical Association},
 \strong{116}(535), 1297--1306.
-\href{https://doi.org/10.1080/01621459.2019.1708748}{doi:10.1080/01621459.2019.1708748}.
+\doi{10.1080/01621459.2019.1708748}.
 }
 \keyword{datasets}
