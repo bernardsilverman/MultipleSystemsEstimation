@@ -27,7 +27,8 @@ estimate_population_bayesthresh(
   prior_variance = 1,
   threshold = 2,
   maxorder = 2,
-  return_posterior = FALSE,
+  alpha = c(0.025, 0.1, 0.9, 0.975),
+  return_details = FALSE,
   ...
 )
 ```
@@ -56,10 +57,18 @@ estimate_population_bayesthresh(
 
   Maximum interaction order, either 2 or 3.
 
-- return_posterior:
+- alpha:
 
-  Logical. If `TRUE`, include the full posterior sample of the total
-  population in the returned object. The default is `FALSE`.
+  Numeric vector of cumulative probability levels at which posterior
+  credible-interval endpoints are to be reported. The default is
+  `c(0.025, 0.1, 0.9, 0.975)`. The posterior median used for the point
+  estimate is calculated separately and need not be included in `alpha`.
+
+- return_details:
+
+  Logical. If `TRUE`, include thresholding information, effects at minus
+  infinity, and the full posterior sample of total population size. The
+  default is `FALSE`.
 
 - ...:
 
@@ -84,57 +93,37 @@ estimate_population_bayesthresh(
 
 ## Value
 
-A list with the following components:
+A list with components:
 
-- `call`:
+- `input`:
 
-  The matched function call used to obtain the result.
+  A list containing the original `call` and `data`.
 
-- `popest`:
+- `method`:
 
-  Posterior median estimate of the total population size.
+  The character string `"bayesthresh"`.
 
-- `quantiles`:
+- `estimate`:
 
-  Posterior quantiles of the total population size.
+  A named numeric vector containing posterior median estimates of the
+  `dark_figure` and `total` population.
 
-- `retained_interactions`:
+- `fitted_model`:
 
-  Two-list interactions retained by the thresholding procedure and
-  estimated by MCMC.
+  The retained model in hierarchy notation.
 
-- `threshold_statistics`:
+- `uncertainty`:
 
-  Absolute ratios of posterior mean to posterior standard deviation for
-  the two-list interactions considered in the initial thresholding step.
+  A two-row matrix of posterior quantiles for the dark figure and total
+  population at the probabilities in `alpha`.
 
-- `eligible_triples`:
+- `details`:
 
-  If `maxorder = 3`, the eligible three-list interactions: those for
-  which all three constituent two-list interactions have been retained.
-
-- `retained_triples`:
-
-  If the three-list thresholding step is carried out, the eligible
-  three-list interactions retained by that thresholding step.
-
-- `triple_threshold_statistics`:
-
-  If the three-list thresholding step is carried out, the threshold
-  statistics for the eligible three-list interactions.
-
-- `minus_infinite_estimated_effects`:
-
-  With an improper prior, interaction effects whose posterior
-  distribution is concentrated at minus infinity. This component is
-  present only if such effects occur. These effects are retained in the
-  fitted model but are reported separately from interaction effects
-  estimated by MCMC.
-
-- `posterior`:
-
-  If `return_posterior = TRUE`, the full posterior sample of the total
-  population size.
+  If `return_details = TRUE`, a list containing
+  `minus_infinity_effects`, pairwise `threshold_statistics`, applicable
+  `eligible_triples`, `retained_triples`, and
+  `triple_threshold_statistics`, and `posterior`, the complete MCMC
+  sample of total population size. Otherwise `"not requested"`.
 
 ## Details
 
@@ -210,8 +199,9 @@ fit <- estimate_population_bayesthresh(
     mcmc = 1000,
     seed = 1234
 )
-fit$popest
-#> [1] 2527.77
-fit$retained_interactions
-#> [1] "A:E" "D:E"
+fit$estimate
+#> dark_figure       total 
+#>     2182.77     2527.77 
+fit$fitted_model
+#> [1] "[15,45,2,3]"
 ```

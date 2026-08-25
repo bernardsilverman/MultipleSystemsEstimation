@@ -1,6 +1,6 @@
 Package: MultipleSystemsEstimation
 Title: Methods for Multiple Systems Estimation
-Version: 1.0.0
+Version: 1.2.6
 Authors@R: c(
     person(
   given = c("Bernard", "W."),

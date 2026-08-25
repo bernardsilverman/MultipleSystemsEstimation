@@ -31,7 +31,7 @@ observed population to the posterior estimate of the unobserved cell."></head><b
 
     <a class="navbar-brand me-2" href="../index.html">MultipleSystemsEstimation</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -87,7 +87,8 @@ observed population to the posterior estimate of the unobserved cell.</p>
 <span>  prior_variance <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  threshold <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  maxorder <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>  return_posterior <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.025</span>, <span class="fl">0.1</span>, <span class="fl">0.9</span>, <span class="fl">0.975</span><span class="op">)</span>,</span>
+<span>  return_details <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -119,10 +120,18 @@ to posterior standard deviation for interaction parameters.</p></dd>
 <dd><p>Maximum interaction order, either 2 or 3.</p></dd>
 
 
-<dt id="arg-return-posterior">return_posterior<a class="anchor" aria-label="anchor" href="#arg-return-posterior"></a></dt>
-<dd><p>Logical. If <code>TRUE</code>, include the full posterior
-sample of the total population in the returned object. The default is
-<code>FALSE</code>.</p></dd>
+<dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
+<dd><p>Numeric vector of cumulative probability levels at which
+posterior credible-interval endpoints are to be reported. The default is
+<code>c(0.025, 0.1, 0.9, 0.975)</code>. The posterior median used for the point
+estimate is calculated separately and need not be included in
+<code>alpha</code>.</p></dd>
+
+
+<dt id="arg-return-details">return_details<a class="anchor" aria-label="anchor" href="#arg-return-details"></a></dt>
+<dd><p>Logical. If <code>TRUE</code>, include thresholding
+information, effects at minus infinity, and the full posterior sample of
+total population size. The default is <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -142,47 +151,30 @@ Useful arguments include:</p><ul><li><p><code>burnin</code>: number of burn-in i
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list with the following components:</p><dl><dt><code>call</code></dt>
-<dd><p>The matched function call used to obtain the result.</p></dd>
+    <p>A list with components:</p><dl><dt><code>input</code></dt>
+<dd><p>A list containing the original <code>call</code> and
+  <code>data</code>.</p></dd>
 
-    <dt><code>popest</code></dt>
-<dd><p>Posterior median estimate of the total population size.</p></dd>
+  <dt><code>method</code></dt>
+<dd><p>The character string <code>"bayesthresh"</code>.</p></dd>
 
-    <dt><code>quantiles</code></dt>
-<dd><p>Posterior quantiles of the total population size.</p></dd>
+  <dt><code>estimate</code></dt>
+<dd><p>A named numeric vector containing posterior median
+  estimates of the <code>dark_figure</code> and <code>total</code> population.</p></dd>
 
-    <dt><code>retained_interactions</code></dt>
-<dd><p>Two-list interactions retained by the thresholding procedure and
-      estimated by MCMC.</p></dd>
+  <dt><code>fitted_model</code></dt>
+<dd><p>The retained model in hierarchy notation.</p></dd>
 
-    <dt><code>threshold_statistics</code></dt>
-<dd><p>Absolute ratios of posterior mean to posterior standard deviation for
-      the two-list interactions considered in the initial thresholding
-      step.</p></dd>
+  <dt><code>uncertainty</code></dt>
+<dd><p>A two-row matrix of posterior quantiles for the
+  dark figure and total population at the probabilities in <code>alpha</code>.</p></dd>
 
-    <dt><code>eligible_triples</code></dt>
-<dd><p>If <code>maxorder = 3</code>, the eligible three-list interactions: those
-      for which all three constituent two-list interactions have been
-      retained.</p></dd>
-
-    <dt><code>retained_triples</code></dt>
-<dd><p>If the three-list thresholding step is carried out, the eligible
-      three-list interactions retained by that thresholding step.</p></dd>
-
-    <dt><code>triple_threshold_statistics</code></dt>
-<dd><p>If the three-list thresholding step is carried out, the threshold
-      statistics for the eligible three-list interactions.</p></dd>
-
-    <dt><code>minus_infinite_estimated_effects</code></dt>
-<dd><p>With an improper prior, interaction effects whose posterior
-      distribution is concentrated at minus infinity. This component is
-      present only if such effects occur. These effects are retained in
-      the fitted model but are reported separately from interaction
-      effects estimated by MCMC.</p></dd>
-
-    <dt><code>posterior</code></dt>
-<dd><p>If <code>return_posterior = TRUE</code>, the full posterior sample of the
-      total population size.</p></dd>
+  <dt><code>details</code></dt>
+<dd><p>If <code>return_details = TRUE</code>, a list containing
+  <code>minus_infinity_effects</code>, pairwise <code>threshold_statistics</code>,
+  applicable <code>eligible_triples</code>, <code>retained_triples</code>, and
+  <code>triple_threshold_statistics</code>, and <code>posterior</code>, the complete
+  MCMC sample of total population size. Otherwise <code>"not requested"</code>.</p></dd>
 
 
 </dl></div>
@@ -250,10 +242,11 @@ Monte Carlo in R. <em>Journal of Statistical Software</em>, 42(9), 1–21.</p>
 <span class="r-in"><span>    mcmc <span class="op">=</span> <span class="fl">1000</span>,</span></span>
 <span class="r-in"><span>    seed <span class="op">=</span> <span class="fl">1234</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">fit</span><span class="op">$</span><span class="va">popest</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2527.77</span>
-<span class="r-in"><span><span class="va">fit</span><span class="op">$</span><span class="va">retained_interactions</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "A:E" "D:E"</span>
+<span class="r-in"><span><span class="va">fit</span><span class="op">$</span><span class="va">estimate</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> dark_figure       total </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     2182.77     2527.77 </span>
+<span class="r-in"><span><span class="va">fit</span><span class="op">$</span><span class="va">fitted_model</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "[15,45,2,3]"</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

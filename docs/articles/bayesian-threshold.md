@@ -96,9 +96,10 @@ for the total population size. The resulting collection of draws
 therefore gives the posterior distribution of the total population. By
 default,
 [`estimate_population_bayesthresh()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_bayesthresh.md)
-reports the posterior median as the population estimate, together with
-selected posterior quantiles. The full set of posterior draws can also
-be returned if required.
+reports posterior medians of the dark figure and total population,
+together with posterior quantiles at the probabilities supplied through
+`alpha`. The full set of posterior draws can also be returned if
+required.
 
 The thresholding step approximates a Bayesian model with a mixed prior
 for the parameters of an atom of probability at zero and some other
@@ -115,24 +116,28 @@ interactions.
 
 ``` r
 
-estimate_population_bayesthresh(
-    Kosovo,
-    maxorder = 2
+fit_bayes <- estimate_population_bayesthresh(
+  Kosovo,
+  maxorder = 2,
+  alpha = c(0.025, 0.975),
+  return_details = TRUE
 )
-#> $call
-#> estimate_population_bayesthresh(zdat = Kosovo, maxorder = 2)
-#> 
-#> $popest
-#> [1] 13971.48
-#> 
-#> $quantiles
-#>     2.5%      10%      50%      90%    97.5% 
-#> 12236.22 12796.88 13971.48 15475.37 16389.40 
-#> 
-#> $retained_interactions
-#> [1] "EXH:ABA"  "EXH:OSCE" "ABA:OSCE" "EXH:HRW"  "OSCE:HRW"
-#> 
-#> $threshold_statistics
+
+fit_bayes$estimate
+#> dark_figure       total 
+#>    9571.481   13971.481
+fit_bayes$uncertainty
+#>                 0.025   0.975
+#> dark_figure  7836.223 11989.4
+#> total       12236.223 16389.4
+fit_bayes$fitted_model
+#> [1] "[12,13,14,23,34]"
+fit_bayes$estimate
+#> dark_figure       total 
+#>    9571.481   13971.481
+fit_bayes$fitted_model
+#> [1] "[12,13,14,23,34]"
+fit_bayes$details$threshold_statistics
 #>   EXH:ABA  EXH:OSCE  ABA:OSCE   EXH:HRW   ABA:HRW  OSCE:HRW 
 #>  8.464526  9.162971 12.540216  6.929278  0.196996 10.605549
 ```
@@ -154,38 +159,31 @@ interactions.
 ``` r
 
 
-estimate_population_bayesthresh(
-    Kosovo,
-    maxorder = 3,
-    threshold = 2.5
+fit_bayes3 <- estimate_population_bayesthresh(
+  Kosovo,
+  maxorder = 3, threshold = 2.5, alpha = c(0.025, 0.975),
+  return_details = TRUE
 )
-#> $call
-#> estimate_population_bayesthresh(zdat = Kosovo, threshold = 2.5, 
-#>     maxorder = 3)
-#> 
-#> $popest
-#> [1] 10313.86
-#> 
-#> $quantiles
-#>      2.5%       10%       50%       90%     97.5% 
-#>  9031.819  9370.497 10313.857 11420.954 12094.699 
-#> 
-#> $retained_interactions
-#> [1] "EXH:ABA"  "EXH:OSCE" "ABA:OSCE" "EXH:HRW"  "OSCE:HRW"
-#> 
-#> $eligible_triples
-#> [1] "EXH:ABA:OSCE" "EXH:OSCE:HRW"
-#> 
-#> $retained_triples
-#> [1] "EXH:ABA:OSCE"
-#> 
-#> $threshold_statistics
+
+fit_bayes3$estimate
+#> dark_figure       total 
+#>    5913.857   10313.857
+fit_bayes$uncertainty
+#>                 0.025   0.975
+#> dark_figure  7836.223 11989.4
+#> total       12236.223 16389.4
+fit_bayes3$fitted_model
+#> [1] "[123,14,34]"
+fit_bayes3$details$threshold_statistics
 #>   EXH:ABA  EXH:OSCE  ABA:OSCE   EXH:HRW   ABA:HRW  OSCE:HRW 
-#>  8.464526  9.162971 12.540216  6.929278  0.196996 10.605549 
-#> 
-#> $triple_threshold_statistics
+#>  8.464526  9.162971 12.540216  6.929278  0.196996 10.605549
+fit_bayes3$details$eligible_triples
+#> [1] "EXH:ABA:OSCE" "EXH:OSCE:HRW"
+fit_bayes3$details$triple_threshold_statistics
 #> EXH:ABA:OSCE EXH:OSCE:HRW 
 #>     4.263698     2.451189
+fit_bayes3$details$retained_triples
+#> [1] "EXH:ABA:OSCE"
 ```
 
 The same five two-list interactions are retained. Two three-list
@@ -213,45 +211,37 @@ statistic is zero has its posterior distribution concentrated at minus
 infinity. Such terms are accounted for before the MCMC fit is carried
 out. Effects whose posterior distribution is concentrated at minus
 infinity are identified automatically and reported in the
-`minus_infinite_estimated_effects` component of the returned object. The
-effects are still retained in the model, but are not included in
-`retained_interactions`, which reports only retained interaction effects
-estimated by MCMC. For example, with the five-list UK data:
+`details$minus_infinity_effects` component of the returned object. The
+effects are still retained in the fitted hierarchy and are reported
+separately from interaction effects estimated by MCMC. For example, with
+the five-list UK data:
 
 ``` r
 
 
-estimate_population_bayesthresh(
+fit_improper <- estimate_population_bayesthresh(
   UKdat_5,
-  prior = "improper"
+  prior = "improper",
+  return_details = TRUE
 )
-#> $call
-#> estimate_population_bayesthresh(zdat = UKdat_5, prior = "improper")
-#> 
-#> $popest
-#> [1] 12188.27
-#> 
-#> $quantiles
-#>     2.5%      10%      50%      90%    97.5% 
-#> 10652.41 11127.74 12188.27 13284.99 13946.75 
-#> 
-#> $retained_interactions
-#> [1] "LA:NG"    "LA:PFNCA" "NG:GP"    "PFNCA:GP" "GO:GP"   
-#> 
-#> $threshold_statistics
-#>      LA:NG   LA:PFNCA   NG:PFNCA      LA:GO      NG:GO   PFNCA:GO      NG:GP 
-#> 3.43586815 2.00326932 0.01839113 0.65612309 1.59135231 0.35586023 3.33634055 
-#>   PFNCA:GP      GO:GP 
-#> 2.72748176 2.62723073 
-#> 
-#> $minus_infinite_estimated_effects
+
+fit_improper$estimate
+#> dark_figure       total 
+#>    9444.267   12188.267
+fit_improper$uncertainty
+#>                 0.025       0.1      0.9    0.975
+#> dark_figure  7908.409  8383.743 10540.99 11202.75
+#> total       10652.409 11127.743 13284.99 13946.75
+fit_improper$fitted_model
+#> [1] "[12,13,15,25,35,45]"
+fit_improper$details$minus_infinity_effects
 #> [1] "LA:GP"
 ```
 
-Here `LA:GP` is retained in the model with its effect estimated as minus
-infinity, and is therefore reported in
-`minus_infinite_estimated_effects` rather than in
-`retained_interactions`.
+Here `LA:GP`, corresponding to the interaction `15` in the numerical
+hierarchy notation, is retained in the model with its effect estimated
+as minus infinity, and is therefore reported in
+`details$minus_infinity_effects`.
 
 #### Checking existence with improper interaction priors
 
@@ -312,7 +302,7 @@ visible, we use the unusually low value `threshold = 0.2`.
 
 ``` r
 
-estimate_population_bayesthresh(
+fit_western <- estimate_population_bayesthresh(
   Western,
   prior = "improper",
   maxorder = 3,
@@ -320,29 +310,9 @@ estimate_population_bayesthresh(
 )
 #> Warning: The maximal three-list extension fails the Fienberg-Rinaldo existence
 #> criterion; reverting to maxorder = 2.
-#> $call
-#> estimate_population_bayesthresh(zdat = Western, prior = "improper", 
-#>     threshold = 0.2, maxorder = 3)
-#> 
-#> $popest
-#> [1] 10097.75
-#> 
-#> $quantiles
-#>       2.5%        10%        50%        90%      97.5% 
-#>   1412.593   2511.101  10097.746  44546.939 108778.780 
-#> 
-#> $retained_interactions
-#> [1] "A:C" "B:C" "A:D" "B:D" "C:D" "A:E" "C:E" "D:E"
-#> 
-#> $eligible_triples
-#> [1] "A:C:D" "B:C:D" "A:C:E" "A:D:E" "C:D:E"
-#> 
-#> $threshold_statistics
-#>       A:C       B:C       A:D       B:D       C:D       A:E       C:E       D:E 
-#> 1.5833948 1.5023393 0.7010506 0.9366806 0.2713546 3.0876138 0.4068421 2.3093711 
-#> 
-#> $minus_infinite_estimated_effects
-#> [1] "A:B" "B:E"
+
+fit_western$fitted_model
+#> [1] "[12,13,14,15,23,24,25,34,35,45]"
 ```
 
 The initial two-list fit and thresholding are completed, but the model
@@ -368,8 +338,8 @@ different seed can be supplied through `...` if a different MCMC run is
 required.
 
 By default, the full posterior sample of total population size is not
-returned. It can be retained, when required, by setting
-`return_posterior = TRUE`.
+returned. It can be retained as `details$posterior`, when required, by
+setting `return_details = TRUE`.
 
 ## Summary
 

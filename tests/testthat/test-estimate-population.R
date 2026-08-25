@@ -1,8 +1,8 @@
 test_that("auto selects BIC for up to five lists", {
   out <- estimate_population(Korea)
 
-  expect_identical(attr(out, "method"), "bic")
-  expect_identical(attr(out, "nlists"), 3L)
+  expect_identical(out$method, "bic")
+  expect_identical(ncol(out$input$data) - 1L, 3L)
 })
 
 test_that("auto selects stepwise for six lists and gives a message", {
@@ -11,8 +11,8 @@ test_that("auto selects stepwise for six lists and gives a message", {
     "uses the stepwise method"
   )
 
-  expect_identical(attr(out, "method"), "stepwise")
-  expect_identical(attr(out, "nlists"), 6L)
+  expect_identical(out$method, "stepwise")
+  expect_identical(ncol(out$input$data) - 1L, 6L)
 })
 
 test_that("explicit BIC is allowed for six lists", {
@@ -26,7 +26,7 @@ test_that("explicit BIC is allowed for six lists", {
 
   out <- estimate_population(UKdat, method = "bic")
 
-  expect_identical(attr(out, "method"), "bic")
+  expect_identical(out$method, "bic")
   expect_true(out$ok)
 })
 
@@ -80,10 +80,8 @@ test_that("population wrapper passes maxorder to stepwise estimation", {
     maxorder = Inf
   )
 
-  expect_equal(wrapped$popest, direct$popest)
-  expect_equal(
-    wrapped$MSEfit$hiermod,
-    direct$MSEfit$hiermod
-  )
+  expect_equal(wrapped$estimate, direct$estimate)
+  expect_equal(wrapped$fitted_model, direct$fitted_model)
+  expect_identical(wrapped$input$call[[1L]], as.name("estimate_population"))
 })
 

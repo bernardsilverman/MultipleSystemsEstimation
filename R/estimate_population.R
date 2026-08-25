@@ -43,11 +43,22 @@
 #'   \code{\link{estimate_population_fixed}} for the arguments available
 #'   for each method.
 #'
-#' @return The object returned by
-#'   \code{\link{estimate_population_bic}},
-#'   \code{\link{estimate_population_stepwise}},
-#'   \code{\link{estimate_population_bayesthresh}}, or
-#'   \code{\link{estimate_population_fixed}}.
+#' @return A list with components:
+#' \describe{
+#'   \item{\code{input}}{A list containing the original \code{call} and
+#'   \code{data}.}
+#'   \item{\code{method}}{The method actually used, including after
+#'   \code{method = "auto"} has been resolved.}
+#'   \item{\code{estimate}}{A named numeric vector containing the estimated
+#'   \code{dark_figure} and \code{total} population.}
+#'   \item{\code{fitted_model}}{The supplied, selected or retained model in
+#'   hierarchy notation.}
+#'   \item{\code{uncertainty}}{Confidence or credible endpoints for the dark
+#'   figure and total population, or an explanatory character string when
+#'   bootstrap inference was not requested.}
+#'   \item{\code{details}}{Method-specific supporting output when requested,
+#'   and \code{"not requested"} otherwise.}
+#' }
 #'
 #' @seealso
 #' \code{\link{estimate_population_bic}},
@@ -98,6 +109,7 @@ estimate_population <- function(
     method = c("auto", "bic", "stepwise", "fixed", "bayesthresh"),
     ...
 ) {
+  call <- match.call()
   method <- match.arg(method)
 
   if (!is.matrix(zdat) && !is.data.frame(zdat)) {
@@ -169,8 +181,53 @@ estimate_population <- function(
     )
   }
 
-  attr(result, "method") <- resolved_method
-  attr(result, "nlists") <- nlists
+  result$input$call <- call
+  result$method <- resolved_method
 
   result
+}
+
+.mse_estimate <- function(total, zdat) {
+  observed <- sum(zdat[, ncol(zdat)])
+
+  c(
+    dark_figure = unname(total) - observed,
+    total = unname(total)
+  )
+}
+
+.mse_uncertainty <- function(total_quantiles, zdat) {
+  if (is.null(total_quantiles)) {
+    return("not calculated because nboot = 0")
+  }
+
+  observed <- sum(zdat[, ncol(zdat)])
+  probabilities <- names(total_quantiles)
+
+  ans <- rbind(
+    dark_figure = unname(total_quantiles) - observed,
+    total = unname(total_quantiles)
+  )
+  colnames(ans) <- probabilities
+  ans
+}
+
+.mse_effect_names <- function(encoded, zdat) {
+  if (!length(encoded)) {
+    return(character(0))
+  }
+
+  ing <- ingest_data(zdat)
+
+  vapply(
+    encoded,
+    function(k) {
+      paste(
+        ing$listnames[decode_capture(k, ing$nlists)],
+        collapse = ":"
+      )
+    },
+    character(1),
+    USE.NAMES = FALSE
+  )
 }

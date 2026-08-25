@@ -50,6 +50,11 @@ components are:
 
   The largest retained interaction order.
 
+- `best_neginfpars`:
+
+  Encoded minus-infinity effects for the original best-BIC model, passed
+  through unchanged.
+
 - `jackabund`, `jackbic`:
 
   Jackknife population estimates and BIC values, if present in the

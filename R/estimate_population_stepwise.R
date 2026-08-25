@@ -35,6 +35,10 @@
 #' \code{nboot > 0}. The default is
 #' \code{c(0.025, 0.1, 0.9, 0.975)}.
 #'
+#' @param return_details Logical. If \code{TRUE}, include the bootstrap
+#' estimates, BCa acceleration, and effects estimated at minus infinity. The
+#' default is \code{FALSE}.
+#'
 #' @details
 #' By default, the procedure considers two-list interactions only, reproducing
 #' the method of Chan, Silverman and Vincent (2021). Higher-order interactions
@@ -67,24 +71,21 @@
 #' is useful only for checking that the routine runs. A substantially larger
 #' number of bootstrap replications should be used for substantive inference.
 #'
-#' @return A list with the following components:
+#' @return A list with components:
 #' \describe{
-#'   \item{\code{popest}}{The estimated total population for the original
-#'   data, including the estimated unobserved population.}
-#'
-#'   \item{\code{MSEfit}}{The model selected and fitted to the original data.}
-#'
-#'   \item{\code{bootreps}}{A numeric vector containing the estimated total
-#'   population from each bootstrap sample. This is \code{NULL} when
-#'   \code{nboot = 0}.}
-#'
-#'   \item{\code{ahat}}{The estimated BCa acceleration parameter. This is
-#'   \code{NULL} when \code{nboot = 0}.}
-#'
-#'   \item{\code{BCaquantiles}}{The endpoints of the BCa confidence intervals
-#'   at the cumulative
-#'   probability levels specified by \code{alpha}. This is \code{NULL} when
-#'   \code{nboot = 0}.}
+#'   \item{\code{input}}{A list containing the original \code{call} and
+#'   \code{data}.}
+#'   \item{\code{method}}{The character string \code{"stepwise"}.}
+#'   \item{\code{estimate}}{A named numeric vector containing the estimated
+#'   \code{dark_figure} and \code{total} population.}
+#'   \item{\code{fitted_model}}{The hierarchy selected from the original
+#'   data.}
+#'   \item{\code{uncertainty}}{A two-row matrix of BCa endpoints for the dark
+#'   figure and total population when \code{nboot > 0}; otherwise an
+#'   explanatory character string.}
+#'   \item{\code{details}}{If \code{return_details = TRUE}, a list containing
+#'   \code{minus_infinity_effects}, \code{bootstrap_estimates}, and
+#'   \code{bca_acceleration}. Otherwise \code{"not requested"}.}
 #' }
 #'
 #' @references
@@ -120,8 +121,10 @@ estimate_population_stepwise <- function(
     pthresh = 0.02,
     maxorder = 2,
     iseed = 1234,
-    alpha = c(0.025, 0.1, 0.9, 0.975)
+    alpha = c(0.025, 0.1, 0.9, 0.975),
+    return_details = FALSE
 ) {
+  call <- match.call()
   #  find nboot bootstrap estimates of population size
   if (length(nboot) != 1L ||
       is.na(nboot) ||
@@ -138,12 +141,26 @@ estimate_population_stepwise <- function(
 
   MSEfit = populationestimatefromdata$MSEfit
   if (nboot == 0L) {
+    details <- if (return_details) {
+      list(
+        minus_infinity_effects = .mse_effect_names(
+          MSEfit$fit$neginfpars,
+          zdat
+        ),
+        bootstrap_estimates = "not generated because nboot = 0",
+        bca_acceleration = "not calculated because nboot = 0"
+      )
+    } else {
+      "not requested"
+    }
+
     return(list(
-      popest = popest,
-      MSEfit = MSEfit,
-      bootreps = NULL,
-      ahat = NULL,
-      BCaquantiles = NULL
+      input = list(call = call, data = zdat),
+      method = "stepwise",
+      estimate = .mse_estimate(popest, zdat),
+      fitted_model = MSEfit$hiermod,
+      uncertainty = .mse_uncertainty(NULL, zdat),
+      details = details
     ))
   }
   set.seed(iseed)
@@ -179,5 +196,25 @@ estimate_population_stepwise <- function(
   ahat = sum(countsobserved*jr^3)/(6 * (sum(countsobserved*jr^2))^{3/2})
   #  find BCa conf limits
   confquantiles = bcaconfvalues(bootreps, popest,ahat, alpha)
-  return(list(popest=popest, MSEfit=MSEfit, bootreps=bootreps, ahat=ahat, BCaquantiles=confquantiles))
+  details <- if (return_details) {
+    list(
+      minus_infinity_effects = .mse_effect_names(
+        MSEfit$fit$neginfpars,
+        zdat
+      ),
+      bootstrap_estimates = bootreps,
+      bca_acceleration = ahat
+    )
+  } else {
+    "not requested"
+  }
+
+  list(
+    input = list(call = call, data = zdat),
+    method = "stepwise",
+    estimate = .mse_estimate(popest, zdat),
+    fitted_model = MSEfit$hiermod,
+    uncertainty = .mse_uncertainty(confquantiles, zdat),
+    details = details
+  )
 }

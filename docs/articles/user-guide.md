@@ -4,10 +4,10 @@
 
 Multiple systems estimation uses several incomplete lists of observed
 individuals to estimate the size of a population, including the number
-of individuals who appear on none of the lists. The
-`MultipleSystemsEstimation` package implements Poisson log-linear
-methods for this problem, with particular attention to two important
-practical issues:
+of individuals who appear on none of the lists, often referred to as the
+*dark figure*. The `MultipleSystemsEstimation` package implements
+Poisson log-linear methods for this problem, with particular attention
+to two important practical issues:
 
 - sparse capture data, including combinations of lists with no observed
   overlap; and
@@ -51,9 +51,8 @@ treated as having count zero.
 
 The all-zero capture history is fundamentally different. It represents
 individuals who occur on none of the lists and therefore cannot be
-observed directly. Estimating the size of this unobserved group, often
-called the *dark figure*, is the central objective of multiple systems
-estimation.
+observed directly. Estimating the size of this unobserved group, the
+‘dark figure’, is the central objective of multiple systems estimation.
 
 The package includes several example datasets. The three-list `Korea`
 data provide a compact illustration:
@@ -98,18 +97,18 @@ For routine use, begin with the default call:
 ``` r
 
 fit <- estimate_population(Korea)
-fit$popest
-#> [1] 157.1667
-attr(fit, "method")
+fit$estimate
+#> dark_figure       total 
+#>    34.16667   157.16667
+fit$method
 #> [1] "bic"
-attr(fit, "nlists")
+ncol(fit$input$data) - 1
 #> [1] 3
 ```
 
 Because `Korea` has three lists, `method = "auto"` selects the BIC
-method. The returned `popest` is the estimated total population,
-including both the individuals observed on at least one list and the
-estimated dark figure.
+method. The returned `estimate` gives both the estimated dark figure and
+the estimated total population.
 
 The automatic rule is:
 
@@ -161,14 +160,16 @@ The BIC method can be requested explicitly:
 
 fit_bic <- estimate_population(
   Korea,
-  method = "bic"
+  method = "bic",
+  return_details = TRUE
 )
 
-fit_bic$popest
-#> [1] 157.1667
-fit_bic$model
+fit_bic$estimate
+#> dark_figure       total 
+#>    34.16667   157.16667
+fit_bic$fitted_model
 #> [1] "[12,23]"
-fit_bic$BIC
+fit_bic$details$BIC
 #> [1] 57.14081
 ```
 
@@ -177,7 +178,7 @@ original data:
 
 ``` r
 
-head(fit_bic$bic_results$res)
+head(fit_bic$details$bic_results$res)
 #>         abundance       BIC modelsorder
 #> [12,23]  157.1667  57.14081           2
 #> [12,3]   268.7778  58.96860           2
@@ -229,14 +230,10 @@ fit_bic_boot <- estimate_population(
   nboot = 100
 )
 
-fit_bic_boot$BCaquantiles
-#>            0.025      0.1      0.9    0.975
-#> [12,23] 133.2116 136.9897 199.7547 303.2850
-#> [12,3]  133.1861 136.8837 282.6830 409.4789
-#> [13,23] 133.1861 136.8837 282.6830 409.4789
-#> [23,1]  129.5471 136.0981 285.0565 417.0102
-#> [13,2]  129.5471 136.0981 285.0565 417.0102
-#> [1,2,3] 129.5471 136.0981 285.0565 417.0102
+fit_bic_boot$uncertainty
+#>                 0.025       0.1      0.9    0.975
+#> dark_figure   6.54714  13.09813 162.0565 294.0102
+#> total       129.54714 136.09813 285.0565 417.0102
 ```
 
 A small value of `nboot` is useful for checking code, but substantive
@@ -272,16 +269,13 @@ fit_bic_5 <- estimate_population(
   ntopmodels = 5
 )
 
-fit_bic_5$BCaquantiles
-#>            0.025      0.1      0.9    0.975
-#> [12,23] 133.2116 136.9897 199.7547 303.2850
-#> [12,3]  133.1861 136.8837 282.6830 409.4789
-#> [13,23] 133.1861 136.8837 282.6830 409.4789
-#> [23,1]  129.5471 136.0981 285.0565 417.0102
-#> [13,2]  129.5471 136.0981 285.0565 417.0102
+fit_bic_5$uncertainty
+#>                 0.025       0.1      0.9    0.975
+#> dark_figure   6.54714  13.09813 162.0565 294.0102
+#> total       129.54714 136.09813 285.0565 417.0102
 ```
 
-The `BCaquantiles` component gives the endpoints of the bias-corrected
+The `uncertainty` component gives the endpoints of the bias-corrected
 and accelerated (BCa) confidence intervals obtained when model selection
 is allowed among all models retained for the bootstrap calculation.
 
@@ -386,9 +380,10 @@ fit_step <- estimate_population(
   method = "stepwise"
 )
 
-fit_step$popest
-#> [1] 268.7778
-fit_step$MSEfit$hiermod
+fit_step$estimate
+#> dark_figure       total 
+#>    145.7778    268.7778
+fit_step$fitted_model
 #> [1] "[12,3]"
 ```
 
@@ -402,8 +397,9 @@ fit_step_01 <- estimate_population(
   pthresh = 0.01
 )
 
-fit_step_01$popest
-#> [1] 268.7778
+fit_step_01$estimate
+#> dark_figure       total 
+#>    145.7778    268.7778
 ```
 
 Higher-order interactions can be allowed by increasing `maxorder`.
@@ -430,15 +426,15 @@ fit_step_unrestricted <- estimate_population(
 )
 
 c(
-  pairwise = fit_step_pairwise$popest,
-  unrestricted = fit_step_unrestricted$popest
+  pairwise = fit_step_pairwise$estimate["total"],
+  unrestricted = fit_step_unrestricted$estimate["total"]
 )
-#>     pairwise unrestricted 
-#>     14341.66     18393.31
+#>     pairwise.total unrestricted.total 
+#>           14341.66           18393.31
 
 c(
-  pairwise = fit_step_pairwise$MSEfit$hiermod,
-  unrestricted = fit_step_unrestricted$MSEfit$hiermod
+  pairwise = fit_step_pairwise$fitted_model,
+  unrestricted = fit_step_unrestricted$fitted_model
 )
 #>           pairwise       unrestricted 
 #> "[12,13,14,23,34]"      "[134,12,23]"
@@ -465,12 +461,14 @@ conditioning on the model selected from the original data.
 fit_step_boot <- estimate_population(
   Korea,
   method = "stepwise",
-  nboot = 100
+  nboot = 100,
+  return_details = TRUE
 )
 
-fit_step_boot$BCaquantiles
-#>    0.025      0.1      0.9    0.975 
-#> 123.3274 193.8215 358.3031 399.8280
+fit_step_boot$uncertainty
+#>                   0.025       0.1      0.9   0.975
+#> dark_figure   0.3274105  70.82153 235.3031 276.828
+#> total       123.3274105 193.82153 358.3031 399.828
 ```
 
 The bootstrap samples are generated by multinomial resampling of the
@@ -482,10 +480,10 @@ estimated acceleration parameter:
 
 ``` r
 
-summary(fit_step_boot$bootreps)
+summary(fit_step_boot$details$bootstrap_estimates)
 #>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 #>   123.1   197.1   247.8   235.9   287.0   400.7
-fit_step_boot$ahat
+fit_step_boot$details$bca_acceleration
 #> [1] -0.02877338
 ```
 
@@ -511,42 +509,21 @@ For example:
 
 ``` r
 
-estimate_population(
+fit_bayes <- estimate_population(
   Kosovo,
   method = "bayesthresh",
   maxorder = 3
 )
-#> $call
-#> estimate_population_bayesthresh(zdat = zdat, maxorder = 3)
-#> 
-#> $popest
-#> [1] 11814.25
-#> 
-#> $quantiles
-#>     2.5%      10%      50%      90%    97.5% 
-#> 10015.00 10430.24 11814.25 13439.14 14567.56 
-#> 
-#> $retained_interactions
-#> [1] "EXH:ABA"  "EXH:OSCE" "ABA:OSCE" "EXH:HRW"  "OSCE:HRW"
-#> 
-#> $eligible_triples
-#> [1] "EXH:ABA:OSCE" "EXH:OSCE:HRW"
-#> 
-#> $retained_triples
-#> [1] "EXH:ABA:OSCE" "EXH:OSCE:HRW"
-#> 
-#> $threshold_statistics
-#>   EXH:ABA  EXH:OSCE  ABA:OSCE   EXH:HRW   ABA:HRW  OSCE:HRW 
-#>  8.464526  9.162971 12.540216  6.929278  0.196996 10.605549 
-#> 
-#> $triple_threshold_statistics
-#> EXH:ABA:OSCE EXH:OSCE:HRW 
-#>     4.263698     2.451189 
-#> 
-#> attr(,"method")
-#> [1] "bayesthresh"
-#> attr(,"nlists")
-#> [1] 4
+
+fit_bayes$estimate
+#> dark_figure       total 
+#>    7414.249   11814.249
+fit_bayes$fitted_model
+#> [1] "[123,134]"
+fit_bayes$uncertainty
+#>             0.025       0.1       0.9    0.975
+#> dark_figure  5615  6030.242  9039.142 10167.56
+#> total       10015 10430.242 13439.142 14567.56
 ```
 
 By default `maxorder = 2`, so only two-list interactions are considered.
@@ -588,9 +565,10 @@ fit_fixed <- estimate_population(
   model = "[12,23]"
 )
 
-fit_fixed$popest
-#> [1] 157.1667
-fit_fixed$model
+fit_fixed$estimate
+#> dark_figure       total 
+#>    34.16667   157.16667
+fit_fixed$fitted_model
 #> [1] "[12,23]"
 ```
 
@@ -611,9 +589,10 @@ fit_fixed_boot <- estimate_population(
 #> population-size estimate under the specified fixed hierarchical model and were
 #> omitted.
 
-fit_fixed_boot$BCaquantiles
-#>    0.025      0.1      0.9    0.975 
-#> 131.7082 135.6852 208.5624 244.9442
+fit_fixed_boot$uncertainty
+#>                  0.025       0.1       0.9    0.975
+#> dark_figure   8.708197  12.68516  85.56239 121.9442
+#> total       131.708197 135.68516 208.56239 244.9442
 ```
 
 Three bootstrap replications failed to produce a finite estimate under
@@ -682,51 +661,28 @@ than six lists, the BIC enumeration method is not available.
 
 ## Looking inside the result
 
-The exact components returned depend on the method selected.
-
-For BIC fitting:
+All four methods return the same top-level components:
 
 ``` r
 
 names(fit_bic)
-#> [1] "popest"       "model"        "BIC"          "bic_results"  "BCaquantiles"
+#> [1] "input"        "method"       "estimate"     "fitted_model" "uncertainty" 
+#> [6] "details"
 ```
 
-The most important components are:
+- `input`: the original call and data;
+- `method`: the method actually used, including after `method = "auto"`;
+- `estimate`: estimates of the dark figure and total population;
+- `fitted_model`: the supplied, selected or retained hierarchy;
+- `uncertainty`: confidence or credible endpoints for both estimates;
+- `details`: method-specific supporting output, or `"not requested"`.
 
-- `popest`: estimated total population;
-- `model`: minimum-BIC hierarchical model;
-- `BIC`: BIC of that model;
-- `bic_results`: full original-data BIC enumeration;
-- `BCaquantiles`: bootstrap BCa inference when requested.
-
-For stepwise fitting:
-
-``` r
-
-names(fit_step)
-#> [1] "popest"       "MSEfit"       "bootreps"     "ahat"         "BCaquantiles"
-```
-
-`MSEfit` contains the selected fitted model, while `bootreps`, `ahat`
-and `BCaquantiles` contain the resampling results when bootstrap
-inference has been requested.
-
-For `bayesthresh` the components returned depend on the options chosen
-and on the result of the analysis. See the individual documentation for
-details.
-
-For fixed fitting:
-
-``` r
-
-names(fit_fixed)
-#> [1] "popest"       "MSEfit"       "model"        "bootreps"     "ahat"        
-#> [6] "BCaquantiles"
-```
-
-`model` records the model that was fitted and `MSEfit` contains the
-detailed fitted object.
+Set `return_details = TRUE` to retain supporting output. For BIC this
+includes the selected BIC and complete original-data enumeration; for
+the likelihood methods it includes the bootstrap estimates and BCa
+acceleration. The complete conditional GLM fit is returned only by the
+fixed method. Bayesian details include the thresholding information and
+complete posterior sample of total population size.
 
 The individual help pages give the complete definitions of returned
 components:

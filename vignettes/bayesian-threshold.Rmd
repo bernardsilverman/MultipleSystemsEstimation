@@ -99,7 +99,7 @@ the unobserved cell is
 \exp(\mu).
 \)
 
-Adding this quantity to the observed population gives a posterior draw for the total population size. The resulting collection of draws therefore gives the posterior distribution of the total population. By default, `estimate_population_bayesthresh()` reports the posterior median as the population estimate, together with selected posterior quantiles. The full set of posterior draws can also be returned if required.
+Adding this quantity to the observed population gives a posterior draw for the total population size. The resulting collection of draws therefore gives the posterior distribution of the total population. By default, `estimate_population_bayesthresh()` reports posterior medians of the dark figure and total population, together with posterior quantiles at the probabilities supplied through `alpha`. The full set of posterior draws can also be returned if required.
 
 The thresholding step approximates a Bayesian model with a mixed prior for the parameters of an atom of probability at zero and some other symmetric density, hence modelling a parsimonious interaction structure; see
 Silverman (2020) for further discussion.
@@ -113,10 +113,19 @@ We first fit the Bayesian-threshold procedure using only two-list
 interactions.
 
 ```{r kosovo-pairwise, eval=have_mcmcpack}
-estimate_population_bayesthresh(
-    Kosovo,
-    maxorder = 2
+fit_bayes <- estimate_population_bayesthresh(
+  Kosovo,
+  maxorder = 2,
+  alpha = c(0.025, 0.975),
+  return_details = TRUE
 )
+
+fit_bayes$estimate
+fit_bayes$uncertainty
+fit_bayes$fitted_model
+fit_bayes$estimate
+fit_bayes$fitted_model
+fit_bayes$details$threshold_statistics
 ```
 
 With the default proper prior for the interaction parameters, the retained two-list interactions are
@@ -133,11 +142,19 @@ interactions.
 
 ```{r kosovo-threefactor, eval=have_mcmcpack}
 
-estimate_population_bayesthresh(
-    Kosovo,
-    maxorder = 3,
-    threshold = 2.5
+fit_bayes3 <- estimate_population_bayesthresh(
+  Kosovo,
+  maxorder = 3, threshold = 2.5, alpha = c(0.025, 0.975),
+  return_details = TRUE
 )
+
+fit_bayes3$estimate
+fit_bayes$uncertainty
+fit_bayes3$fitted_model
+fit_bayes3$details$threshold_statistics
+fit_bayes3$details$eligible_triples
+fit_bayes3$details$triple_threshold_statistics
+fit_bayes3$details$retained_triples
 ```
 
 The same five two-list interactions are retained. Two three-list interactions
@@ -161,22 +178,27 @@ distribution concentrated at minus infinity. Such terms are accounted for
 before the MCMC fit is carried out.
 Effects whose posterior distribution is concentrated at minus infinity
 are identified automatically and reported in the
-`minus_infinite_estimated_effects` component of the returned object. The
-effects are still retained in the model, but are not included in
-`retained_interactions`, which reports only retained interaction effects
-estimated by MCMC. For example, with the five-list UK data:
+`details$minus_infinity_effects` component of the returned object. The
+effects are still retained in the fitted hierarchy and are reported
+separately from interaction effects estimated by MCMC. For example, with the
+five-list UK data:
 
 ```{r uk-improper-minus-infinity, eval=have_mcmcpack}
 
-estimate_population_bayesthresh(
+fit_improper <- estimate_population_bayesthresh(
   UKdat_5,
-  prior = "improper"
+  prior = "improper",
+  return_details = TRUE
 )
+
+fit_improper$estimate
+fit_improper$uncertainty
+fit_improper$fitted_model
+fit_improper$details$minus_infinity_effects
 ```
 
-Here `LA:GP` is retained in the model with its effect estimated as minus
-infinity, and is therefore reported in `minus_infinite_estimated_effects`
-rather than in `retained_interactions`.
+Here `LA:GP`, corresponding to the interaction `15` in the numerical hierarchy notation, is retained in the model with its effect estimated as minus
+infinity, and is therefore reported in `details$minus_infinity_effects`.
 
 ### Checking existence with improper interaction priors
 
@@ -232,12 +254,14 @@ The second possibility is illustrated by Western. To make the issue
 visible, we use the unusually low value `threshold = 0.2`.
 
 ```{r western-existence, eval=have_mcmcpack}
-estimate_population_bayesthresh(
+fit_western <- estimate_population_bayesthresh(
   Western,
   prior = "improper",
   maxorder = 3,
   threshold = 0.2
 )
+
+fit_western$fitted_model
 ```
 The initial two-list fit and thresholding are completed, but the model
 containing the retained two-list interactions and all eligible three-list
@@ -258,7 +282,8 @@ specified. A different seed can be supplied through `...` if a different MCMC
 run is required.
 
 By default, the full posterior sample of total population size is not returned.
-It can be retained, when required, by setting `return_posterior = TRUE`.
+It can be retained as `details$posterior`, when required, by setting
+`return_details = TRUE`.
 
 # Summary
 

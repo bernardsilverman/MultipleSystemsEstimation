@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">MultipleSystemsEstimation</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -72,10 +72,10 @@
 </h2>
 <p>Multiple systems estimation uses several incomplete lists of observed
 individuals to estimate the size of a population, including the number
-of individuals who appear on none of the lists. The
-<code>MultipleSystemsEstimation</code> package implements Poisson
-log-linear methods for this problem, with particular attention to two
-important practical issues:</p>
+of individuals who appear on none of the lists, often referred to as the
+<em>dark figure</em>. The <code>MultipleSystemsEstimation</code> package
+implements Poisson log-linear methods for this problem, with particular
+attention to two important practical issues:</p>
 <ul>
 <li>sparse capture data, including combinations of lists with no
 observed overlap; and</li>
@@ -118,8 +118,8 @@ treated as having count zero.</p>
 <p>The all-zero capture history is fundamentally different. It
 represents individuals who occur on none of the lists and therefore
 cannot be observed directly. Estimating the size of this unobserved
-group, often called the <em>dark figure</em>, is the central objective
-of multiple systems estimation.</p>
+group, the ‘dark figure’, is the central objective of multiple systems
+estimation.</p>
 <p>The package includes several example datasets. The three-list
 <code>Korea</code> data provide a compact illustration:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -153,17 +153,17 @@ are zero.</p>
 <p>For routine use, begin with the default call:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_population.html">estimate_population</a></span><span class="op">(</span><span class="va">Korea</span><span class="op">)</span></span>
-<span><span class="va">fit</span><span class="op">$</span><span class="va">popest</span></span>
-<span><span class="co">#&gt; [1] 157.1667</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">fit</span>, <span class="st">"method"</span><span class="op">)</span></span>
+<span><span class="va">fit</span><span class="op">$</span><span class="va">estimate</span></span>
+<span><span class="co">#&gt; dark_figure       total </span></span>
+<span><span class="co">#&gt;    34.16667   157.16667</span></span>
+<span><span class="va">fit</span><span class="op">$</span><span class="va">method</span></span>
 <span><span class="co">#&gt; [1] "bic"</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">fit</span>, <span class="st">"nlists"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">input</span><span class="op">$</span><span class="va">data</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span></span>
 <span><span class="co">#&gt; [1] 3</span></span></code></pre></div>
 <p>Because <code>Korea</code> has three lists,
 <code>method = "auto"</code> selects the BIC method. The returned
-<code>popest</code> is the estimated total population, including both
-the individuals observed on at least one list and the estimated dark
-figure.</p>
+<code>estimate</code> gives both the estimated dark figure and the
+estimated total population.</p>
 <p>The automatic rule is:</p>
 <table class="table">
 <thead><tr class="header">
@@ -223,19 +223,21 @@ smallest BIC gives the point estimate for the original data.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_bic</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_population.html">estimate_population</a></span><span class="op">(</span></span>
 <span>  <span class="va">Korea</span>,</span>
-<span>  method <span class="op">=</span> <span class="st">"bic"</span></span>
+<span>  method <span class="op">=</span> <span class="st">"bic"</span>,</span>
+<span>  return_details <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">fit_bic</span><span class="op">$</span><span class="va">popest</span></span>
-<span><span class="co">#&gt; [1] 157.1667</span></span>
-<span><span class="va">fit_bic</span><span class="op">$</span><span class="va">model</span></span>
+<span><span class="va">fit_bic</span><span class="op">$</span><span class="va">estimate</span></span>
+<span><span class="co">#&gt; dark_figure       total </span></span>
+<span><span class="co">#&gt;    34.16667   157.16667</span></span>
+<span><span class="va">fit_bic</span><span class="op">$</span><span class="va">fitted_model</span></span>
 <span><span class="co">#&gt; [1] "[12,23]"</span></span>
-<span><span class="va">fit_bic</span><span class="op">$</span><span class="va">BIC</span></span>
+<span><span class="va">fit_bic</span><span class="op">$</span><span class="va">details</span><span class="op">$</span><span class="va">BIC</span></span>
 <span><span class="co">#&gt; [1] 57.14081</span></span></code></pre></div>
 <p>The <code>bic_results</code> component contains the full BIC
 enumeration for the original data:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">fit_bic</span><span class="op">$</span><span class="va">bic_results</span><span class="op">$</span><span class="va">res</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">fit_bic</span><span class="op">$</span><span class="va">details</span><span class="op">$</span><span class="va">bic_results</span><span class="op">$</span><span class="va">res</span><span class="op">)</span></span>
 <span><span class="co">#&gt;         abundance       BIC modelsorder</span></span>
 <span><span class="co">#&gt; [12,23]  157.1667  57.14081           2</span></span>
 <span><span class="co">#&gt; [12,3]   268.7778  58.96860           2</span></span>
@@ -303,14 +305,10 @@ substantive inference.</p>
 <span>  nboot <span class="op">=</span> <span class="fl">100</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">fit_bic_boot</span><span class="op">$</span><span class="va">BCaquantiles</span></span>
-<span><span class="co">#&gt;            0.025      0.1      0.9    0.975</span></span>
-<span><span class="co">#&gt; [12,23] 133.2116 136.9897 199.7547 303.2850</span></span>
-<span><span class="co">#&gt; [12,3]  133.1861 136.8837 282.6830 409.4789</span></span>
-<span><span class="co">#&gt; [13,23] 133.1861 136.8837 282.6830 409.4789</span></span>
-<span><span class="co">#&gt; [23,1]  129.5471 136.0981 285.0565 417.0102</span></span>
-<span><span class="co">#&gt; [13,2]  129.5471 136.0981 285.0565 417.0102</span></span>
-<span><span class="co">#&gt; [1,2,3] 129.5471 136.0981 285.0565 417.0102</span></span></code></pre></div>
+<span><span class="va">fit_bic_boot</span><span class="op">$</span><span class="va">uncertainty</span></span>
+<span><span class="co">#&gt;                 0.025       0.1      0.9    0.975</span></span>
+<span><span class="co">#&gt; dark_figure   6.54714  13.09813 162.0565 294.0102</span></span>
+<span><span class="co">#&gt; total       129.54714 136.09813 285.0565 417.0102</span></span></code></pre></div>
 <p>A small value of <code>nboot</code> is useful for checking code, but
 substantive inference should use substantially more bootstrap
 replications.</p>
@@ -354,14 +352,11 @@ from the full candidate set allowed by <code>maxorder</code>.</p>
 <span>  ntopmodels <span class="op">=</span> <span class="fl">5</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">fit_bic_5</span><span class="op">$</span><span class="va">BCaquantiles</span></span>
-<span><span class="co">#&gt;            0.025      0.1      0.9    0.975</span></span>
-<span><span class="co">#&gt; [12,23] 133.2116 136.9897 199.7547 303.2850</span></span>
-<span><span class="co">#&gt; [12,3]  133.1861 136.8837 282.6830 409.4789</span></span>
-<span><span class="co">#&gt; [13,23] 133.1861 136.8837 282.6830 409.4789</span></span>
-<span><span class="co">#&gt; [23,1]  129.5471 136.0981 285.0565 417.0102</span></span>
-<span><span class="co">#&gt; [13,2]  129.5471 136.0981 285.0565 417.0102</span></span></code></pre></div>
-<p>The <code>BCaquantiles</code> component gives the endpoints of the
+<span><span class="va">fit_bic_5</span><span class="op">$</span><span class="va">uncertainty</span></span>
+<span><span class="co">#&gt;                 0.025       0.1      0.9    0.975</span></span>
+<span><span class="co">#&gt; dark_figure   6.54714  13.09813 162.0565 294.0102</span></span>
+<span><span class="co">#&gt; total       129.54714 136.09813 285.0565 417.0102</span></span></code></pre></div>
+<p>The <code>uncertainty</code> component gives the endpoints of the
 bias-corrected and accelerated (BCa) confidence intervals obtained when
 model selection is allowed among all models retained for the bootstrap
 calculation.</p>
@@ -453,9 +448,10 @@ paper.</p>
 <span>  method <span class="op">=</span> <span class="st">"stepwise"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">fit_step</span><span class="op">$</span><span class="va">popest</span></span>
-<span><span class="co">#&gt; [1] 268.7778</span></span>
-<span><span class="va">fit_step</span><span class="op">$</span><span class="va">MSEfit</span><span class="op">$</span><span class="va">hiermod</span></span>
+<span><span class="va">fit_step</span><span class="op">$</span><span class="va">estimate</span></span>
+<span><span class="co">#&gt; dark_figure       total </span></span>
+<span><span class="co">#&gt;    145.7778    268.7778</span></span>
+<span><span class="va">fit_step</span><span class="op">$</span><span class="va">fitted_model</span></span>
 <span><span class="co">#&gt; [1] "[12,3]"</span></span></code></pre></div>
 <p>The threshold can be varied explicitly:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
@@ -465,8 +461,9 @@ paper.</p>
 <span>  pthresh <span class="op">=</span> <span class="fl">0.01</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">fit_step_01</span><span class="op">$</span><span class="va">popest</span></span>
-<span><span class="co">#&gt; [1] 268.7778</span></span></code></pre></div>
+<span><span class="va">fit_step_01</span><span class="op">$</span><span class="va">estimate</span></span>
+<span><span class="co">#&gt; dark_figure       total </span></span>
+<span><span class="co">#&gt;    145.7778    268.7778</span></span></code></pre></div>
 <p>Higher-order interactions can be allowed by increasing
 <code>maxorder</code>. Setting <code>maxorder = Inf</code> allows
 interactions of any order to be considered. A higher-order interaction
@@ -488,15 +485,15 @@ the selected model and the population estimate:</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>  pairwise <span class="op">=</span> <span class="va">fit_step_pairwise</span><span class="op">$</span><span class="va">popest</span>,</span>
-<span>  unrestricted <span class="op">=</span> <span class="va">fit_step_unrestricted</span><span class="op">$</span><span class="va">popest</span></span>
+<span>  pairwise <span class="op">=</span> <span class="va">fit_step_pairwise</span><span class="op">$</span><span class="va">estimate</span><span class="op">[</span><span class="st">"total"</span><span class="op">]</span>,</span>
+<span>  unrestricted <span class="op">=</span> <span class="va">fit_step_unrestricted</span><span class="op">$</span><span class="va">estimate</span><span class="op">[</span><span class="st">"total"</span><span class="op">]</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt;     pairwise unrestricted </span></span>
-<span><span class="co">#&gt;     14341.66     18393.31</span></span>
+<span><span class="co">#&gt;     pairwise.total unrestricted.total </span></span>
+<span><span class="co">#&gt;           14341.66           18393.31</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>  pairwise <span class="op">=</span> <span class="va">fit_step_pairwise</span><span class="op">$</span><span class="va">MSEfit</span><span class="op">$</span><span class="va">hiermod</span>,</span>
-<span>  unrestricted <span class="op">=</span> <span class="va">fit_step_unrestricted</span><span class="op">$</span><span class="va">MSEfit</span><span class="op">$</span><span class="va">hiermod</span></span>
+<span>  pairwise <span class="op">=</span> <span class="va">fit_step_pairwise</span><span class="op">$</span><span class="va">fitted_model</span>,</span>
+<span>  unrestricted <span class="op">=</span> <span class="va">fit_step_unrestricted</span><span class="op">$</span><span class="va">fitted_model</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt;           pairwise       unrestricted </span></span>
 <span><span class="co">#&gt; "[12,13,14,23,34]"      "[134,12,23]"</span></span></code></pre></div>
@@ -519,22 +516,24 @@ conditioning on the model selected from the original data.</p>
 <code class="sourceCode R"><span><span class="va">fit_step_boot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_population.html">estimate_population</a></span><span class="op">(</span></span>
 <span>  <span class="va">Korea</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"stepwise"</span>,</span>
-<span>  nboot <span class="op">=</span> <span class="fl">100</span></span>
+<span>  nboot <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  return_details <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">fit_step_boot</span><span class="op">$</span><span class="va">BCaquantiles</span></span>
-<span><span class="co">#&gt;    0.025      0.1      0.9    0.975 </span></span>
-<span><span class="co">#&gt; 123.3274 193.8215 358.3031 399.8280</span></span></code></pre></div>
+<span><span class="va">fit_step_boot</span><span class="op">$</span><span class="va">uncertainty</span></span>
+<span><span class="co">#&gt;                   0.025       0.1      0.9   0.975</span></span>
+<span><span class="co">#&gt; dark_figure   0.3274105  70.82153 235.3031 276.828</span></span>
+<span><span class="co">#&gt; total       123.3274105 193.82153 358.3031 399.828</span></span></code></pre></div>
 <p>The bootstrap samples are generated by multinomial resampling of the
 observed capture-history counts. A delete-one jackknife calculation
 supplies the acceleration term for the BCa confidence intervals.</p>
 <p>The result also contains the bootstrap population estimates and the
 estimated acceleration parameter:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_step_boot</span><span class="op">$</span><span class="va">bootreps</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_step_boot</span><span class="op">$</span><span class="va">details</span><span class="op">$</span><span class="va">bootstrap_estimates</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></span>
 <span><span class="co">#&gt;   123.1   197.1   247.8   235.9   287.0   400.7</span></span>
-<span><span class="va">fit_step_boot</span><span class="op">$</span><span class="va">ahat</span></span>
+<span><span class="va">fit_step_boot</span><span class="op">$</span><span class="va">details</span><span class="op">$</span><span class="va">bca_acceleration</span></span>
 <span><span class="co">#&gt; [1] -0.02877338</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -557,42 +556,21 @@ suggested package <code>MCMCpack</code>, but only when
 <code>bayesthresh</code> is actually used.</p>
 <p>For example:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/estimate_population.html">estimate_population</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">fit_bayes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_population.html">estimate_population</a></span><span class="op">(</span></span>
 <span>  <span class="va">Kosovo</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"bayesthresh"</span>,</span>
 <span>  maxorder <span class="op">=</span> <span class="fl">3</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; $call</span></span>
-<span><span class="co">#&gt; estimate_population_bayesthresh(zdat = zdat, maxorder = 3)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $popest</span></span>
-<span><span class="co">#&gt; [1] 11814.25</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $quantiles</span></span>
-<span><span class="co">#&gt;     2.5%      10%      50%      90%    97.5% </span></span>
-<span><span class="co">#&gt; 10015.00 10430.24 11814.25 13439.14 14567.56 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $retained_interactions</span></span>
-<span><span class="co">#&gt; [1] "EXH:ABA"  "EXH:OSCE" "ABA:OSCE" "EXH:HRW"  "OSCE:HRW"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $eligible_triples</span></span>
-<span><span class="co">#&gt; [1] "EXH:ABA:OSCE" "EXH:OSCE:HRW"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $retained_triples</span></span>
-<span><span class="co">#&gt; [1] "EXH:ABA:OSCE" "EXH:OSCE:HRW"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $threshold_statistics</span></span>
-<span><span class="co">#&gt;   EXH:ABA  EXH:OSCE  ABA:OSCE   EXH:HRW   ABA:HRW  OSCE:HRW </span></span>
-<span><span class="co">#&gt;  8.464526  9.162971 12.540216  6.929278  0.196996 10.605549 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $triple_threshold_statistics</span></span>
-<span><span class="co">#&gt; EXH:ABA:OSCE EXH:OSCE:HRW </span></span>
-<span><span class="co">#&gt;     4.263698     2.451189 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; attr(,"method")</span></span>
-<span><span class="co">#&gt; [1] "bayesthresh"</span></span>
-<span><span class="co">#&gt; attr(,"nlists")</span></span>
-<span><span class="co">#&gt; [1] 4</span></span></code></pre></div>
+<span></span>
+<span><span class="va">fit_bayes</span><span class="op">$</span><span class="va">estimate</span></span>
+<span><span class="co">#&gt; dark_figure       total </span></span>
+<span><span class="co">#&gt;    7414.249   11814.249</span></span>
+<span><span class="va">fit_bayes</span><span class="op">$</span><span class="va">fitted_model</span></span>
+<span><span class="co">#&gt; [1] "[123,134]"</span></span>
+<span><span class="va">fit_bayes</span><span class="op">$</span><span class="va">uncertainty</span></span>
+<span><span class="co">#&gt;             0.025       0.1       0.9    0.975</span></span>
+<span><span class="co">#&gt; dark_figure  5615  6030.242  9039.142 10167.56</span></span>
+<span><span class="co">#&gt; total       10015 10430.242 13439.142 14567.56</span></span></code></pre></div>
 <p>By default <code>maxorder = 2</code>, so only two-list interactions
 are considered. Setting <code>maxorder = 3</code> allows three-list
 interactions as well. A three-list interaction is eligible for
@@ -629,9 +607,10 @@ either automatic model-selection procedure. In that case use
 <span>  model <span class="op">=</span> <span class="st">"[12,23]"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">fit_fixed</span><span class="op">$</span><span class="va">popest</span></span>
-<span><span class="co">#&gt; [1] 157.1667</span></span>
-<span><span class="va">fit_fixed</span><span class="op">$</span><span class="va">model</span></span>
+<span><span class="va">fit_fixed</span><span class="op">$</span><span class="va">estimate</span></span>
+<span><span class="co">#&gt; dark_figure       total </span></span>
+<span><span class="co">#&gt;    34.16667   157.16667</span></span>
+<span><span class="va">fit_fixed</span><span class="op">$</span><span class="va">fitted_model</span></span>
 <span><span class="co">#&gt; [1] "[12,23]"</span></span></code></pre></div>
 <p>Bootstrap inference for a fixed model is requested in the same way.
 In contrast to the BIC and stepwise procedures, the same specified model
@@ -648,9 +627,10 @@ model-selection step inside the resampling procedure.</p>
 <span><span class="co">#&gt; population-size estimate under the specified fixed hierarchical model and were</span></span>
 <span><span class="co">#&gt; omitted.</span></span>
 <span></span>
-<span><span class="va">fit_fixed_boot</span><span class="op">$</span><span class="va">BCaquantiles</span></span>
-<span><span class="co">#&gt;    0.025      0.1      0.9    0.975 </span></span>
-<span><span class="co">#&gt; 131.7082 135.6852 208.5624 244.9442</span></span></code></pre></div>
+<span><span class="va">fit_fixed_boot</span><span class="op">$</span><span class="va">uncertainty</span></span>
+<span><span class="co">#&gt;                  0.025       0.1       0.9    0.975</span></span>
+<span><span class="co">#&gt; dark_figure   8.708197  12.68516  85.56239 121.9442</span></span>
+<span><span class="co">#&gt; total       131.708197 135.68516 208.56239 244.9442</span></span></code></pre></div>
 <p>Three bootstrap replications failed to produce a finite estimate
 under the specified fixed model and were omitted. With only 100
 replications, the resulting interval is included to demonstrate the
@@ -717,46 +697,40 @@ available.</p>
 <div class="section level2">
 <h2 id="looking-inside-the-result">Looking inside the result<a class="anchor" aria-label="anchor" href="#looking-inside-the-result"></a>
 </h2>
-<p>The exact components returned depend on the method selected.</p>
-<p>For BIC fitting:</p>
+<p>All four methods return the same top-level components:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">fit_bic</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "popest"       "model"        "BIC"          "bic_results"  "BCaquantiles"</span></span></code></pre></div>
-<p>The most important components are:</p>
+<span><span class="co">#&gt; [1] "input"        "method"       "estimate"     "fitted_model" "uncertainty" </span></span>
+<span><span class="co">#&gt; [6] "details"</span></span></code></pre></div>
 <ul>
 <li>
-<code>popest</code>: estimated total population;</li>
+<code>input</code>: the original call and data;</li>
 <li>
-<code>model</code>: minimum-BIC hierarchical model;</li>
+<code>method</code>: the method actually used, including after
+<code>method = "auto"</code>;</li>
 <li>
-<code>BIC</code>: BIC of that model;</li>
+<code>estimate</code>: estimates of the dark figure and total
+population;</li>
 <li>
-<code>bic_results</code>: full original-data BIC enumeration;</li>
+<code>fitted_model</code>: the supplied, selected or retained
+hierarchy;</li>
 <li>
-<code>BCaquantiles</code>: bootstrap BCa inference when
-requested.</li>
+<code>uncertainty</code>: confidence or credible endpoints for both
+estimates;</li>
+<li>
+<code>details</code>: method-specific supporting output, or
+<code>"not requested"</code>.</li>
 </ul>
-<p>For stepwise fitting:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">fit_step</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "popest"       "MSEfit"       "bootreps"     "ahat"         "BCaquantiles"</span></span></code></pre></div>
-<p><code>MSEfit</code> contains the selected fitted model, while
-<code>bootreps</code>, <code>ahat</code> and <code>BCaquantiles</code>
-contain the resampling results when bootstrap inference has been
-requested.</p>
-<p>For <code>bayesthresh</code> the components returned depend on the
-options chosen and on the result of the analysis. See the individual
-documentation for details.</p>
-<p>For fixed fitting:</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">fit_fixed</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "popest"       "MSEfit"       "model"        "bootreps"     "ahat"        </span></span>
-<span><span class="co">#&gt; [6] "BCaquantiles"</span></span></code></pre></div>
-<p><code>model</code> records the model that was fitted and
-<code>MSEfit</code> contains the detailed fitted object.</p>
+<p>Set <code>return_details = TRUE</code> to retain supporting output.
+For BIC this includes the selected BIC and complete original-data
+enumeration; for the likelihood methods it includes the bootstrap
+estimates and BCa acceleration. The complete conditional GLM fit is
+returned only by the fixed method. Bayesian details include the
+thresholding information and complete posterior sample of total
+population size.</p>
 <p>The individual help pages give the complete definitions of returned
 components:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="op">?</span><span class="va">estimate_population</span></span>
 <span><span class="op">?</span><span class="va">estimate_population_bic</span></span>
 <span><span class="op">?</span><span class="va">estimate_population_stepwise</span></span>

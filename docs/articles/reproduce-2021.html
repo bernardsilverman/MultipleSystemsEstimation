@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">MultipleSystemsEstimation</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -248,9 +248,10 @@ bootstrapping:</p>
 <span>  maxorder <span class="op">=</span> <span class="fl">2</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">fit</span><span class="op">$</span><span class="va">popest</span></span>
-<span><span class="co">#&gt; [1] 268.7778</span></span>
-<span><span class="va">fit</span><span class="op">$</span><span class="va">MSEfit</span><span class="op">$</span><span class="va">hiermod</span></span>
+<span><span class="va">fit</span><span class="op">$</span><span class="va">estimate</span></span>
+<span><span class="co">#&gt; dark_figure       total </span></span>
+<span><span class="co">#&gt;    145.7778    268.7778</span></span>
+<span><span class="va">fit</span><span class="op">$</span><span class="va">fitted_model</span></span>
 <span><span class="co">#&gt; [1] "[12,3]"</span></span></code></pre></div>
 <p>The same method is also available from the overall package
 interface:</p>
@@ -286,15 +287,15 @@ different results:</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>  pairwise <span class="op">=</span> <span class="va">Kosovo_pairwise</span><span class="op">$</span><span class="va">popest</span>,</span>
-<span>  unrestricted <span class="op">=</span> <span class="va">Kosovo_unrestricted</span><span class="op">$</span><span class="va">popest</span></span>
+<span>  pairwise <span class="op">=</span> <span class="va">Kosovo_pairwise</span><span class="op">$</span><span class="va">estimate</span><span class="op">[</span><span class="st">"total"</span><span class="op">]</span>,</span>
+<span>  unrestricted <span class="op">=</span> <span class="va">Kosovo_unrestricted</span><span class="op">$</span><span class="va">estimate</span><span class="op">[</span><span class="st">"total"</span><span class="op">]</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt;     pairwise unrestricted </span></span>
-<span><span class="co">#&gt;     14341.66     18393.31</span></span>
+<span><span class="co">#&gt;     pairwise.total unrestricted.total </span></span>
+<span><span class="co">#&gt;           14341.66           18393.31</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>  pairwise <span class="op">=</span> <span class="va">Kosovo_pairwise</span><span class="op">$</span><span class="va">MSEfit</span><span class="op">$</span><span class="va">hiermod</span>,</span>
-<span>  unrestricted <span class="op">=</span> <span class="va">Kosovo_unrestricted</span><span class="op">$</span><span class="va">MSEfit</span><span class="op">$</span><span class="va">hiermod</span></span>
+<span>  pairwise <span class="op">=</span> <span class="va">Kosovo_pairwise</span><span class="op">$</span><span class="va">fitted_model</span>,</span>
+<span>  unrestricted <span class="op">=</span> <span class="va">Kosovo_unrestricted</span><span class="op">$</span><span class="va">fitted_model</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt;           pairwise       unrestricted </span></span>
 <span><span class="co">#&gt; "[12,13,14,23,34]"      "[134,12,23]"</span></span></code></pre></div>
@@ -330,11 +331,13 @@ capture histories need to be considered explicitly.</p>
 <span>  iseed <span class="op">=</span> <span class="fl">1234</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">fit_boot</span><span class="op">$</span><span class="va">popest</span></span>
-<span><span class="co">#&gt; [1] 268.7778</span></span>
-<span><span class="va">fit_boot</span><span class="op">$</span><span class="va">BCaquantiles</span></span>
-<span><span class="co">#&gt;    0.025      0.1      0.9    0.975 </span></span>
-<span><span class="co">#&gt; 123.3274 193.8215 358.3031 399.8280</span></span></code></pre></div>
+<span><span class="va">fit_boot</span><span class="op">$</span><span class="va">estimate</span></span>
+<span><span class="co">#&gt; dark_figure       total </span></span>
+<span><span class="co">#&gt;    145.7778    268.7778</span></span>
+<span><span class="va">fit_boot</span><span class="op">$</span><span class="va">uncertainty</span></span>
+<span><span class="co">#&gt;                   0.025       0.1      0.9   0.975</span></span>
+<span><span class="co">#&gt; dark_figure   0.3274105  70.82153 235.3031 276.828</span></span>
+<span><span class="co">#&gt; total       123.3274105 193.82153 358.3031 399.828</span></span></code></pre></div>
 <p>To keep the vignette quick, the bootstrap calculations run below use
 only 100 replications. The resulting BCa confidence intervals are
 included only to demonstrate the operation of the code and may differ
@@ -355,7 +358,7 @@ computation.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">NewOrl</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span></span>
 <span><span class="co">#&gt; [1] 8</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">NewOrl</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">NewOrl</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 186</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 185</span></span></code></pre></div>
 <p>There are 28 possible pairs of lists, of which 18 are
 nonoverlapping.</p>
 <p>Applying the stepwise procedure with
@@ -367,9 +370,10 @@ nonoverlapping.</p>
 <span>  maxorder <span class="op">=</span> <span class="fl">2</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">NewOrl_fit</span><span class="op">$</span><span class="va">popest</span></span>
-<span><span class="co">#&gt; [1] 1110.488</span></span>
-<span><span class="va">NewOrl_fit</span><span class="op">$</span><span class="va">MSEfit</span><span class="op">$</span><span class="va">hiermod</span></span>
+<span><span class="va">NewOrl_fit</span><span class="op">$</span><span class="va">estimate</span></span>
+<span><span class="co">#&gt; dark_figure       total </span></span>
+<span><span class="co">#&gt;    998.6923   1183.6923</span></span>
+<span><span class="va">NewOrl_fit</span><span class="op">$</span><span class="va">fitted_model</span></span>
 <span><span class="co">#&gt; [1] "[45,1,2,3,6,7,8]"</span></span></code></pre></div>
 <p>The paper reports that the selected model contains the two-list
 effect DE and gives a total population estimate of
@@ -385,7 +389,7 @@ replications, is <strong>(717, 1657)</strong>.</p>
 <span>  nboot <span class="op">=</span> <span class="fl">1000</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">NewOrl_boot</span><span class="op">$</span><span class="va">BCaquantiles</span></span></code></pre></div>
+<span><span class="va">NewOrl_boot</span><span class="op">$</span><span class="va">uncertainty</span></span></code></pre></div>
 <p>The paper also considers the main-effects-only model, obtained when
 the threshold is 0.01 or smaller. It reports a point estimate of
 <strong>997</strong> and a 95% confidence interval of <strong>(644,
@@ -399,8 +403,8 @@ the threshold is 0.01 or smaller. It reports a point estimate of
 <span>  nboot <span class="op">=</span> <span class="fl">1000</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">NewOrl_main</span><span class="op">$</span><span class="va">popest</span></span>
-<span><span class="va">NewOrl_main</span><span class="op">$</span><span class="va">BCaquantiles</span></span></code></pre></div>
+<span><span class="va">NewOrl_main</span><span class="op">$</span><span class="va">estimate</span></span>
+<span><span class="va">NewOrl_main</span><span class="op">$</span><span class="va">uncertainty</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="five-list-new-orleans-data">Five-list New Orleans data<a class="anchor" aria-label="anchor" href="#five-list-new-orleans-data"></a>
@@ -417,9 +421,10 @@ five-list version. This is supplied as <code>NewOrl_5</code>.</p>
 <span>  maxorder <span class="op">=</span> <span class="fl">2</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">NewOrl5_fit</span><span class="op">$</span><span class="va">popest</span></span>
-<span><span class="co">#&gt; [1] 981.4314</span></span>
-<span><span class="va">NewOrl5_fit</span><span class="op">$</span><span class="va">MSEfit</span><span class="op">$</span><span class="va">hiermod</span></span>
+<span><span class="va">NewOrl5_fit</span><span class="op">$</span><span class="va">estimate</span></span>
+<span><span class="co">#&gt; dark_figure       total </span></span>
+<span><span class="co">#&gt;    849.1511   1034.1511</span></span>
+<span><span class="va">NewOrl5_fit</span><span class="op">$</span><span class="va">fitted_model</span></span>
 <span><span class="co">#&gt; [1] "[1,2,3,4,5]"</span></span></code></pre></div>
 <p>The paper reports that no two-list parameter is significant even at
 the 5% level. The point estimate is <strong>1034</strong>, with BCa 95%
@@ -433,9 +438,10 @@ confidence interval <strong>(589, 1703)</strong>.</p>
 <span>  nboot <span class="op">=</span> <span class="fl">100</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">NewOrl5_boot</span><span class="op">$</span><span class="va">BCaquantiles</span></span>
-<span><span class="co">#&gt;     0.025       0.1       0.9     0.975 </span></span>
-<span><span class="co">#&gt;  700.3053  700.3053 1114.2200 1330.4792</span></span></code></pre></div>
+<span><span class="va">NewOrl5_boot</span><span class="op">$</span><span class="va">uncertainty</span></span>
+<span><span class="co">#&gt;                0.025      0.1      0.9    0.975</span></span>
+<span><span class="co">#&gt; dark_figure 416.0089 416.0089 1110.799 1651.069</span></span>
+<span><span class="co">#&gt; total       601.0089 601.0089 1295.799 1836.069</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="western-site-data-section-4-2">Western site data: Section 4.2<a class="anchor" aria-label="anchor" href="#western-site-data-section-4-2"></a>
@@ -450,9 +456,10 @@ confidence interval <strong>(589, 1703)</strong>.</p>
 <span>  maxorder <span class="op">=</span> <span class="fl">2</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">Western_fit</span><span class="op">$</span><span class="va">popest</span></span>
-<span><span class="co">#&gt; [1] 2483.384</span></span>
-<span><span class="va">Western_fit</span><span class="op">$</span><span class="va">MSEfit</span><span class="op">$</span><span class="va">hiermod</span></span>
+<span><span class="va">Western_fit</span><span class="op">$</span><span class="va">estimate</span></span>
+<span><span class="co">#&gt; dark_figure       total </span></span>
+<span><span class="co">#&gt;    2138.384    2483.384</span></span>
+<span><span class="va">Western_fit</span><span class="op">$</span><span class="va">fitted_model</span></span>
 <span><span class="co">#&gt; [1] "[15,2,3,4]"</span></span></code></pre></div>
 <p>The paper reports that the selected model contains the two-list
 effect AE and that the resulting point estimate is
@@ -468,9 +475,10 @@ effect AE and that the resulting point estimate is
 <span>  nboot <span class="op">=</span> <span class="fl">100</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">Western_boot</span><span class="op">$</span><span class="va">BCaquantiles</span></span>
-<span><span class="co">#&gt;    0.025      0.1      0.9    0.975 </span></span>
-<span><span class="co">#&gt; 1550.954 1550.954 2869.327 3409.250</span></span></code></pre></div>
+<span><span class="va">Western_boot</span><span class="op">$</span><span class="va">uncertainty</span></span>
+<span><span class="co">#&gt;                0.025      0.1      0.9   0.975</span></span>
+<span><span class="co">#&gt; dark_figure 1205.954 1205.954 2524.327 3064.25</span></span>
+<span><span class="co">#&gt; total       1550.954 1550.954 2869.327 3409.25</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="comparison-with-the-bic-approach-section-3-4">Comparison with the BIC approach: Section 3.4<a class="anchor" aria-label="anchor" href="#comparison-with-the-bic-approach-section-3-4"></a>
@@ -572,9 +580,10 @@ now</p>
 <span>  maxorder <span class="op">=</span> <span class="fl">2</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">fit_current</span><span class="op">$</span><span class="va">popest</span></span>
-<span><span class="co">#&gt; [1] 268.7778</span></span>
-<span><span class="va">fit_current</span><span class="op">$</span><span class="va">MSEfit</span><span class="op">$</span><span class="va">hiermod</span></span>
+<span><span class="va">fit_current</span><span class="op">$</span><span class="va">estimate</span></span>
+<span><span class="co">#&gt; dark_figure       total </span></span>
+<span><span class="co">#&gt;    145.7778    268.7778</span></span>
+<span><span class="va">fit_current</span><span class="op">$</span><span class="va">fitted_model</span></span>
 <span><span class="co">#&gt; [1] "[12,3]"</span></span></code></pre></div>
 <p>or, equivalently, by calling
 <code>estimate_population_stepwise(Korea, maxorder = 2)</code>

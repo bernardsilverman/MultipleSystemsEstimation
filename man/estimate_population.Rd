@@ -30,11 +30,22 @@ function. See \code{\link{estimate_population_bic}},
 for each method.}
 }
 \value{
-The object returned by
-  \code{\link{estimate_population_bic}},
-  \code{\link{estimate_population_stepwise}},
-  \code{\link{estimate_population_bayesthresh}}, or
-  \code{\link{estimate_population_fixed}}.
+A list with components:
+\describe{
+  \item{\code{input}}{A list containing the original \code{call} and
+  \code{data}.}
+  \item{\code{method}}{The method actually used, including after
+  \code{method = "auto"} has been resolved.}
+  \item{\code{estimate}}{A named numeric vector containing the estimated
+  \code{dark_figure} and \code{total} population.}
+  \item{\code{fitted_model}}{The supplied, selected or retained model in
+  hierarchy notation.}
+  \item{\code{uncertainty}}{Confidence or credible endpoints for the dark
+  figure and total population, or an explanatory character string when
+  bootstrap inference was not requested.}
+  \item{\code{details}}{Method-specific supporting output when requested,
+  and \code{"not requested"} otherwise.}
+}
 }
 \description{
 Provides a common interface to the principal population-estimation

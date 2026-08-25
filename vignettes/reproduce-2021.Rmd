@@ -135,8 +135,8 @@ fit <- estimate_population_stepwise(
   maxorder = 2
 )
 
-fit$popest
-fit$MSEfit$hiermod
+fit$estimate
+fit$fitted_model
 ```
 
 The same method is also available from the overall package interface:
@@ -175,13 +175,13 @@ Kosovo_unrestricted <- estimate_population_stepwise(
 )
 
 c(
-  pairwise = Kosovo_pairwise$popest,
-  unrestricted = Kosovo_unrestricted$popest
+  pairwise = Kosovo_pairwise$estimate["total"],
+  unrestricted = Kosovo_unrestricted$estimate["total"]
 )
 
 c(
-  pairwise = Kosovo_pairwise$MSEfit$hiermod,
-  unrestricted = Kosovo_unrestricted$MSEfit$hiermod
+  pairwise = Kosovo_pairwise$fitted_model,
+  unrestricted = Kosovo_unrestricted$fitted_model
 )
 ```
 
@@ -214,8 +214,8 @@ fit_boot <- estimate_population_stepwise(
   iseed = 1234
 )
 
-fit_boot$popest
-fit_boot$BCaquantiles
+fit_boot$estimate
+fit_boot$uncertainty
 ```
 
 To keep the vignette quick, the bootstrap calculations run below use only 100 replications.  The resulting BCa confidence intervals are included only to demonstrate the operation of the code and may differ considerably from the published intervals quoted in the text, which are based on 1000 replications. A substantially larger number of bootstrap replications should be used for substantive inference. The bootstrap code for the full eight-list New Orleans data is displayed but not run at all, because even a small value of `nboot` leads to slow computation.
@@ -242,8 +242,8 @@ NewOrl_fit <- estimate_population_stepwise(
   maxorder = 2
 )
 
-NewOrl_fit$popest
-NewOrl_fit$MSEfit$hiermod
+NewOrl_fit$estimate
+NewOrl_fit$fitted_model
 ```
 
 The paper reports that the selected model contains the two-list effect DE and gives a total population estimate of **1184**.
@@ -260,7 +260,7 @@ NewOrl_boot <- estimate_population_stepwise(
   nboot = 1000
 )
 
-NewOrl_boot$BCaquantiles
+NewOrl_boot$uncertainty
 ```
 
 The paper also considers the main-effects-only model, obtained when the threshold is 0.01 or smaller. It reports a point estimate of **997** and a 95% confidence interval of **(644, 1618)**.
@@ -275,8 +275,8 @@ NewOrl_main <- estimate_population_stepwise(
   nboot = 1000
 )
 
-NewOrl_main$popest
-NewOrl_main$BCaquantiles
+NewOrl_main$estimate
+NewOrl_main$uncertainty
 ```
 
 # Five-list New Orleans data
@@ -292,8 +292,8 @@ NewOrl5_fit <- estimate_population_stepwise(
   maxorder = 2
 )
 
-NewOrl5_fit$popest
-NewOrl5_fit$MSEfit$hiermod
+NewOrl5_fit$estimate
+NewOrl5_fit$fitted_model
 ```
 
 The paper reports that no two-list parameter is significant even at the 5% level. The point estimate is **1034**, with BCa 95% confidence interval **(589, 1703)**.
@@ -308,7 +308,7 @@ NewOrl5_boot <- estimate_population_stepwise(
   nboot = 100
 )
 
-NewOrl5_boot$BCaquantiles
+NewOrl5_boot$uncertainty
 ```
 
 # Western site data: Section 4.2
@@ -324,8 +324,8 @@ Western_fit <- estimate_population_stepwise(
   maxorder = 2
 )
 
-Western_fit$popest
-Western_fit$MSEfit$hiermod
+Western_fit$estimate
+Western_fit$fitted_model
 ```
 
 The paper reports that the selected model contains the two-list effect AE and that the resulting point estimate is **2483**.
@@ -342,7 +342,7 @@ Western_boot <- estimate_population_stepwise(
   nboot = 100
 )
 
-Western_boot$BCaquantiles
+Western_boot$uncertainty
 ```
 
 # Comparison with the BIC approach: Section 3.4
@@ -420,8 +420,8 @@ fit_current <- estimate_population(
   maxorder = 2
 )
 
-fit_current$popest
-fit_current$MSEfit$hiermod
+fit_current$estimate
+fit_current$fitted_model
 ```
 
 or, equivalently, by calling

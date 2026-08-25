@@ -10,7 +10,8 @@ estimate_population_bic(
   iseed = 1234,
   alpha = c(0.025, 0.1, 0.9, 0.975),
   maxorder = NULL,
-  ntopmodels = NULL
+  ntopmodels = NULL,
+  return_details = FALSE
 )
 }
 \arguments{
@@ -44,31 +45,32 @@ made when \code{nboot > 0}: all available models for two or three lists,
 argument is irrelevant when \code{nboot = 0}, because no model subsetting
 is then performed. If \code{ntopmodels} is greater than the total number of
 available models, then all models are considered.}
+
+\item{return_details}{Logical. If \code{TRUE}, include the bootstrap
+estimates, BCa acceleration, selected-model BIC, complete original-data BIC
+enumeration, and effects estimated at minus infinity. The default is
+\code{FALSE}.}
 }
 \value{
 A list with components:
 \describe{
-  \item{\code{popest}}{The estimated total population for
-  the original data, including the estimated unobserved population,
-  from the model with the smallest BIC.}
-  \item{\code{model}}{The hierarchical model with the smallest BIC on
-  the original data.}
-  \item{\code{BIC}}{The BIC value of the selected model.}
-  \item{\code{bic_results}}{The complete result of the original-data BIC
-  enumeration, including all eligible models permitted by \code{maxorder}, ordered
-  by BIC.}
-  \item{\code{BCaquantiles}}{A named numeric vector containing the endpoints
-  of the BCa confidence intervals at the cumulative probability levels
-  specified by \code{alpha} when \code{nboot > 0}, and \code{NULL} when
-  \code{nboot = 0}. Model selection within each bootstrap and jackknife
-  replication is restricted to all models retained through
-  \code{ntopmodels}.}
+  \item{\code{input}}{A list containing the original \code{call} and
+  \code{data}.}
+  \item{\code{method}}{The character string \code{"bic"}.}
+  \item{\code{estimate}}{A named numeric vector containing the estimated
+  \code{dark_figure} and \code{total} population.}
+  \item{\code{fitted_model}}{The hierarchy with the smallest BIC on the
+  original data.}
+  \item{\code{uncertainty}}{A two-row matrix of BCa endpoints for the dark
+  figure and total population when \code{nboot > 0}; otherwise an
+  explanatory character string.}
+  \item{\code{details}}{If \code{return_details = TRUE}, a list containing
+  \code{minus_infinity_effects}, \code{bootstrap_estimates},
+  \code{bca_acceleration}, \code{BIC}, and \code{bic_results}. The last is
+  the complete original-data enumeration, with one row per eligible model
+  giving its total-population estimate, BIC and maximum interaction order,
+  ordered by increasing BIC. Otherwise \code{"not requested"}.}
 }
-
-When \code{nboot > 0}, the \code{BCaquantiles} component gives BCa
-inference based on repeated BIC model selection among all retained models.
-The names correspond to the cumulative probability levels supplied in
-\code{alpha}.
 }
 \description{
 Selects a model using the BIC criterion, accounting for sparse data

@@ -44,6 +44,11 @@
 #' endpoints of the BCa confidence intervals are to be evaluated. The default is
 #' \code{c(0.025, 0.1, 0.9, 0.975)}.
 #'
+#' @param return_details Logical. If \code{TRUE}, include the bootstrap
+#' estimates, BCa acceleration, selected-model BIC, complete original-data BIC
+#' enumeration, and effects estimated at minus infinity. The default is
+#' \code{FALSE}.
+#'
 #' @details
 #'
 #' If \code{nboot > 0}, the routine implements the bootstrap procedure described by Silverman,
@@ -73,27 +78,23 @@
 #'
 #' @return A list with components:
 #' \describe{
-#'   \item{\code{popest}}{The estimated total population for
-#'   the original data, including the estimated unobserved population,
-#'   from the model with the smallest BIC.}
-#'   \item{\code{model}}{The hierarchical model with the smallest BIC on
-#'   the original data.}
-#'   \item{\code{BIC}}{The BIC value of the selected model.}
-#'   \item{\code{bic_results}}{The complete result of the original-data BIC
-#'   enumeration, including all eligible models permitted by \code{maxorder}, ordered
-#'   by BIC.}
-#'   \item{\code{BCaquantiles}}{A named numeric vector containing the endpoints
-#'   of the BCa confidence intervals at the cumulative probability levels
-#'   specified by \code{alpha} when \code{nboot > 0}, and \code{NULL} when
-#'   \code{nboot = 0}. Model selection within each bootstrap and jackknife
-#'   replication is restricted to all models retained through
-#'   \code{ntopmodels}.}
+#'   \item{\code{input}}{A list containing the original \code{call} and
+#'   \code{data}.}
+#'   \item{\code{method}}{The character string \code{"bic"}.}
+#'   \item{\code{estimate}}{A named numeric vector containing the estimated
+#'   \code{dark_figure} and \code{total} population.}
+#'   \item{\code{fitted_model}}{The hierarchy with the smallest BIC on the
+#'   original data.}
+#'   \item{\code{uncertainty}}{A two-row matrix of BCa endpoints for the dark
+#'   figure and total population when \code{nboot > 0}; otherwise an
+#'   explanatory character string.}
+#'   \item{\code{details}}{If \code{return_details = TRUE}, a list containing
+#'   \code{minus_infinity_effects}, \code{bootstrap_estimates},
+#'   \code{bca_acceleration}, \code{BIC}, and \code{bic_results}. The last is
+#'   the complete original-data enumeration, with one row per eligible model
+#'   giving its total-population estimate, BIC and maximum interaction order,
+#'   ordered by increasing BIC. Otherwise \code{"not requested"}.}
 #' }
-#'
-#' When \code{nboot > 0}, the \code{BCaquantiles} component gives BCa
-#' inference based on repeated BIC model selection among all retained models.
-#' The names correspond to the cumulative probability levels supplied in
-#' \code{alpha}.
 #'
 #' @references
 #' Silverman, B. W., Chan, L. and Vincent, K. (2024).
@@ -116,8 +117,10 @@ estimate_population_bic <- function(
     iseed = 1234,
     alpha = c(0.025, 0.1, 0.9, 0.975),
     maxorder = NULL,
-    ntopmodels = NULL
+    ntopmodels = NULL,
+    return_details = FALSE
 ) {
+  call <- match.call()
   nlists <- ncol(zdat) - 1L
 
   if (length(nboot) != 1L ||
@@ -185,16 +188,35 @@ estimate_population_bic <- function(
   popest <- unname(bic_results$res[1L, "abundance"])
   model <- rownames(bic_results$res)[1L]
   BIC <- unname(bic_results$res[1L, "BIC"])
+  minus_infinity_effects <- .mse_effect_names(
+    bic_results$best_neginfpars,
+    zdat
+  )
+  public_bic_results <- bic_results
+  public_bic_results$best_neginfpars <- NULL
 
   # If no bootstrap inference is requested, return the point estimate
   # together with the complete original-data BIC enumeration.
   if (nboot == 0L) {
+    details <- if (return_details) {
+      list(
+        minus_infinity_effects = minus_infinity_effects,
+        bootstrap_estimates = "not generated because nboot = 0",
+        bca_acceleration = "not calculated because nboot = 0",
+        BIC = BIC,
+        bic_results = public_bic_results
+      )
+    } else {
+      "not requested"
+    }
+
     return(list(
-      popest = popest,
-      model = model,
-      BIC = BIC,
-      bic_results = bic_results,
-      BCaquantiles = NULL
+      input = list(call = call, data = zdat),
+      method = "bic",
+      estimate = .mse_estimate(popest, zdat),
+      fitted_model = model,
+      uncertainty = .mse_uncertainty(NULL, zdat),
+      details = details
     ))
   }
 
@@ -282,11 +304,24 @@ estimate_population_bic <- function(
     )
   }
 
+  details <- if (return_details) {
+    list(
+      minus_infinity_effects = minus_infinity_effects,
+      bootstrap_estimates = bootreps,
+      bca_acceleration = ahat,
+      BIC = BIC,
+      bic_results = public_bic_results
+    )
+  } else {
+    "not requested"
+  }
+
   list(
-    popest = popest,
-    model = model,
-    BIC = BIC,
-    bic_results = bic_results,
-    BCaquantiles = BCaquantiles
+    input = list(call = call, data = zdat),
+    method = "bic",
+    estimate = .mse_estimate(popest, zdat),
+    fitted_model = model,
+    uncertainty = .mse_uncertainty(BCaquantiles, zdat),
+    details = details
   )
 }

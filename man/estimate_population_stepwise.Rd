@@ -10,7 +10,8 @@ estimate_population_stepwise(
   pthresh = 0.02,
   maxorder = 2,
   iseed = 1234,
-  alpha = c(0.025, 0.1, 0.9, 0.975)
+  alpha = c(0.025, 0.1, 0.9, 0.975),
+  return_details = FALSE
 )
 }
 \arguments{
@@ -42,26 +43,27 @@ endpoints of the BCa confidence intervals are to be calculated. This
 argument is used only when
 \code{nboot > 0}. The default is
 \code{c(0.025, 0.1, 0.9, 0.975)}.}
+
+\item{return_details}{Logical. If \code{TRUE}, include the bootstrap
+estimates, BCa acceleration, and effects estimated at minus infinity. The
+default is \code{FALSE}.}
 }
 \value{
-A list with the following components:
+A list with components:
 \describe{
-  \item{\code{popest}}{The estimated total population for the original
-  data, including the estimated unobserved population.}
-
-  \item{\code{MSEfit}}{The model selected and fitted to the original data.}
-
-  \item{\code{bootreps}}{A numeric vector containing the estimated total
-  population from each bootstrap sample. This is \code{NULL} when
-  \code{nboot = 0}.}
-
-  \item{\code{ahat}}{The estimated BCa acceleration parameter. This is
-  \code{NULL} when \code{nboot = 0}.}
-
-  \item{\code{BCaquantiles}}{The endpoints of the BCa confidence intervals
-  at the cumulative
-  probability levels specified by \code{alpha}. This is \code{NULL} when
-  \code{nboot = 0}.}
+  \item{\code{input}}{A list containing the original \code{call} and
+  \code{data}.}
+  \item{\code{method}}{The character string \code{"stepwise"}.}
+  \item{\code{estimate}}{A named numeric vector containing the estimated
+  \code{dark_figure} and \code{total} population.}
+  \item{\code{fitted_model}}{The hierarchy selected from the original
+  data.}
+  \item{\code{uncertainty}}{A two-row matrix of BCa endpoints for the dark
+  figure and total population when \code{nboot > 0}; otherwise an
+  explanatory character string.}
+  \item{\code{details}}{If \code{return_details = TRUE}, a list containing
+  \code{minus_infinity_effects}, \code{bootstrap_estimates}, and
+  \code{bca_acceleration}. Otherwise \code{"not requested"}.}
 }
 }
 \description{

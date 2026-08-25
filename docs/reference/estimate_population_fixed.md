@@ -11,7 +11,8 @@ estimate_population_fixed(
   model = NULL,
   nboot = 0,
   iseed = 1234,
-  alpha = c(0.025, 0.1, 0.9, 0.975)
+  alpha = c(0.025, 0.1, 0.9, 0.975),
+  return_details = FALSE
 )
 ```
 
@@ -52,39 +53,45 @@ estimate_population_fixed(
   used only when `nboot > 0`. The default is
   `c(0.025, 0.1, 0.9, 0.975)`.
 
+- return_details:
+
+  Logical. If `TRUE`, include the original-data GLM fit, bootstrap
+  estimates, BCa acceleration, and effects estimated at minus infinity.
+  The default is `FALSE`.
+
 ## Value
 
-A list with the following components:
+A list with components:
 
-- `popest`:
+- `input`:
 
-  The estimated total population for the original data, including the
-  estimated unobserved population.
+  A list containing the original `call` and `data`.
 
-- `MSEfit`:
+- `method`:
 
-  The fitted model object for the original data.
+  The character string `"fixed"`.
 
-- `model`:
+- `estimate`:
 
-  The hierarchy-string representation of the fixed model used in the
-  analysis.
+  A named numeric vector containing the estimated `dark_figure` and
+  `total` population.
 
-- `bootreps`:
+- `fitted_model`:
 
-  A numeric vector containing the estimated total population from each
-  usable bootstrap sample. This is `NULL` when `nboot = 0`.
+  The hierarchy fitted to the original data.
 
-- `ahat`:
+- `uncertainty`:
 
-  The estimated BCa acceleration parameter. This is `NULL` when
-  `nboot = 0`.
+  A two-row matrix of BCa endpoints for the dark figure and total
+  population when `nboot > 0`; otherwise an explanatory character
+  string.
 
-- `BCaquantiles`:
+- `details`:
 
-  The endpoints of the BCa confidence intervals at the cumulative
-  probability levels specified by `alpha`. This is `NULL` when
-  `nboot = 0`.
+  If `return_details = TRUE`, a list containing
+  `minus_infinity_effects`, `bootstrap_estimates`, `bca_acceleration`,
+  and `glm_fit`. The last is the complete conditional GLM fit for the
+  fixed model. Otherwise `"not requested"`.
 
 ## Details
 
@@ -136,265 +143,70 @@ data(Korea)
 
 # Main-effects model without bootstrapping
 estimate_population_fixed(Korea)
-#> $popest
-#> [1] 141.9926
+#> $input
+#> $input$call
+#> estimate_population_fixed(zdat = Korea)
 #> 
-#> $MSEfit
-#> $MSEfit$coefficients
-#>             1             2             3             5 
-#>  2.9440519227  0.1695312760  0.0001035638 -0.3412145738 
-#> 
-#> $MSEfit$residuals
-#>          2          3          4          5          6          7          8 
-#> -0.7777929 -0.7367675  1.3995885  2.0365886 -0.6249175 -1.0000000 -0.2499126 
-#> 
-#> $MSEfit$fitted.values
-#>        2        3        4        5        6        7        8 
-#> 22.50153 18.99461 22.50386 13.50199 15.99648 13.50339 15.99814 
-#> 
-#> $MSEfit$effects
-#>           1           2           3           5                         
-#> -32.0136480   1.2237697  -0.3551149   1.8302583  -4.3623100  -7.6164526 
-#>             
-#>  -8.2289685 
-#> 
-#> $MSEfit$R
-#>           1         2         3          5
-#> 1 -11.09055 -6.942847 -6.401874 -5.3198569
-#> 2   0.00000  5.366274 -1.107882 -0.9206323
-#> 3   0.00000  0.000000 -5.365533  1.0391091
-#> 5   0.00000  0.000000  0.000000 -5.3639513
-#> 
-#> $MSEfit$rank
-#> [1] 4
-#> 
-#> $MSEfit$qr
-#> $qr
-#>             1          2          3          5
-#> 2 -11.0905544 -6.9428466 -6.4018740 -5.3198569
-#> 3   0.3929743  5.3662742 -1.1078817 -0.9206323
-#> 4   0.4277358 -0.2315634 -5.3655325  1.0391091
-#> 5   0.3313196  0.5053763 -0.4950180 -5.3639513
-#> 6   0.3606273 -0.1952328 -0.2171111  0.4152757
-#> 7   0.3313370  0.5054028  0.1898294  0.5459299
-#> 8   0.3606462 -0.1952431  0.5283332  0.6469733
-#> 
-#> $rank
-#> [1] 4
-#> 
-#> $qraux
-#> [1] 1.427713 1.599421 1.626617 1.333065
-#> 
-#> $pivot
-#> [1] 1 2 3 4
-#> 
-#> $tol
-#> [1] 1e-11
-#> 
-#> attr(,"class")
-#> [1] "qr"
-#> 
-#> $MSEfit$family
-#> 
-#> Family: poisson 
-#> Link function: log 
+#> $input$data
+#>      b c d Count
+#> [1,] 0 0 1    41
+#> [2,] 0 1 0     5
+#> [3,] 1 0 0     5
+#> [4,] 1 1 0    54
+#> [5,] 1 0 1     6
+#> [6,] 0 1 1     0
+#> [7,] 1 1 1    12
 #> 
 #> 
-#> $MSEfit$linear.predictors
-#>        2        3        4        5        6        7        8 
-#> 3.113583 2.944155 3.113687 2.602837 2.772369 2.602941 2.772472 
+#> $method
+#> [1] "fixed"
 #> 
-#> $MSEfit$deviance
-#> [1] 138.5548
+#> $estimate
+#> dark_figure       total 
+#>    18.99265   141.99265 
 #> 
-#> $MSEfit$aic
-#> [1] 172.8956
-#> 
-#> $MSEfit$null.deviance
-#> [1] 143.5474
-#> 
-#> $MSEfit$iter
-#> [1] 6
-#> 
-#> $MSEfit$weights
-#>        2        3        4        5        6        7        8 
-#> 22.50153 18.99480 22.50390 13.50208 15.99645 13.50350 15.99813 
-#> 
-#> $MSEfit$prior.weights
-#> 2 3 4 5 6 7 8 
-#> 1 1 1 1 1 1 1 
-#> 
-#> $MSEfit$df.residual
-#> [1] 3
-#> 
-#> $MSEfit$df.null
-#> [1] 6
-#> 
-#> $MSEfit$y
-#>  2  3  4  5  6  7  8 
-#>  5  5 54 41  6  0 12 
-#> 
-#> $MSEfit$converged
-#> [1] TRUE
-#> 
-#> $MSEfit$boundary
-#> [1] FALSE
-#> 
-#> $MSEfit$abundance
-#>        1 
-#> 141.9926 
-#> 
-#> $MSEfit$bic
-#> [1] 184.1443
-#> 
-#> $MSEfit$neginfpars
-#> numeric(0)
-#> 
-#> 
-#> $model
+#> $fitted_model
 #> [1] "[1,2,3]"
 #> 
-#> $bootreps
-#> NULL
+#> $uncertainty
+#> [1] "not calculated because nboot = 0"
 #> 
-#> $ahat
-#> NULL
-#> 
-#> $BCaquantiles
-#> NULL
+#> $details
+#> [1] "not requested"
 #> 
 
 # A fixed pairwise-interaction model using hierarchy notation
 estimate_population_fixed(Korea, model = "[23,1]")
-#> $popest
-#> [1] 126.1944
+#> $input
+#> $input$call
+#> estimate_population_fixed(zdat = Korea, model = "[23,1]")
 #> 
-#> $MSEfit
-#> $MSEfit$coefficients
-#>          1          2          3          5          7 
-#>  1.1614132  0.4480247  1.9740810  1.7466912 -3.3393220 
-#> 
-#> $MSEfit$residuals
-#>             2             3             4             5             6 
-#> -1.065814e-15 -7.826087e-01  5.000000e-01  1.237743e+00 -7.907801e-01 
-#>             7             8 
-#> -1.000000e+00  6.388889e-01 
-#> 
-#> $MSEfit$fitted.values
-#>         2         3         4         5         6         7         8 
-#>  5.000000 23.000000 36.000000 18.322034 28.677966  4.677966  7.322034 
-#> 
-#> $MSEfit$effects
-#>           1           2           3           5           7             
-#> -34.3081838   1.8043554  -0.6686752   2.1560943  -5.8399070  -6.9496217 
-#>             
-#>  -5.3345419 
-#> 
-#> $MSEfit$R
-#>           1         2          3          5           7
-#> 1 -11.09062 -6.942823 -6.4019296 -5.3199281 -1.08206617
-#> 2   0.00000  5.366325 -0.2096683 -0.1742319 -0.03543852
-#> 3   0.00000  0.000000 -5.4747350  4.0355466 -0.92534999
-#> 5   0.00000  0.000000  0.0000000 -3.7925833 -2.62944577
-#> 7   0.00000  0.000000  0.0000000  0.0000000  1.74883017
-#> 
-#> $MSEfit$rank
-#> [1] 5
-#> 
-#> $MSEfit$qr
-#> $qr
-#>             1          2          3          5           7
-#> 2 -11.0906228 -6.9428230 -6.4019296 -5.3199281 -1.08206617
-#> 3   0.4324288  5.3663246 -0.2096683 -0.1742319 -0.03543852
-#> 4   0.5409968 -0.3479919 -5.4747350  4.0355466 -0.92534999
-#> 5   0.3859560  0.5493949 -0.5434124 -3.7925833 -2.62944577
-#> 6   0.4828562 -0.3105935 -0.3750195  0.3585523  1.74883017
-#> 7   0.1950254  0.2776120  0.1204902  0.5505191 -0.52288741
-#> 8   0.2439896 -0.1569444  0.3047707  0.7104509 -0.54698449
-#> 
-#> $rank
-#> [1] 5
-#> 
-#> $qraux
-#> [1] 1.201618 1.615547 1.675766 1.252247 1.653756
-#> 
-#> $pivot
-#> [1] 1 2 3 4 5
-#> 
-#> $tol
-#> [1] 1e-11
-#> 
-#> attr(,"class")
-#> [1] "qr"
-#> 
-#> $MSEfit$family
-#> 
-#> Family: poisson 
-#> Link function: log 
+#> $input$data
+#>      b c d Count
+#> [1,] 0 0 1    41
+#> [2,] 0 1 0     5
+#> [3,] 1 0 0     5
+#> [4,] 1 1 0    54
+#> [5,] 1 0 1     6
+#> [6,] 0 1 1     0
+#> [7,] 1 1 1    12
 #> 
 #> 
-#> $MSEfit$linear.predictors
-#>        2        3        4        5        6        7        8 
-#> 1.609438 3.135494 3.583519 2.908104 3.356129 1.542863 1.990888 
+#> $method
+#> [1] "fixed"
 #> 
-#> $MSEfit$deviance
-#> [1] 87.66203
+#> $estimate
+#> dark_figure       total 
+#>    3.194444  126.194444 
 #> 
-#> $MSEfit$aic
-#> [1] 124.0028
-#> 
-#> $MSEfit$null.deviance
-#> [1] 143.5474
-#> 
-#> $MSEfit$iter
-#> [1] 5
-#> 
-#> $MSEfit$weights
-#>         2         3         4         5         6         7         8 
-#>  5.000000 23.000702 35.999897 18.322613 28.677915  4.678368  7.322419 
-#> 
-#> $MSEfit$prior.weights
-#> 2 3 4 5 6 7 8 
-#> 1 1 1 1 1 1 1 
-#> 
-#> $MSEfit$df.residual
-#> [1] 2
-#> 
-#> $MSEfit$df.null
-#> [1] 6
-#> 
-#> $MSEfit$y
-#>  2  3  4  5  6  7  8 
-#>  5  5 54 41  6  0 12 
-#> 
-#> $MSEfit$converged
-#> [1] TRUE
-#> 
-#> $MSEfit$boundary
-#> [1] FALSE
-#> 
-#> $MSEfit$abundance
-#>        1 
-#> 126.1944 
-#> 
-#> $MSEfit$bic
-#> [1] 138.0637
-#> 
-#> $MSEfit$neginfpars
-#> numeric(0)
-#> 
-#> 
-#> $model
+#> $fitted_model
 #> [1] "[23,1]"
 #> 
-#> $bootreps
-#> NULL
+#> $uncertainty
+#> [1] "not calculated because nboot = 0"
 #> 
-#> $ahat
-#> NULL
-#> 
-#> $BCaquantiles
-#> NULL
+#> $details
+#> [1] "not requested"
 #> 
 
 # A very small number of bootstrap replications is used here only
@@ -404,135 +216,37 @@ estimate_population_fixed(
   model = "[23,1]",
   nboot = 2
 )
-#> $popest
-#> [1] 126.1944
+#> $input
+#> $input$call
+#> estimate_population_fixed(zdat = Korea, model = "[23,1]", nboot = 2)
 #> 
-#> $MSEfit
-#> $MSEfit$coefficients
-#>          1          2          3          5          7 
-#>  1.1614132  0.4480247  1.9740810  1.7466912 -3.3393220 
-#> 
-#> $MSEfit$residuals
-#>             2             3             4             5             6 
-#> -1.065814e-15 -7.826087e-01  5.000000e-01  1.237743e+00 -7.907801e-01 
-#>             7             8 
-#> -1.000000e+00  6.388889e-01 
-#> 
-#> $MSEfit$fitted.values
-#>         2         3         4         5         6         7         8 
-#>  5.000000 23.000000 36.000000 18.322034 28.677966  4.677966  7.322034 
-#> 
-#> $MSEfit$effects
-#>           1           2           3           5           7             
-#> -34.3081838   1.8043554  -0.6686752   2.1560943  -5.8399070  -6.9496217 
-#>             
-#>  -5.3345419 
-#> 
-#> $MSEfit$R
-#>           1         2          3          5           7
-#> 1 -11.09062 -6.942823 -6.4019296 -5.3199281 -1.08206617
-#> 2   0.00000  5.366325 -0.2096683 -0.1742319 -0.03543852
-#> 3   0.00000  0.000000 -5.4747350  4.0355466 -0.92534999
-#> 5   0.00000  0.000000  0.0000000 -3.7925833 -2.62944577
-#> 7   0.00000  0.000000  0.0000000  0.0000000  1.74883017
-#> 
-#> $MSEfit$rank
-#> [1] 5
-#> 
-#> $MSEfit$qr
-#> $qr
-#>             1          2          3          5           7
-#> 2 -11.0906228 -6.9428230 -6.4019296 -5.3199281 -1.08206617
-#> 3   0.4324288  5.3663246 -0.2096683 -0.1742319 -0.03543852
-#> 4   0.5409968 -0.3479919 -5.4747350  4.0355466 -0.92534999
-#> 5   0.3859560  0.5493949 -0.5434124 -3.7925833 -2.62944577
-#> 6   0.4828562 -0.3105935 -0.3750195  0.3585523  1.74883017
-#> 7   0.1950254  0.2776120  0.1204902  0.5505191 -0.52288741
-#> 8   0.2439896 -0.1569444  0.3047707  0.7104509 -0.54698449
-#> 
-#> $rank
-#> [1] 5
-#> 
-#> $qraux
-#> [1] 1.201618 1.615547 1.675766 1.252247 1.653756
-#> 
-#> $pivot
-#> [1] 1 2 3 4 5
-#> 
-#> $tol
-#> [1] 1e-11
-#> 
-#> attr(,"class")
-#> [1] "qr"
-#> 
-#> $MSEfit$family
-#> 
-#> Family: poisson 
-#> Link function: log 
+#> $input$data
+#>      b c d Count
+#> [1,] 0 0 1    41
+#> [2,] 0 1 0     5
+#> [3,] 1 0 0     5
+#> [4,] 1 1 0    54
+#> [5,] 1 0 1     6
+#> [6,] 0 1 1     0
+#> [7,] 1 1 1    12
 #> 
 #> 
-#> $MSEfit$linear.predictors
-#>        2        3        4        5        6        7        8 
-#> 1.609438 3.135494 3.583519 2.908104 3.356129 1.542863 1.990888 
+#> $method
+#> [1] "fixed"
 #> 
-#> $MSEfit$deviance
-#> [1] 87.66203
+#> $estimate
+#> dark_figure       total 
+#>    3.194444  126.194444 
 #> 
-#> $MSEfit$aic
-#> [1] 124.0028
-#> 
-#> $MSEfit$null.deviance
-#> [1] 143.5474
-#> 
-#> $MSEfit$iter
-#> [1] 5
-#> 
-#> $MSEfit$weights
-#>         2         3         4         5         6         7         8 
-#>  5.000000 23.000702 35.999897 18.322613 28.677915  4.678368  7.322419 
-#> 
-#> $MSEfit$prior.weights
-#> 2 3 4 5 6 7 8 
-#> 1 1 1 1 1 1 1 
-#> 
-#> $MSEfit$df.residual
-#> [1] 2
-#> 
-#> $MSEfit$df.null
-#> [1] 6
-#> 
-#> $MSEfit$y
-#>  2  3  4  5  6  7  8 
-#>  5  5 54 41  6  0 12 
-#> 
-#> $MSEfit$converged
-#> [1] TRUE
-#> 
-#> $MSEfit$boundary
-#> [1] FALSE
-#> 
-#> $MSEfit$abundance
-#>        1 
-#> 126.1944 
-#> 
-#> $MSEfit$bic
-#> [1] 138.0637
-#> 
-#> $MSEfit$neginfpars
-#> numeric(0)
-#> 
-#> 
-#> $model
+#> $fitted_model
 #> [1] "[23,1]"
 #> 
-#> $bootreps
-#> [1] 126.6164 126.0822
+#> $uncertainty
+#>                  0.025        0.1        0.9      0.975
+#> dark_figure   3.082192   3.082192   3.616438   3.616438
+#> total       126.082192 126.082192 126.616438 126.616438
 #> 
-#> $ahat
-#> [1] 0.05311501
-#> 
-#> $BCaquantiles
-#>    0.025      0.1      0.9    0.975 
-#> 126.0822 126.0822 126.6164 126.6164 
+#> $details
+#> [1] "not requested"
 #> 
 ```

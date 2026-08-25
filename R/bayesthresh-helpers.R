@@ -49,6 +49,33 @@
 }
 
 
+.bayesthresh_hierarchy <- function(effects, nlists) {
+    main_effects <- vapply(
+        seq_len(nlists),
+        function(i) {
+            z <- integer(nlists)
+            z[i] <- 1L
+            encode_capture(z)
+        },
+        numeric(1)
+    )
+
+    interactions <- vapply(
+        effects,
+        function(effect) {
+            z <- integer(nlists)
+            z[.bayesthresh_indices(effect)] <- 1L
+            encode_capture(z)
+        },
+        numeric(1)
+    )
+
+    convert_to_hierarchy(
+        sort(unique(c(1, main_effects, interactions)))
+    )
+}
+
+
 .bayesthresh_pretty <- function(effects, zfull) {
     if (!length(effects))
         return(character(0))

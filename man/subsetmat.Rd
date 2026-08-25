@@ -24,6 +24,8 @@ possible components are:
   \item{\code{res}}{The original-data model results.}
   \item{\code{xdata}}{The original capture history data.}
   \item{\code{maxorder}}{The largest retained interaction order.}
+  \item{\code{best_neginfpars}}{Encoded minus-infinity effects for the
+  original best-BIC model, passed through unchanged.}
   \item{\code{jackabund}, \code{jackbic}}{Jackknife population estimates
   and BIC values, if present in the input.}
   \item{\code{countsobserved}}{Capture history counts, if present in the

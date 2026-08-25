@@ -10,40 +10,41 @@ test_that("Bayesian threshold regression agrees on UKdat_5", {
         mcmc = 10000,
         burnin = 1000,
         thin = 10,
-        seed = 1234
+        seed = 1234,
+        return_details = TRUE
     )
 
     expect_equal(
-        fit$popest,
+        unname(fit$estimate["total"]),
         12163.46,
         tolerance = 0.01
     )
 
     expect_equal(
-        fit$quantiles,
+        fit$uncertainty["total", ],
         c(
-            `2.5%` = 10609.25,
-            `10%` = 11083.69,
-            `50%` = 12163.46,
-            `90%` = 13266.99,
-            `97.5%` = 13694.40
+            `0.025` = 10609.25,
+            `0.1` = 11083.69,
+            `0.9` = 13266.99,
+            `0.975` = 13694.40
         ),
         tolerance = 0.02
     )
-
     expect_identical(
-        sort(fit$retained_interactions),
-        sort(c(
-            "GO:GP",
-            "LA:NG",
-            "LA:PFNCA",
-            "NG:GP",
-            "PFNCA:GP"
-        ))
+        colnames(fit$uncertainty),
+        c("0.025", "0.1", "0.9", "0.975")
     )
+    expect_identical(
+        rownames(fit$uncertainty),
+        c("dark_figure", "total")
+    )
+    expect_false("0.5" %in% colnames(fit$uncertainty))
 
-    expect_length(fit$retained_triples, 0)
-    expect_identical(fit$minus_infinite_estimated_effects, "LA:GP")
+    expect_identical(fit$fitted_model, "[12,13,15,25,35,45]")
+
+    expect_length(fit$details$retained_triples, 0)
+    expect_identical(fit$details$minus_infinity_effects, "LA:GP")
+    expect_length(fit$details$posterior, 1000L)
 })
 
 

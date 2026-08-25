@@ -32,6 +32,10 @@
 #' \code{nboot > 0}. The default is
 #' \code{c(0.025, 0.1, 0.9, 0.975)}.
 #'
+#' @param return_details Logical. If \code{TRUE}, include the original-data
+#' GLM fit, bootstrap estimates, BCa acceleration, and effects estimated at
+#' minus infinity. The default is \code{FALSE}.
+#'
 #' @details
 #' The specified hierarchical model is fitted to the observed data.
 #' Parameter identifiability and existence of the extended MLE are checked
@@ -58,27 +62,22 @@
 #' is useful only for checking that the routine runs. A substantially larger
 #' number of bootstrap replications should be used for substantive inference.
 #'
-#' @return A list with the following components:
+#' @return A list with components:
 #' \describe{
-#'   \item{\code{popest}}{The estimated total population for the original
-#'   data, including the estimated unobserved population.}
-#'
-#'   \item{\code{MSEfit}}{The fitted model object for the original data.}
-#'
-#'   \item{\code{model}}{The hierarchy-string representation of the fixed
-#'   model used in the analysis.}
-#'
-#'   \item{\code{bootreps}}{A numeric vector containing the estimated total
-#'   population from each usable bootstrap sample. This is \code{NULL} when
-#'   \code{nboot = 0}.}
-#'
-#'   \item{\code{ahat}}{The estimated BCa acceleration parameter. This is
-#'   \code{NULL} when \code{nboot = 0}.}
-#'
-#'   \item{\code{BCaquantiles}}{The endpoints of the BCa confidence intervals
-#'   at the cumulative
-#'   probability levels specified by \code{alpha}. This is \code{NULL} when
-#'   \code{nboot = 0}.}
+#'   \item{\code{input}}{A list containing the original \code{call} and
+#'   \code{data}.}
+#'   \item{\code{method}}{The character string \code{"fixed"}.}
+#'   \item{\code{estimate}}{A named numeric vector containing the estimated
+#'   \code{dark_figure} and \code{total} population.}
+#'   \item{\code{fitted_model}}{The hierarchy fitted to the original data.}
+#'   \item{\code{uncertainty}}{A two-row matrix of BCa endpoints for the dark
+#'   figure and total population when \code{nboot > 0}; otherwise an
+#'   explanatory character string.}
+#'   \item{\code{details}}{If \code{return_details = TRUE}, a list containing
+#'   \code{minus_infinity_effects}, \code{bootstrap_estimates},
+#'   \code{bca_acceleration}, and \code{glm_fit}. The last is the complete
+#'   conditional GLM fit for the fixed model. Otherwise
+#'   \code{"not requested"}.}
 #' }
 #'
 #' @references
@@ -117,8 +116,10 @@ estimate_population_fixed <- function(
     model = NULL,
     nboot = 0,
     iseed = 1234,
-    alpha = c(0.025, 0.1, 0.9, 0.975)
+    alpha = c(0.025, 0.1, 0.9, 0.975),
+    return_details = FALSE
 ) {
+  call <- match.call()
   if (length(nboot) != 1L ||
       is.na(nboot) ||
       nboot < 0 ||
@@ -156,13 +157,24 @@ estimate_population_fixed <- function(
   }
 
   if (nboot == 0L) {
+    details <- if (return_details) {
+      list(
+        minus_infinity_effects = .mse_effect_names(MSEfit$neginfpars, zdat),
+        bootstrap_estimates = "not generated because nboot = 0",
+        bca_acceleration = "not calculated because nboot = 0",
+        glm_fit = MSEfit
+      )
+    } else {
+      "not requested"
+    }
+
     return(list(
-      popest = popest,
-      MSEfit = MSEfit,
-      model = model,
-      bootreps = NULL,
-      ahat = NULL,
-      BCaquantiles = NULL
+      input = list(call = call, data = zdat),
+      method = "fixed",
+      estimate = .mse_estimate(popest, zdat),
+      fitted_model = model,
+      uncertainty = .mse_uncertainty(NULL, zdat),
+      details = details
     ))
   }
   set.seed(iseed)
@@ -277,12 +289,23 @@ estimate_population_fixed <- function(
     alpha
   )
 
+  details <- if (return_details) {
+    list(
+      minus_infinity_effects = .mse_effect_names(MSEfit$neginfpars, zdat),
+      bootstrap_estimates = bootreps,
+      bca_acceleration = ahat,
+      glm_fit = MSEfit
+    )
+  } else {
+    "not requested"
+  }
+
   list(
-    popest = popest,
-    MSEfit = MSEfit,
-    model = model,
-    bootreps = bootreps,
-    ahat = ahat,
-    BCaquantiles = confquantiles
+    input = list(call = call, data = zdat),
+    method = "fixed",
+    estimate = .mse_estimate(popest, zdat),
+    fitted_model = model,
+    uncertainty = .mse_uncertainty(confquantiles, zdat),
+    details = details
   )
 }

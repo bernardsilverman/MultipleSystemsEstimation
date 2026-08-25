@@ -58,3 +58,9 @@ A list with components:
 
   The largest interaction order among the retained models, or 0 if no
   model is retained.
+
+- `best_neginfpars`:
+
+  Encoded effects estimated at minus infinity in the model with the
+  smallest BIC, or an empty vector if there is no valid model or no such
+  effect.

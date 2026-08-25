@@ -9,7 +9,7 @@ a specified hierarchical log-linear model."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">MultipleSystemsEstimation</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,7 +53,8 @@ a specified hierarchical log-linear model.</p>
 <span>  model <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  nboot <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  iseed <span class="op">=</span> <span class="fl">1234</span>,</span>
-<span>  alpha <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.025</span>, <span class="fl">0.1</span>, <span class="fl">0.9</span>, <span class="fl">0.975</span><span class="op">)</span></span>
+<span>  alpha <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.025</span>, <span class="fl">0.1</span>, <span class="fl">0.9</span>, <span class="fl">0.975</span><span class="op">)</span>,</span>
+<span>  return_details <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -96,39 +97,40 @@ argument is used only when
 <code>nboot &gt; 0</code>. The default is
 <code>c(0.025, 0.1, 0.9, 0.975)</code>.</p></dd>
 
+
+<dt id="arg-return-details">return_details<a class="anchor" aria-label="anchor" href="#arg-return-details"></a></dt>
+<dd><p>Logical. If <code>TRUE</code>, include the original-data
+GLM fit, bootstrap estimates, BCa acceleration, and effects estimated at
+minus infinity. The default is <code>FALSE</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list with the following components:</p><dl><dt><code>popest</code></dt>
-<dd><p>The estimated total population for the original
-  data, including the estimated unobserved population.</p></dd>
+    <p>A list with components:</p><dl><dt><code>input</code></dt>
+<dd><p>A list containing the original <code>call</code> and
+  <code>data</code>.</p></dd>
 
+  <dt><code>method</code></dt>
+<dd><p>The character string <code>"fixed"</code>.</p></dd>
 
-  <dt><code>MSEfit</code></dt>
-<dd><p>The fitted model object for the original data.</p></dd>
+  <dt><code>estimate</code></dt>
+<dd><p>A named numeric vector containing the estimated
+  <code>dark_figure</code> and <code>total</code> population.</p></dd>
 
+  <dt><code>fitted_model</code></dt>
+<dd><p>The hierarchy fitted to the original data.</p></dd>
 
-  <dt><code>model</code></dt>
-<dd><p>The hierarchy-string representation of the fixed
-  model used in the analysis.</p></dd>
+  <dt><code>uncertainty</code></dt>
+<dd><p>A two-row matrix of BCa endpoints for the dark
+  figure and total population when <code>nboot &gt; 0</code>; otherwise an
+  explanatory character string.</p></dd>
 
-
-  <dt><code>bootreps</code></dt>
-<dd><p>A numeric vector containing the estimated total
-  population from each usable bootstrap sample. This is <code>NULL</code> when
-  <code>nboot = 0</code>.</p></dd>
-
-
-  <dt><code>ahat</code></dt>
-<dd><p>The estimated BCa acceleration parameter. This is
-  <code>NULL</code> when <code>nboot = 0</code>.</p></dd>
-
-
-  <dt><code>BCaquantiles</code></dt>
-<dd><p>The endpoints of the BCa confidence intervals
-  at the cumulative
-  probability levels specified by <code>alpha</code>. This is <code>NULL</code> when
-  <code>nboot = 0</code>.</p></dd>
+  <dt><code>details</code></dt>
+<dd><p>If <code>return_details = TRUE</code>, a list containing
+  <code>minus_infinity_effects</code>, <code>bootstrap_estimates</code>,
+  <code>bca_acceleration</code>, and <code>glm_fit</code>. The last is the complete
+  conditional GLM fit for the fixed model. Otherwise
+  <code>"not requested"</code>.</p></dd>
 
 
 </dl></div>
@@ -178,265 +180,70 @@ Bootstrap Confidence Intervals.
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Main-effects model without bootstrapping</span></span></span>
 <span class="r-in"><span><span class="fu">estimate_population_fixed</span><span class="op">(</span><span class="va">Korea</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $popest</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 141.9926</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $input</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $input$call</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> estimate_population_fixed(zdat = Korea)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$coefficients</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             1             2             3             5 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2.9440519227  0.1695312760  0.0001035638 -0.3412145738 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$residuals</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          2          3          4          5          6          7          8 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -0.7777929 -0.7367675  1.3995885  2.0365886 -0.6249175 -1.0000000 -0.2499126 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$fitted.values</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        2        3        4        5        6        7        8 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 22.50153 18.99461 22.50386 13.50199 15.99648 13.50339 15.99814 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$effects</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           1           2           3           5                         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -32.0136480   1.2237697  -0.3551149   1.8302583  -4.3623100  -7.6164526 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  -8.2289685 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$R</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           1         2         3          5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 -11.09055 -6.942847 -6.401874 -5.3198569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   0.00000  5.366274 -1.107882 -0.9206323</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   0.00000  0.000000 -5.365533  1.0391091</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   0.00000  0.000000  0.000000 -5.3639513</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$rank</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$qr</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $qr</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             1          2          3          5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 -11.0905544 -6.9428466 -6.4018740 -5.3198569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   0.3929743  5.3662742 -1.1078817 -0.9206323</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4   0.4277358 -0.2315634 -5.3655325  1.0391091</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   0.3313196  0.5053763 -0.4950180 -5.3639513</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6   0.3606273 -0.1952328 -0.2171111  0.4152757</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7   0.3313370  0.5054028  0.1898294  0.5459299</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8   0.3606462 -0.1952431  0.5283332  0.6469733</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $rank</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $qraux</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.427713 1.599421 1.626617 1.333065</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $pivot</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 2 3 4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $tol</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1e-11</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "qr"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$family</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Family: poisson </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Link function: log </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $input$data</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      b c d Count</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0 0 1    41</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0 1 0     5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 1 0 0     5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 1 1 0    54</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 1 0 1     6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 0 1 1     0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [7,] 1 1 1    12</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$linear.predictors</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        2        3        4        5        6        7        8 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3.113583 2.944155 3.113687 2.602837 2.772369 2.602941 2.772472 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $method</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "fixed"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$deviance</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 138.5548</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> dark_figure       total </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    18.99265   141.99265 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$aic</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 172.8956</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$null.deviance</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 143.5474</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$iter</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$weights</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        2        3        4        5        6        7        8 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 22.50153 18.99480 22.50390 13.50208 15.99645 13.50350 15.99813 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$prior.weights</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 3 4 5 6 7 8 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 1 1 1 1 1 1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$df.residual</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$df.null</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$y</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2  3  4  5  6  7  8 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5  5 54 41  6  0 12 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$converged</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$boundary</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$abundance</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 141.9926 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$bic</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 184.1443</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$neginfpars</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> numeric(0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $model</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $fitted_model</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "[1,2,3]"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $bootreps</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $uncertainty</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "not calculated because nboot = 0"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ahat</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $BCaquantiles</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $details</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "not requested"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># A fixed pairwise-interaction model using hierarchy notation</span></span></span>
 <span class="r-in"><span><span class="fu">estimate_population_fixed</span><span class="op">(</span><span class="va">Korea</span>, model <span class="op">=</span> <span class="st">"[23,1]"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $popest</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 126.1944</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $input</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $input$call</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> estimate_population_fixed(zdat = Korea, model = "[23,1]")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$coefficients</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          1          2          3          5          7 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1.1614132  0.4480247  1.9740810  1.7466912 -3.3393220 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$residuals</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             2             3             4             5             6 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -1.065814e-15 -7.826087e-01  5.000000e-01  1.237743e+00 -7.907801e-01 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             7             8 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -1.000000e+00  6.388889e-01 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$fitted.values</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         2         3         4         5         6         7         8 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5.000000 23.000000 36.000000 18.322034 28.677966  4.677966  7.322034 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$effects</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           1           2           3           5           7             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -34.3081838   1.8043554  -0.6686752   2.1560943  -5.8399070  -6.9496217 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  -5.3345419 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$R</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           1         2          3          5           7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 -11.09062 -6.942823 -6.4019296 -5.3199281 -1.08206617</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   0.00000  5.366325 -0.2096683 -0.1742319 -0.03543852</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   0.00000  0.000000 -5.4747350  4.0355466 -0.92534999</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   0.00000  0.000000  0.0000000 -3.7925833 -2.62944577</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7   0.00000  0.000000  0.0000000  0.0000000  1.74883017</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$rank</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$qr</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $qr</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             1          2          3          5           7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 -11.0906228 -6.9428230 -6.4019296 -5.3199281 -1.08206617</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   0.4324288  5.3663246 -0.2096683 -0.1742319 -0.03543852</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4   0.5409968 -0.3479919 -5.4747350  4.0355466 -0.92534999</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   0.3859560  0.5493949 -0.5434124 -3.7925833 -2.62944577</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6   0.4828562 -0.3105935 -0.3750195  0.3585523  1.74883017</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7   0.1950254  0.2776120  0.1204902  0.5505191 -0.52288741</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8   0.2439896 -0.1569444  0.3047707  0.7104509 -0.54698449</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $rank</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $qraux</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.201618 1.615547 1.675766 1.252247 1.653756</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $pivot</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 2 3 4 5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $tol</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1e-11</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "qr"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$family</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Family: poisson </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Link function: log </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $input$data</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      b c d Count</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0 0 1    41</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0 1 0     5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 1 0 0     5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 1 1 0    54</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 1 0 1     6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 0 1 1     0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [7,] 1 1 1    12</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$linear.predictors</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        2        3        4        5        6        7        8 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1.609438 3.135494 3.583519 2.908104 3.356129 1.542863 1.990888 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $method</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "fixed"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$deviance</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 87.66203</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> dark_figure       total </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    3.194444  126.194444 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$aic</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 124.0028</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$null.deviance</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 143.5474</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$iter</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$weights</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         2         3         4         5         6         7         8 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5.000000 23.000702 35.999897 18.322613 28.677915  4.678368  7.322419 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$prior.weights</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 3 4 5 6 7 8 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 1 1 1 1 1 1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$df.residual</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$df.null</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$y</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2  3  4  5  6  7  8 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5  5 54 41  6  0 12 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$converged</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$boundary</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$abundance</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 126.1944 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$bic</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 138.0637</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$neginfpars</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> numeric(0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $model</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $fitted_model</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "[23,1]"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $bootreps</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $uncertainty</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "not calculated because nboot = 0"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ahat</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $BCaquantiles</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $details</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "not requested"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># A very small number of bootstrap replications is used here only</span></span></span>
@@ -446,136 +253,38 @@ Bootstrap Confidence Intervals.
 <span class="r-in"><span>  model <span class="op">=</span> <span class="st">"[23,1]"</span>,</span></span>
 <span class="r-in"><span>  nboot <span class="op">=</span> <span class="fl">2</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $popest</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 126.1944</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $input</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $input$call</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> estimate_population_fixed(zdat = Korea, model = "[23,1]", nboot = 2)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$coefficients</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          1          2          3          5          7 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1.1614132  0.4480247  1.9740810  1.7466912 -3.3393220 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$residuals</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             2             3             4             5             6 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -1.065814e-15 -7.826087e-01  5.000000e-01  1.237743e+00 -7.907801e-01 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             7             8 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -1.000000e+00  6.388889e-01 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$fitted.values</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         2         3         4         5         6         7         8 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5.000000 23.000000 36.000000 18.322034 28.677966  4.677966  7.322034 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$effects</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           1           2           3           5           7             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -34.3081838   1.8043554  -0.6686752   2.1560943  -5.8399070  -6.9496217 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  -5.3345419 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$R</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           1         2          3          5           7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 -11.09062 -6.942823 -6.4019296 -5.3199281 -1.08206617</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   0.00000  5.366325 -0.2096683 -0.1742319 -0.03543852</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   0.00000  0.000000 -5.4747350  4.0355466 -0.92534999</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   0.00000  0.000000  0.0000000 -3.7925833 -2.62944577</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7   0.00000  0.000000  0.0000000  0.0000000  1.74883017</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$rank</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$qr</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $qr</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             1          2          3          5           7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 -11.0906228 -6.9428230 -6.4019296 -5.3199281 -1.08206617</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   0.4324288  5.3663246 -0.2096683 -0.1742319 -0.03543852</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4   0.5409968 -0.3479919 -5.4747350  4.0355466 -0.92534999</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   0.3859560  0.5493949 -0.5434124 -3.7925833 -2.62944577</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6   0.4828562 -0.3105935 -0.3750195  0.3585523  1.74883017</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7   0.1950254  0.2776120  0.1204902  0.5505191 -0.52288741</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8   0.2439896 -0.1569444  0.3047707  0.7104509 -0.54698449</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $rank</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $qraux</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.201618 1.615547 1.675766 1.252247 1.653756</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $pivot</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 2 3 4 5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $tol</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1e-11</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "qr"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$family</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Family: poisson </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Link function: log </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $input$data</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      b c d Count</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0 0 1    41</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0 1 0     5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 1 0 0     5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 1 1 0    54</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 1 0 1     6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 0 1 1     0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [7,] 1 1 1    12</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$linear.predictors</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        2        3        4        5        6        7        8 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1.609438 3.135494 3.583519 2.908104 3.356129 1.542863 1.990888 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $method</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "fixed"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$deviance</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 87.66203</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> dark_figure       total </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    3.194444  126.194444 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$aic</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 124.0028</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$null.deviance</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 143.5474</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$iter</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$weights</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         2         3         4         5         6         7         8 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5.000000 23.000702 35.999897 18.322613 28.677915  4.678368  7.322419 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$prior.weights</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 3 4 5 6 7 8 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 1 1 1 1 1 1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$df.residual</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$df.null</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$y</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2  3  4  5  6  7  8 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5  5 54 41  6  0 12 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$converged</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$boundary</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$abundance</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 126.1944 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$bic</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 138.0637</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $MSEfit$neginfpars</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> numeric(0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $model</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $fitted_model</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "[23,1]"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $bootreps</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 126.6164 126.0822</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $uncertainty</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                  0.025        0.1        0.9      0.975</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> dark_figure   3.082192   3.082192   3.616438   3.616438</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> total       126.082192 126.082192 126.616438 126.616438</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ahat</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.05311501</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $BCaquantiles</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    0.025      0.1      0.9    0.975 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 126.0822 126.0822 126.6164 126.6164 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $details</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "not requested"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

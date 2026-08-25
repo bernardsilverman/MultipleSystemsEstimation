@@ -21,7 +21,8 @@ estimate_population_bic(
   iseed = 1234,
   alpha = c(0.025, 0.1, 0.9, 0.975),
   maxorder = NULL,
-  ntopmodels = NULL
+  ntopmodels = NULL,
+  return_details = FALSE
 )
 ```
 
@@ -70,39 +71,47 @@ estimate_population_bic(
   performed. If `ntopmodels` is greater than the total number of
   available models, then all models are considered.
 
+- return_details:
+
+  Logical. If `TRUE`, include the bootstrap estimates, BCa acceleration,
+  selected-model BIC, complete original-data BIC enumeration, and
+  effects estimated at minus infinity. The default is `FALSE`.
+
 ## Value
 
 A list with components:
 
-- `popest`:
+- `input`:
 
-  The estimated total population for the original data, including the
-  estimated unobserved population, from the model with the smallest BIC.
+  A list containing the original `call` and `data`.
 
-- `model`:
+- `method`:
 
-  The hierarchical model with the smallest BIC on the original data.
+  The character string `"bic"`.
 
-- `BIC`:
+- `estimate`:
 
-  The BIC value of the selected model.
+  A named numeric vector containing the estimated `dark_figure` and
+  `total` population.
 
-- `bic_results`:
+- `fitted_model`:
 
-  The complete result of the original-data BIC enumeration, including
-  all eligible models permitted by `maxorder`, ordered by BIC.
+  The hierarchy with the smallest BIC on the original data.
 
-- `BCaquantiles`:
+- `uncertainty`:
 
-  A named numeric vector containing the endpoints of the BCa confidence
-  intervals at the cumulative probability levels specified by `alpha`
-  when `nboot > 0`, and `NULL` when `nboot = 0`. Model selection within
-  each bootstrap and jackknife replication is restricted to all models
-  retained through `ntopmodels`.
+  A two-row matrix of BCa endpoints for the dark figure and total
+  population when `nboot > 0`; otherwise an explanatory character
+  string.
 
-When `nboot > 0`, the `BCaquantiles` component gives BCa inference based
-on repeated BIC model selection among all retained models. The names
-correspond to the cumulative probability levels supplied in `alpha`.
+- `details`:
+
+  If `return_details = TRUE`, a list containing
+  `minus_infinity_effects`, `bootstrap_estimates`, `bca_acceleration`,
+  `BIC`, and `bic_results`. The last is the complete original-data
+  enumeration, with one row per eligible model giving its
+  total-population estimate, BIC and maximum interaction order, ordered
+  by increasing BIC. Otherwise `"not requested"`.
 
 ## Details
 
@@ -149,26 +158,11 @@ data(Korea)
 # A very small number of bootstrap replications is used here only
 # to keep the example quick.
 estimate_population_bic(Korea, nboot = 10)
-#> $popest
-#> [1] 157.1667
+#> $input
+#> $input$call
+#> estimate_population_bic(zdat = Korea, nboot = 10)
 #> 
-#> $model
-#> [1] "[12,23]"
-#> 
-#> $BIC
-#> [1] 57.14081
-#> 
-#> $bic_results
-#> $bic_results$res
-#>         abundance       BIC modelsorder
-#> [12,23]  157.1667  57.14081           2
-#> [12,3]   268.7778  58.96860           2
-#> [13,23]  123.4630  91.89711           2
-#> [23,1]   126.1944 138.06368           2
-#> [13,2]   126.9394 155.16018           2
-#> [1,2,3]  141.9926 184.14431           1
-#> 
-#> $bic_results$xdata
+#> $input$data
 #>      b c d Count
 #> [1,] 0 0 1    41
 #> [2,] 0 1 0     5
@@ -178,17 +172,23 @@ estimate_population_bic(Korea, nboot = 10)
 #> [6,] 0 1 1     0
 #> [7,] 1 1 1    12
 #> 
-#> $bic_results$maxorder
-#> [1] 2
 #> 
+#> $method
+#> [1] "bic"
 #> 
-#> $BCaquantiles
-#>            0.025      0.1      0.9 0.975
-#> [12,23] 134.7273 134.8201 187.6457   201
-#> [12,3]  134.7273 134.8201 320.3872   336
-#> [13,23] 134.7273 134.8201 320.3872   336
-#> [23,1]  134.7273 134.8201 320.3872   336
-#> [13,2]  134.7273 134.8201 320.3872   336
-#> [1,2,3] 134.7273 134.8201 320.3872   336
+#> $estimate
+#> dark_figure       total 
+#>    34.16667   157.16667 
+#> 
+#> $fitted_model
+#> [1] "[12,23]"
+#> 
+#> $uncertainty
+#>                 0.025       0.1      0.9 0.975
+#> dark_figure  11.72727  11.82012 197.3872   213
+#> total       134.72727 134.82012 320.3872   336
+#> 
+#> $details
+#> [1] "not requested"
 #> 
 ```

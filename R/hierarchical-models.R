@@ -21,6 +21,9 @@ utils::globalVariables("hiermodels")
 #'   \item{\code{xdata}}{The original capture history data.}
 #'   \item{\code{maxorder}}{The largest interaction order among the retained
 #'   models, or 0 if no model is retained.}
+#'   \item{\code{best_neginfpars}}{Encoded effects estimated at minus infinity
+#'   in the model with the smallest BIC, or an empty vector if there is no valid
+#'   model or no such effect.}
 #' }
 #'
 #' @keywords internal
@@ -63,7 +66,8 @@ assemble_bic <-
       return(list(
         res = res,
         xdata = xdata,
-        maxorder = 0
+        maxorder = 0,
+        best_neginfpars = numeric(0)
       ))
     }
     # arrange rows in order of BIC
@@ -72,10 +76,12 @@ assemble_bic <-
     modelsorder = vapply(modelnames, .model_order, numeric(1))
     res = cbind(res, modelsorder)
     maxorder = max(modelsorder)
+    bestfit = hiermodfit[[match(modelnames[1], hiermodels_cons)]]
     return(list(
       res = res,
       xdata = xdata,
-      maxorder = maxorder
+      maxorder = maxorder,
+      best_neginfpars = bestfit$neginfpars
     ))
   }
 
@@ -99,6 +105,8 @@ assemble_bic <-
 #'   \item{\code{res}}{The original-data model results.}
 #'   \item{\code{xdata}}{The original capture history data.}
 #'   \item{\code{maxorder}}{The largest retained interaction order.}
+#'   \item{\code{best_neginfpars}}{Encoded minus-infinity effects for the
+#'   original best-BIC model, passed through unchanged.}
 #'   \item{\code{jackabund}, \code{jackbic}}{Jackknife population estimates
 #'   and BIC values, if present in the input.}
 #'   \item{\code{countsobserved}}{Capture history counts, if present in the

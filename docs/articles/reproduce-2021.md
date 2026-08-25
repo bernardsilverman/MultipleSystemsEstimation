@@ -191,9 +191,10 @@ fit <- estimate_population_stepwise(
   maxorder = 2
 )
 
-fit$popest
-#> [1] 268.7778
-fit$MSEfit$hiermod
+fit$estimate
+#> dark_figure       total 
+#>    145.7778    268.7778
+fit$fitted_model
 #> [1] "[12,3]"
 ```
 
@@ -236,15 +237,15 @@ Kosovo_unrestricted <- estimate_population_stepwise(
 )
 
 c(
-  pairwise = Kosovo_pairwise$popest,
-  unrestricted = Kosovo_unrestricted$popest
+  pairwise = Kosovo_pairwise$estimate["total"],
+  unrestricted = Kosovo_unrestricted$estimate["total"]
 )
-#>     pairwise unrestricted 
-#>     14341.66     18393.31
+#>     pairwise.total unrestricted.total 
+#>           14341.66           18393.31
 
 c(
-  pairwise = Kosovo_pairwise$MSEfit$hiermod,
-  unrestricted = Kosovo_unrestricted$MSEfit$hiermod
+  pairwise = Kosovo_pairwise$fitted_model,
+  unrestricted = Kosovo_unrestricted$fitted_model
 )
 #>           pairwise       unrestricted 
 #> "[12,13,14,23,34]"      "[134,12,23]"
@@ -286,11 +287,13 @@ fit_boot <- estimate_population_stepwise(
   iseed = 1234
 )
 
-fit_boot$popest
-#> [1] 268.7778
-fit_boot$BCaquantiles
-#>    0.025      0.1      0.9    0.975 
-#> 123.3274 193.8215 358.3031 399.8280
+fit_boot$estimate
+#> dark_figure       total 
+#>    145.7778    268.7778
+fit_boot$uncertainty
+#>                   0.025       0.1      0.9   0.975
+#> dark_figure   0.3274105  70.82153 235.3031 276.828
+#> total       123.3274105 193.82153 358.3031 399.828
 ```
 
 To keep the vignette quick, the bootstrap calculations run below use
@@ -313,7 +316,7 @@ data(NewOrl)
 ncol(NewOrl) - 1
 #> [1] 8
 sum(NewOrl[, ncol(NewOrl)])
-#> [1] 186
+#> [1] 185
 ```
 
 There are 28 possible pairs of lists, of which 18 are nonoverlapping.
@@ -328,9 +331,10 @@ NewOrl_fit <- estimate_population_stepwise(
   maxorder = 2
 )
 
-NewOrl_fit$popest
-#> [1] 1110.488
-NewOrl_fit$MSEfit$hiermod
+NewOrl_fit$estimate
+#> dark_figure       total 
+#>    998.6923   1183.6923
+NewOrl_fit$fitted_model
 #> [1] "[45,1,2,3,6,7,8]"
 ```
 
@@ -351,7 +355,7 @@ NewOrl_boot <- estimate_population_stepwise(
   nboot = 1000
 )
 
-NewOrl_boot$BCaquantiles
+NewOrl_boot$uncertainty
 ```
 
 The paper also considers the main-effects-only model, obtained when the
@@ -369,8 +373,8 @@ NewOrl_main <- estimate_population_stepwise(
   nboot = 1000
 )
 
-NewOrl_main$popest
-NewOrl_main$BCaquantiles
+NewOrl_main$estimate
+NewOrl_main$uncertainty
 ```
 
 ## Five-list New Orleans data
@@ -389,9 +393,10 @@ NewOrl5_fit <- estimate_population_stepwise(
   maxorder = 2
 )
 
-NewOrl5_fit$popest
-#> [1] 981.4314
-NewOrl5_fit$MSEfit$hiermod
+NewOrl5_fit$estimate
+#> dark_figure       total 
+#>    849.1511   1034.1511
+NewOrl5_fit$fitted_model
 #> [1] "[1,2,3,4,5]"
 ```
 
@@ -410,9 +415,10 @@ NewOrl5_boot <- estimate_population_stepwise(
   nboot = 100
 )
 
-NewOrl5_boot$BCaquantiles
-#>     0.025       0.1       0.9     0.975 
-#>  700.3053  700.3053 1114.2200 1330.4792
+NewOrl5_boot$uncertainty
+#>                0.025      0.1      0.9    0.975
+#> dark_figure 416.0089 416.0089 1110.799 1651.069
+#> total       601.0089 601.0089 1295.799 1836.069
 ```
 
 ## Western site data: Section 4.2
@@ -429,9 +435,10 @@ Western_fit <- estimate_population_stepwise(
   maxorder = 2
 )
 
-Western_fit$popest
-#> [1] 2483.384
-Western_fit$MSEfit$hiermod
+Western_fit$estimate
+#> dark_figure       total 
+#>    2138.384    2483.384
+Western_fit$fitted_model
 #> [1] "[15,2,3,4]"
 ```
 
@@ -451,9 +458,10 @@ Western_boot <- estimate_population_stepwise(
   nboot = 100
 )
 
-Western_boot$BCaquantiles
-#>    0.025      0.1      0.9    0.975 
-#> 1550.954 1550.954 2869.327 3409.250
+Western_boot$uncertainty
+#>                0.025      0.1      0.9   0.975
+#> dark_figure 1205.954 1205.954 2524.327 3064.25
+#> total       1550.954 1550.954 2869.327 3409.25
 ```
 
 ## Comparison with the BIC approach: Section 3.4
@@ -567,9 +575,10 @@ fit_current <- estimate_population(
   maxorder = 2
 )
 
-fit_current$popest
-#> [1] 268.7778
-fit_current$MSEfit$hiermod
+fit_current$estimate
+#> dark_figure       total 
+#>    145.7778    268.7778
+fit_current$fitted_model
 #> [1] "[12,3]"
 ```
 

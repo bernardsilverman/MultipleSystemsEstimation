@@ -7,7 +7,7 @@ test_that("New Orleans stepwise fit reproduces the published point estimate", {
   )
 
   expect_equal(
-    fit$popest,
+    unname(fit$estimate["total"]),
     1184,
     tolerance = 1
   )
@@ -23,7 +23,7 @@ test_that("Western stepwise fit reproduces the published point estimate", {
   )
 
   expect_equal(
-    fit$popest,
+    unname(fit$estimate["total"]),
     2483,
     tolerance = 1
   )
@@ -39,7 +39,7 @@ test_that("five-list New Orleans fit reproduces the published point estimate", {
   )
 
   expect_equal(
-    fit$popest,
+    unname(fit$estimate["total"]),
     1034,
     tolerance = 1
   )

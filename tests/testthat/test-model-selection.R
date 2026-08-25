@@ -2,7 +2,16 @@ selected_interactions_ms <- function(fit, zdat) {
   list_names <- colnames(zdat)[seq_len(ncol(zdat) - 1L)]
   pairs <- utils::combn(list_names, 2)
 
-  selected <- fit$MSEfit$selected
+  pair_codes <- apply(
+    utils::combn(seq_along(list_names), 2),
+    2,
+    function(ii) {
+      z <- integer(length(list_names))
+      z[ii] <- 1L
+      encode_capture(z)
+    }
+  )
+  selected <- pair_codes %in% convert_from_hierarchy(fit$fitted_model)
 
   if (!any(selected))
     return(character(0))
@@ -24,8 +33,8 @@ test_that("stepwise threshold zero gives the main-effects model", {
     pthresh = 0
   )
 
-  expect_false(any(fit$MSEfit$selected))
-  expect_true(is.finite(fit$popest))
+  expect_identical(fit$fitted_model, "[1,2,3,4,5]")
+  expect_true(is.finite(fit$estimate["total"]))
 })
 
 
@@ -53,8 +62,8 @@ test_that("published stepwise selections are reproduced", {
     "A:E"
   )
 
-  expect_equal(new_orleans$popest, 1184, tolerance = 1)
-  expect_equal(western$popest, 2483, tolerance = 1)
+  expect_equal(unname(new_orleans$estimate["total"]), 1184, tolerance = 1)
+  expect_equal(unname(western$estimate["total"]), 2483, tolerance = 1)
 })
 test_that("small exhaustive BIC search reproduces the Korea result", {
   data("Korea", package = "MultipleSystemsEstimation")
@@ -379,15 +388,8 @@ test_that("stepwise maxorder defaults to pairwise selection", {
   default <- estimate_population_stepwise(Korea)
   pairwise <- estimate_population_stepwise(Korea, maxorder = 2)
 
-  expect_equal(default$popest, pairwise$popest)
-  expect_equal(
-    default$MSEfit$hiermod,
-    pairwise$MSEfit$hiermod
-  )
-  expect_equal(
-    default$MSEfit$selected,
-    pairwise$MSEfit$selected
-  )
+  expect_equal(default$estimate, pairwise$estimate)
+  expect_equal(default$fitted_model, pairwise$fitted_model)
 })
 
 
@@ -408,33 +410,33 @@ test_that("stepwise selection can include higher-order interactions", {
   )
 
   expect_equal(
-    pairwise$MSEfit$hiermod,
+    pairwise$fitted_model,
     "[12,13,14,23,34]"
   )
 
   expect_equal(
-    order3$MSEfit$hiermod,
+    order3$fitted_model,
     "[134,12,23]"
   )
 
   expect_equal(
-    unrestricted$MSEfit$hiermod,
-    order3$MSEfit$hiermod
+    unrestricted$fitted_model,
+    order3$fitted_model
   )
 
   expect_equal(
-    round(pairwise$popest, 2),
+    round(unname(pairwise$estimate["total"]), 2),
     14341.66
   )
 
   expect_equal(
-    round(order3$popest, 2),
+    round(unname(order3$estimate["total"]), 2),
     18393.31
   )
 
   expect_equal(
-    unrestricted$popest,
-    order3$popest
+    unrestricted$estimate,
+    order3$estimate
   )
 })
 

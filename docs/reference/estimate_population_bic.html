@@ -25,7 +25,7 @@ a specified number of the best-ranked models."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">MultipleSystemsEstimation</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -78,7 +78,8 @@ a specified number of the best-ranked models.</p>
 <span>  iseed <span class="op">=</span> <span class="fl">1234</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.025</span>, <span class="fl">0.1</span>, <span class="fl">0.9</span>, <span class="fl">0.975</span><span class="op">)</span>,</span>
 <span>  maxorder <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  ntopmodels <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  ntopmodels <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  return_details <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -128,40 +129,46 @@ argument is irrelevant when <code>nboot = 0</code>, because no model subsetting
 is then performed. If <code>ntopmodels</code> is greater than the total number of
 available models, then all models are considered.</p></dd>
 
+
+<dt id="arg-return-details">return_details<a class="anchor" aria-label="anchor" href="#arg-return-details"></a></dt>
+<dd><p>Logical. If <code>TRUE</code>, include the bootstrap
+estimates, BCa acceleration, selected-model BIC, complete original-data BIC
+enumeration, and effects estimated at minus infinity. The default is
+<code>FALSE</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list with components:</p><dl><dt><code>popest</code></dt>
-<dd><p>The estimated total population for
-  the original data, including the estimated unobserved population,
-  from the model with the smallest BIC.</p></dd>
+    <p>A list with components:</p><dl><dt><code>input</code></dt>
+<dd><p>A list containing the original <code>call</code> and
+  <code>data</code>.</p></dd>
 
-  <dt><code>model</code></dt>
-<dd><p>The hierarchical model with the smallest BIC on
-  the original data.</p></dd>
+  <dt><code>method</code></dt>
+<dd><p>The character string <code>"bic"</code>.</p></dd>
 
-  <dt><code>BIC</code></dt>
-<dd><p>The BIC value of the selected model.</p></dd>
+  <dt><code>estimate</code></dt>
+<dd><p>A named numeric vector containing the estimated
+  <code>dark_figure</code> and <code>total</code> population.</p></dd>
 
-  <dt><code>bic_results</code></dt>
-<dd><p>The complete result of the original-data BIC
-  enumeration, including all eligible models permitted by <code>maxorder</code>, ordered
-  by BIC.</p></dd>
+  <dt><code>fitted_model</code></dt>
+<dd><p>The hierarchy with the smallest BIC on the
+  original data.</p></dd>
 
-  <dt><code>BCaquantiles</code></dt>
-<dd><p>A named numeric vector containing the endpoints
-  of the BCa confidence intervals at the cumulative probability levels
-  specified by <code>alpha</code> when <code>nboot &gt; 0</code>, and <code>NULL</code> when
-  <code>nboot = 0</code>. Model selection within each bootstrap and jackknife
-  replication is restricted to all models retained through
-  <code>ntopmodels</code>.</p></dd>
+  <dt><code>uncertainty</code></dt>
+<dd><p>A two-row matrix of BCa endpoints for the dark
+  figure and total population when <code>nboot &gt; 0</code>; otherwise an
+  explanatory character string.</p></dd>
+
+  <dt><code>details</code></dt>
+<dd><p>If <code>return_details = TRUE</code>, a list containing
+  <code>minus_infinity_effects</code>, <code>bootstrap_estimates</code>,
+  <code>bca_acceleration</code>, <code>BIC</code>, and <code>bic_results</code>. The last is
+  the complete original-data enumeration, with one row per eligible model
+  giving its total-population estimate, BIC and maximum interaction order,
+  ordered by increasing BIC. Otherwise <code>"not requested"</code>.</p></dd>
 
 
-</dl><p>When <code>nboot &gt; 0</code>, the <code>BCaquantiles</code> component gives BCa
-inference based on repeated BIC model selection among all retained models.
-The names correspond to the cumulative probability levels supplied in
-<code>alpha</code>.</p>
-    </div>
+</dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>If <code>nboot &gt; 0</code>, the routine implements the bootstrap procedure described by Silverman,
@@ -201,26 +208,11 @@ Available from
 <span class="r-in"><span><span class="co"># A very small number of bootstrap replications is used here only</span></span></span>
 <span class="r-in"><span><span class="co"># to keep the example quick.</span></span></span>
 <span class="r-in"><span><span class="fu">estimate_population_bic</span><span class="op">(</span><span class="va">Korea</span>, nboot <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $popest</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 157.1667</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $input</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $input$call</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> estimate_population_bic(zdat = Korea, nboot = 10)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $model</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "[12,23]"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $BIC</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 57.14081</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $bic_results</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $bic_results$res</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         abundance       BIC modelsorder</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [12,23]  157.1667  57.14081           2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [12,3]   268.7778  58.96860           2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13,23]  123.4630  91.89711           2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [23,1]   126.1944 138.06368           2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13,2]   126.9394 155.16018           2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,2,3]  141.9926 184.14431           1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $bic_results$xdata</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $input$data</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      b c d Count</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0 0 1    41</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0 1 0     5</span>
@@ -230,18 +222,24 @@ Available from
 <span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 0 1 1     0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [7,] 1 1 1    12</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $bic_results$maxorder</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $method</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "bic"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $BCaquantiles</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            0.025      0.1      0.9 0.975</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [12,23] 134.7273 134.8201 187.6457   201</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [12,3]  134.7273 134.8201 320.3872   336</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13,23] 134.7273 134.8201 320.3872   336</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [23,1]  134.7273 134.8201 320.3872   336</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13,2]  134.7273 134.8201 320.3872   336</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,2,3] 134.7273 134.8201 320.3872   336</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> dark_figure       total </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    34.16667   157.16667 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $fitted_model</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "[12,23]"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $uncertainty</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 0.025       0.1      0.9 0.975</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> dark_figure  11.72727  11.82012 197.3872   213</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> total       134.72727 134.82012 320.3872   336</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $details</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "not requested"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

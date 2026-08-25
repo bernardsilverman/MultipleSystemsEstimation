@@ -10,7 +10,8 @@ estimate_population_bayesthresh(
   prior_variance = 1,
   threshold = 2,
   maxorder = 2,
-  return_posterior = FALSE,
+  alpha = c(0.025, 0.1, 0.9, 0.975),
+  return_details = FALSE,
   ...
 )
 }
@@ -28,9 +29,15 @@ to posterior standard deviation for interaction parameters.}
 
 \item{maxorder}{Maximum interaction order, either 2 or 3.}
 
-\item{return_posterior}{Logical. If \code{TRUE}, include the full posterior
-sample of the total population in the returned object. The default is
-\code{FALSE}.}
+\item{alpha}{Numeric vector of cumulative probability levels at which
+posterior credible-interval endpoints are to be reported. The default is
+\code{c(0.025, 0.1, 0.9, 0.975)}. The posterior median used for the point
+estimate is calculated separately and need not be included in
+\code{alpha}.}
+
+\item{return_details}{Logical. If \code{TRUE}, include thresholding
+information, effects at minus infinity, and the full posterior sample of
+total population size. The default is \code{FALSE}.}
 
 \item{...}{Additional arguments passed to \code{MCMCpack::MCMCpoisson()}.
 Useful arguments include:
@@ -48,51 +55,22 @@ Useful arguments include:
 }}
 }
 \value{
-A list with the following components:
-  \describe{
-    \item{\code{call}}{
-      The matched function call used to obtain the result.
-    }
-    \item{\code{popest}}{
-      Posterior median estimate of the total population size.
-    }
-    \item{\code{quantiles}}{
-      Posterior quantiles of the total population size.
-    }
-    \item{\code{retained_interactions}}{
-      Two-list interactions retained by the thresholding procedure and
-      estimated by MCMC.
-    }
-    \item{\code{threshold_statistics}}{
-      Absolute ratios of posterior mean to posterior standard deviation for
-      the two-list interactions considered in the initial thresholding
-      step.
-    }
-    \item{\code{eligible_triples}}{
-      If \code{maxorder = 3}, the eligible three-list interactions: those
-      for which all three constituent two-list interactions have been
-      retained.
-    }
-    \item{\code{retained_triples}}{
-      If the three-list thresholding step is carried out, the eligible
-      three-list interactions retained by that thresholding step.
-    }
-    \item{\code{triple_threshold_statistics}}{
-      If the three-list thresholding step is carried out, the threshold
-      statistics for the eligible three-list interactions.
-    }
-    \item{\code{minus_infinite_estimated_effects}}{
-      With an improper prior, interaction effects whose posterior
-      distribution is concentrated at minus infinity. This component is
-      present only if such effects occur. These effects are retained in
-      the fitted model but are reported separately from interaction
-      effects estimated by MCMC.
-    }
-    \item{\code{posterior}}{
-      If \code{return_posterior = TRUE}, the full posterior sample of the
-      total population size.
-    }
-  }
+A list with components:
+\describe{
+  \item{\code{input}}{A list containing the original \code{call} and
+  \code{data}.}
+  \item{\code{method}}{The character string \code{"bayesthresh"}.}
+  \item{\code{estimate}}{A named numeric vector containing posterior median
+  estimates of the \code{dark_figure} and \code{total} population.}
+  \item{\code{fitted_model}}{The retained model in hierarchy notation.}
+  \item{\code{uncertainty}}{A two-row matrix of posterior quantiles for the
+  dark figure and total population at the probabilities in \code{alpha}.}
+  \item{\code{details}}{If \code{return_details = TRUE}, a list containing
+  \code{minus_infinity_effects}, pairwise \code{threshold_statistics},
+  applicable \code{eligible_triples}, \code{retained_triples}, and
+  \code{triple_threshold_statistics}, and \code{posterior}, the complete
+  MCMC sample of total population size. Otherwise \code{"not requested"}.}
+}
 }
 \description{
 Fits the Bayesian-threshold estimator of Silverman (2020), based on a
@@ -164,8 +142,8 @@ fit <- estimate_population_bayesthresh(
     mcmc = 1000,
     seed = 1234
 )
-fit$popest
-fit$retained_interactions
+fit$estimate
+fit$fitted_model
 
 }
 \references{
