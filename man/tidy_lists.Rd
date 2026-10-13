@@ -31,7 +31,35 @@ add all observable histories having zero count and remove non-informative
 capture lists.
 }
 \examples{
-data(NewOrl)
-tidy_lists(NewOrl, includezerocounts = TRUE)
+# Two rows have the same capture history: A only.
+zdat <- data.frame(
+  A = c(1, 1, 0, 1),
+  B = c(0, 0, 1, 1),
+  C = c(0, 0, 0, 1),
+  count = c(3, 5, 4, 2)
+)
+zdat
+
+# Consolidate rows with the same capture history by summing their counts.
+# The two A-only rows become one row with count 3 + 5 = 8.
+tidy_lists(zdat)
+
+# Include all seven observable histories, filling missing counts with zero.
+# The unobserved history (0, 0, 0) is excluded.
+tidy_lists(zdat, includezerocounts = TRUE)
+
+# Add a duplicate list, an empty list and a list containing every case.
+# Keep the count column last.
+redundant <- data.frame(
+  zdat[c("A", "B", "C")],
+  A_copy = zdat$A,
+  empty = 0,
+  everyone = 1,
+  count = zdat$count
+)
+redundant
+
+# Remove the three redundant lists and consolidate repeated histories.
+tidy_lists(redundant, remove_noninformative = TRUE)
 
 }

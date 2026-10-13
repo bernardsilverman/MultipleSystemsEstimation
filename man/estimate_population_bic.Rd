@@ -16,7 +16,8 @@ estimate_population_bic(
 )
 }
 \arguments{
-\item{zdat}{A capture history data matrix with \eqn{t+1} columns. The first
+\item{zdat}{A capture history data matrix with \eqn{t+1} columns, where \eqn{t}
+is the number of lists. The first
 \eqn{t} columns correspond to the capture lists and contain zeros and ones
 defining the observed capture histories. The final column contains the
 number of cases having each capture history. Capture histories not
@@ -105,16 +106,18 @@ with the smallest BIC values are retained, and for five- and six-list data
 the 100 models with the smallest BIC values are retained.  Focusing attention
 on a subset of all possible models enables considerable computational economies.
 
-Models are generated directly. When their number exceeds maxmodel, the
-maximum interaction order is reduced until a complete collection fits.
-This may reduce the search to the main-effects-only model. Requested and
-actual orders are recorded in details; no console notice is issued.
+Models are generated directly. When their number exceeds \code{maxmodel}, the
+maximum interaction order is reduced to a lower value as necessary.
+This may even reduce the search to the main-effects-only model. Requested and
+actual orders are recorded in \code{details}.
 
 A masked interaction is a higher-order effect whose contribution cannot
 change any extended fitted mean because a lower-order effect is
-already represented at minus infinity. For example, if AB has zero
-sufficient statistic, adding ABC is masked. The two hierarchies can
-have the same maximised likelihood but different nominal BIC penalties.
+already estimated at minus infinity. For example, if lists A and B have no overlap
+then AB, if included in the model, is estimated at minus infinity.
+The interaction ABC is masked. Including ABC in the hierarchical model will
+not change the fitted mean of any history but will increase the number of nominal parameters,
+and so the BIC criterion cannot select this model.
 
 A small value of \code{nboot}, such as that used in the example, is useful
 only for checking that the routine runs. A substantially larger number of

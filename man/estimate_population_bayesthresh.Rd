@@ -90,52 +90,61 @@ posterior distribution of the total population is obtained by adding the
 observed population to the posterior estimate of the unobserved cell.
 }
 \details{
-By default, independent zero-centred normal priors are used for the
-interaction parameters, with variance specified by \code{prior_variance}.
-Setting \code{prior = "improper"} instead uses independent improper flat
-priors for the interaction parameters. In that case, interactions having
-zero sufficient statistic are represented at
-minus infinity. Such effects are retained in the model but are accounted
-for separately before carrying out the actual MCMC, as set out in
-Silverman (2020). For a masked effect, the individual canonical parameter
-is not identifiable: any finite value would give the same fitted
-distribution. This method does not propose masked descendants.
+By default, the interaction parameters have independent zero-centred
+normal priors, with variance specified by \code{prior_variance}.
+Setting \code{prior = "improper"} instead assigns independent improper
+flat priors to these parameters.
 
-If \code{maxorder >= 3}, three-list interactions are also considered.
-Two-list interactions are thresholded first. A three-list interaction is
-eligible for consideration only if all three of its constituent two-list
-interactions have been retained with finite parameters. With improper
-priors, a retained two-list interaction represented at minus infinity
-does not generate higher-order candidates: its descendants are masked
-and cannot affect the fitted distribution. The model containing retained
-finite and sparse two-list interactions and all eligible three-list
-interactions is fitted; the eligible triples are then thresholded, apart
-from newly minimal sparse effects handled separately at minus infinity.
+Under improper priors, sparse effects may be handled separately at minus
+infinity. For example, if two lists are non-overlapping and their
+two-list interaction is included in the model, its parameter has a
+posterior distribution concentrated at minus infinity. Such effects
+are retained in the model and reported in \code{minus_infinity_effects},
+but their parameters are excluded from the MCMC. 
 
-With \code{maxorder = 4}, four-list interactions are considered after
-thresholding the three-list interactions. All four constituent triples
-must be retained with finite parameters. Eligible four-list interactions
-are fitted and thresholded in the same way. With an improper prior, failure
-of the existence check returns the completed order-three analysis.
+Thresholding proceeds in increasing order of interaction, starting
+with the two-list interactions. If \code{maxorder >= 3}, a three-list
+interaction is eligible for consideration only if all three of its
+constituent two-list interactions have been retained with
+\emph{finite} parameters. Thus, under improper priors, a three-list
+interaction containing a non-overlapping pair of lists
+cannot be eligible.
 
-When improper priors are used for the interaction parameters, the model
-containing all two-list interactions is checked for identifiability and
-for the Fienberg--Rinaldo existence criterion before thresholding begins.
-If it fails, the procedure stops. With \code{maxorder >= 3}, the model
-containing the retained two-list interactions and all eligible three-list
-interactions is also checked. If this model fails the Fienberg--Rinaldo
-criterion, the proposed three-list extension is not carried out and the
-completed two-list analysis is returned, together with the eligible triples.
+The model containing the retained two-list interactions, including
+any effects handled at minus infinity, and all eligible three-list
+interactions is then fitted. The eligible three-list interactions
+are thresholded, except that, under improper priors, any newly minimal
+sparse effects are handled separately at minus infinity.
 
-The reason for this check is that, with improper priors on the interaction
-parameters, a model without a finite maximum-likelihood estimate will not
-have a proper posterior either. However, results of Forster (2010)
-show that proper priors on the interaction parameters can yield a proper
-posterior even when the corresponding finite maximum-likelihood estimate
-does not exist.
-Therefore these checks are not required when proper priors are used for the
-interaction parameters, and the Bayesian fitting and thresholding
-proceed without applying the Fienberg--Rinaldo criterion.
+If \code{maxorder = 4}, the procedure continues to four-list
+interactions after thresholding the three-list interactions. A
+four-list interaction is eligible only if all four of its constituent
+three-list interactions have been retained with \emph{finite}
+parameters. Eligible four-list interactions are fitted and thresholded
+in the same way.
+
+Under improper priors, the initial model containing all two-list
+interactions is checked for identifiability and against the
+Fienberg--Rinaldo existence criterion before thresholding begins.
+If either check fails, the procedure stops.
+
+Before extending the analysis to three-list interactions, the model
+containing the retained two-list interactions and all eligible
+three-list interactions is also checked against the Fienberg--Rinaldo
+criterion. If this check fails, the extension is not carried out.
+Instead, the completed two-list analysis is returned, together with
+the eligible triples. The analogous check is applied before extending
+to four-list interactions; failure returns the completed three-list
+analysis.
+
+These existence checks are needed because, under improper priors on
+the interaction parameters, a model without an extended maximum-likelihood
+estimate will not have a proper posterior. However, results of
+Forster (2010) show that proper priors on the interaction parameters
+can yield a proper posterior even when a finite maximum-likelihood
+estimate does not exist. Consequently, when proper priors are used,
+Bayesian fitting and thresholding proceed without applying the
+Fienberg--Rinaldo criterion.
 
 When proper priors are used for the interaction parameters, the improper
 priors on the intercept and main effects are approximated internally by

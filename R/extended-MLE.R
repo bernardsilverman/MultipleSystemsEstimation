@@ -14,16 +14,14 @@
 #' Two distinct conditions are checked.
 #'
 #' The Fienberg--Rinaldo condition determines whether the required
-#' extended maximum-likelihood fit exists, accounting for parameters
-#' represented at minus infinity when the
-#' corresponding observed margins are zero.
+#' extended maximum-likelihood fit exists, allowing for parameters corresponding
+#' to sparse interactions
+#' to be estimated at minus infinity.
 #'
 #' The relevant model matrix is also checked for full column rank. Failure
 #' of this condition means that the model parameters are not identifiable.
 #'
 #' The two checks are carried out separately, so either one or both may fail.
-#' A model returning a nonzero status should not be fitted using the
-#' package's ordinary maximum-likelihood estimation routines.
 #'
 #' @return A single integer status code:
 #' \describe{
