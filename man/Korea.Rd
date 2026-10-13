@@ -21,6 +21,5 @@ are given in the data section and Figure 1 of Ball, Shin and Yang (2018).
 Ball, P., Shin, E. H.-S. and Yang, H. (2018).
 There may have been 14 undocumented Korean "comfort women" in Palembang,
 Indonesia. Technical report, Human Rights Data Analysis Group.
-\url{https://hrdag.org/wp-content/uploads/2018/12/KP-Palemban-ests.pdf}.
 }
 \keyword{datasets}

@@ -34,9 +34,10 @@ from the selection of a model from a large range of possibilities.
 
 ### Documentation
 
-The **[User Guide](articles/user-guide.html)** is the recommended
-starting point. It explains the estimation methods, their application
-and the interpretation of results.
+The **[User
+Guide](https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/user-guide.html)**
+is the recommended starting point. It explains the estimation methods,
+their application and the interpretation of results.
 
 Five companion vignettes provide further details of the methods and
 their implementation.
