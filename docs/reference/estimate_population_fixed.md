@@ -20,11 +20,12 @@ estimate_population_fixed(
 
 - zdat:
 
-  A capture history data matrix with \\t+1\\ columns. The first \\t\\
-  columns correspond to the capture lists and contain zeros and ones
-  defining the observed capture histories. The final column contains the
-  number of cases having each capture history. Capture histories not
-  explicitly included in the data are assumed to have zero count.
+  A capture history data matrix with \\t+1\\ columns, where \\t\\ is the
+  number of lists. The first \\t\\ columns correspond to the capture
+  lists and contain zeros and ones defining the observed capture
+  histories. The final column contains the number of cases having each
+  capture history. Capture histories not explicitly included in the data
+  are assumed to have zero count.
 
 - model:
 
@@ -115,10 +116,12 @@ infinity by the fitting routine.
 
 A masked interaction is a higher-order effect whose contribution cannot
 change any extended fitted mean because a lower-order effect is already
-represented at minus infinity. For example, if AB has zero sufficient
-statistic, adding ABC is masked. Its individual canonical coefficient is
-not uniquely determined; representation at minus infinity is replaced by
-the conventional value zero in the reported coefficients.
+estimated at minus infinity. For example, if lists A and B have no
+overlap then AB, if included in the model, is estimated at minus
+infinity. The interaction ABC is masked. Including ABC in the
+hierarchical model will not change the fitted mean of any history but
+will increase the number of nominal parameters, and so the BIC criterion
+cannot select this model.
 
 If `nboot > 0`, multinomial bootstrap samples are generated from the
 observed capture history counts. The same fixed hierarchical model is

@@ -17,8 +17,11 @@ estimate_population(
 
 - zdat:
 
-  Capture history data. The first columns identify list membership and
-  the final column contains the observed counts.
+  Capture history data. A matrix with one more column than the number of
+  lists. Each row corresponds to an observed capture history with 1 in
+  the columns corresponding to the capture lists in the history, and 0
+  otherwise. The last column contains the observed count for the capture
+  history.
 
 - method:
 

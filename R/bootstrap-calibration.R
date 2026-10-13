@@ -54,10 +54,14 @@ bcaconfvalues<-function(bootreps, popest, ahat, alpha=c(0.025, 0.05, 0.1, 0.16, 
 #' @param iseed Integer random-number seed.
 #' @param checkexist If \code{TRUE}, check identifiability and existence of the
 #' extended MLE for each model and support pattern before fitting.
-#' @param saveinterval If finite, save the accumulating result whenever the
-#' replication number is a multiple of this value.
-#' @param savefile File used when \code{saveinterval} is finite. Must be
-#'   supplied explicitly when checkpoint saving is requested.
+#' @param saveinterval Number of bootstrap replications between calls to
+#'   \code{checkpoint}. The default, \code{Inf}, disables checkpointing.
+#' @param checkpoint Optional function taking the accumulating result
+#'   \code{z} as its sole argument. Its return value is ignored. Must be
+#'   supplied when \code{saveinterval} is finite. The default is \code{NULL}.
+#'   The function may inspect or store the result; \code{bootstrapcal()}
+#'   itself does not write any files. Replications not yet processed have
+#'   \code{NA} entries in \code{bootabund} and \code{bootbic}.
 #'
 #' @return The input list \code{z}, with the following components added or
 #' replaced:
@@ -83,17 +87,17 @@ bootstrapcal <- function(z,
                            iseed = 1234,
                            checkexist=TRUE,
                            saveinterval = Inf,
-                           savefile = NULL) {
+                           checkpoint = NULL) {
   if (!is.numeric(saveinterval) || length(saveinterval) != 1L ||
       is.na(saveinterval) || saveinterval <= 0 ||
       (is.finite(saveinterval) && saveinterval != floor(saveinterval))) {
     stop("saveinterval must be a positive integer or Inf")
   }
-  if (is.finite(saveinterval)) {
-    if (!is.character(savefile) || length(savefile) != 1L ||
-        is.na(savefile) || !nzchar(savefile)) {
-      stop("supply a nonempty savefile path when saveinterval is finite")
-    }
+  if (!is.null(checkpoint) && !is.function(checkpoint)) {
+    stop("checkpoint must be NULL or a function")
+  }
+  if (is.finite(saveinterval) && is.null(checkpoint)) {
+    stop("supply a checkpoint function when saveinterval is finite")
   }
   set.seed(iseed)
   zdat = tidy_lists(z$xdata, includezerocounts = TRUE)
@@ -135,8 +139,8 @@ bootstrapcal <- function(z,
       }
     }
     # note that z$bootabund and z$bootbic are initialised to NA, so there is no need to do anything if frmat[imod, j] is FALSE
-    if (j %% saveinterval == 0) {
-      save(z, file = savefile)
+    if (!is.null(checkpoint) && j %% saveinterval == 0) {
+      checkpoint(z)
     }
   }
   return (z)

@@ -84,14 +84,12 @@ indicator column for each list followed by a count column.</p></dd>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Two distinct conditions are checked.</p>
 <p>The Fienberg–Rinaldo condition determines whether the required
-extended maximum-likelihood fit exists, accounting for parameters
-represented at minus infinity when the
-corresponding observed margins are zero.</p>
+extended maximum-likelihood fit exists, allowing for parameters corresponding
+to sparse interactions
+to be estimated at minus infinity.</p>
 <p>The relevant model matrix is also checked for full column rank. Failure
 of this condition means that the model parameters are not identifiable.</p>
-<p>The two checks are carried out separately, so either one or both may fail.
-A model returning a nonzero status should not be fitted using the
-package's ordinary maximum-likelihood estimation routines.</p>
+<p>The two checks are carried out separately, so either one or both may fail.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

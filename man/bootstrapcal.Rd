@@ -10,7 +10,7 @@ bootstrapcal(
   iseed = 1234,
   checkexist = TRUE,
   saveinterval = Inf,
-  savefile = NULL
+  checkpoint = NULL
 )
 }
 \arguments{
@@ -23,11 +23,15 @@ bootstrapcal(
 \item{checkexist}{If \code{TRUE}, check identifiability and existence of the
 extended MLE for each model and support pattern before fitting.}
 
-\item{saveinterval}{If finite, save the accumulating result whenever the
-replication number is a multiple of this value.}
+\item{saveinterval}{Number of bootstrap replications between calls to
+\code{checkpoint}. The default, \code{Inf}, disables checkpointing.}
 
-\item{savefile}{File used when \code{saveinterval} is finite. Must be
-supplied explicitly when checkpoint saving is requested.}
+\item{checkpoint}{Optional function taking the accumulating result
+\code{z} as its sole argument. Its return value is ignored. Must be
+supplied when \code{saveinterval} is finite. The default is \code{NULL}.
+The function may inspect or store the result; \code{bootstrapcal()}
+itself does not write any files. Replications not yet processed have
+\code{NA} entries in \code{bootabund} and \code{bootbic}.}
 }
 \value{
 The input list \code{z}, with the following components added or

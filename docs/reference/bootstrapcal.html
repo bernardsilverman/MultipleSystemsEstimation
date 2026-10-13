@@ -50,7 +50,7 @@ are screened using <code><a href="check_extended_MLE_batch.html">check_extended_
 <span>  iseed <span class="op">=</span> <span class="fl">1234</span>,</span>
 <span>  checkexist <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  saveinterval <span class="op">=</span> <span class="cn">Inf</span>,</span>
-<span>  savefile <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  checkpoint <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -76,13 +76,17 @@ extended MLE for each model and support pattern before fitting.</p></dd>
 
 
 <dt id="arg-saveinterval">saveinterval<a class="anchor" aria-label="anchor" href="#arg-saveinterval"></a></dt>
-<dd><p>If finite, save the accumulating result whenever the
-replication number is a multiple of this value.</p></dd>
+<dd><p>Number of bootstrap replications between calls to
+<code>checkpoint</code>. The default, <code>Inf</code>, disables checkpointing.</p></dd>
 
 
-<dt id="arg-savefile">savefile<a class="anchor" aria-label="anchor" href="#arg-savefile"></a></dt>
-<dd><p>File used when <code>saveinterval</code> is finite. Must be
-supplied explicitly when checkpoint saving is requested.</p></dd>
+<dt id="arg-checkpoint">checkpoint<a class="anchor" aria-label="anchor" href="#arg-checkpoint"></a></dt>
+<dd><p>Optional function taking the accumulating result
+<code>z</code> as its sole argument. Its return value is ignored. Must be
+supplied when <code>saveinterval</code> is finite. The default is <code>NULL</code>.
+The function may inspect or store the result; <code>bootstrapcal()</code>
+itself does not write any files. Replications not yet processed have
+<code>NA</code> entries in <code>bootabund</code> and <code>bootbic</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

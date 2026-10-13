@@ -53,8 +53,11 @@ methods in <span class="pkg">MultipleSystemsEstimation</span>.</p>
 
 
 <dl><dt id="arg-zdat">zdat<a class="anchor" aria-label="anchor" href="#arg-zdat"></a></dt>
-<dd><p>Capture history data. The first columns identify list
-membership and the final column contains the observed counts.</p></dd>
+<dd><p>Capture history data. A matrix with one more column than
+the number of lists. Each row corresponds to an observed capture history
+with 1 in the columns corresponding to the capture lists in the
+history, and 0 otherwise.  The last column contains the observed count for
+the capture history.</p></dd>
 
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>

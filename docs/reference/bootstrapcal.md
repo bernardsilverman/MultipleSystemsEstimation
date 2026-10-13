@@ -15,7 +15,7 @@ bootstrapcal(
   iseed = 1234,
   checkexist = TRUE,
   saveinterval = Inf,
-  savefile = NULL
+  checkpoint = NULL
 )
 ```
 
@@ -43,13 +43,17 @@ bootstrapcal(
 
 - saveinterval:
 
-  If finite, save the accumulating result whenever the replication
-  number is a multiple of this value.
+  Number of bootstrap replications between calls to `checkpoint`. The
+  default, `Inf`, disables checkpointing.
 
-- savefile:
+- checkpoint:
 
-  File used when `saveinterval` is finite. Must be supplied explicitly
-  when checkpoint saving is requested.
+  Optional function taking the accumulating result `z` as its sole
+  argument. Its return value is ignored. Must be supplied when
+  `saveinterval` is finite. The default is `NULL`. The function may
+  inspect or store the result; `bootstrapcal()` itself does not write
+  any files. Replications not yet processed have `NA` entries in
+  `bootabund` and `bootbic`.
 
 ## Value
 

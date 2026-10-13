@@ -467,12 +467,14 @@ $`n`$, the correction factors are specified by
 \delta_3=\binom{n}{3}2^{-(n-3)}.
 ```
 The expressions give lower bounds that are asymptotically equivalent to
-the exact counts. Each correction counts models in which exactly one
-interaction of the next lower order is omitted, while all lower-order
-interactions are retained. Any higher-order interactions containing the
-omitted interaction must also be excluded. Further corrections are
-possible by considering two or more omitted interactions, but the
-expressions become more complicated.
+the exact counts. The main term is the exact count of all models
+containing all interactions of the order one below the highest, and then
+any subset of the highest-order interactions. Each correction counts
+models in which exactly one interaction of the next lower order is
+omitted, while all lower-order interactions are retained. Any
+higher-order interactions containing the omitted interaction must also
+be excluded. Further corrections are possible by considering two or more
+omitted interactions, but the expressions become more complicated.
 
 For maximum order two, each of the $`\binom{n}{2}`$ pairwise
 interactions can independently be included or omitted. The number of
