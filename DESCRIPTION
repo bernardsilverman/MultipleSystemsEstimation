@@ -1,6 +1,6 @@
 Package: MultipleSystemsEstimation
 Title: Methods for Multiple Systems Estimation
-Version: 1.2.6
+Version: 1.3.2
 Authors@R: c(
     person(
   given = c("Bernard", "W."),
@@ -26,15 +26,10 @@ Depends: R (>= 4.2.0)
 License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
-Suggests: MCMCpack, knitr, rmarkdown, testthat (>= 3.0.0)
-Imports: lpSolve
+Suggests: knitr, rmarkdown, testthat (>= 3.0.0)
+Imports: lpSolve, MCMCpack
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 NeedsCompilation: no
 Config/roxygen2/version: 8.1.0
-RoxygenNote: 7.2.3
-Packaged: 2026-08-24 10:02:32 UTC; berna
-Author: Bernard W. Silverman [aut, cre],
-  Lax Chan [ctb],
-  Kyle Vincent [ctb]
 Maintainer: Bernard W. Silverman <bernard.silverman@stats.ox.ac.uk>

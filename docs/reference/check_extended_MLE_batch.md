@@ -28,7 +28,8 @@ check_extended_MLE_batch(x, xcap, zmods)
 
 - zmods:
 
-  Character vector of hierarchical-model strings.
+  Named list of encoded effect vectors, or a character vector of
+  hierarchy strings.
 
 ## Value
 

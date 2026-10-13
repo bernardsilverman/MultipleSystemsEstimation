@@ -22,15 +22,16 @@
 #' @param maxorder Maximum order of interaction to include in the
 #' hierarchical models considered. If \code{NULL}, an automatic choice is
 #' made according to the number of lists: 1 for two lists, 2 for three
-#' lists, 3 for four or five lists, and 2 for six lists.
+#' lists, 3 for four or five lists, and 2 for six or more lists.
 #'
 #' @param ntopmodels Number of models, ranked by BIC on the original data,
 #' to retain for bootstrap inference. If \code{NULL}, an automatic choice is
 #' made when \code{nboot > 0}: all available models for two or three lists,
-#' 20 models for four lists, and 100 models for five or six lists. This
+#' 20 models for four lists, and 100 models for five or more lists. This
 #' argument is irrelevant when \code{nboot = 0}, because no model subsetting
-#' is then performed. If \code{ntopmodels} is greater than the total number of
-#' available models, then all models are considered.
+#' is then performed. Masked enlargements are excluded from the initial
+#' enumeration before any model is fitted. If \code{ntopmodels} is greater than the
+#' number of remaining models, then all remaining models are considered.
 #'
 #' @param nboot Non-negative integer giving the number of bootstrap
 #' replications. If \code{nboot = 0}, the best-BIC population estimate and
@@ -44,9 +45,13 @@
 #' endpoints of the BCa confidence intervals are to be evaluated. The default is
 #' \code{c(0.025, 0.1, 0.9, 0.975)}.
 #'
+#' @param maxmodel Maximum number of candidate models to generate. 
+#' If this limit would be exceeded, the maximum interaction order is reduced 
+#' until the complete set of eligible models is within the limit.
+#' 
 #' @param return_details Logical. If \code{TRUE}, include the bootstrap
 #' estimates, BCa acceleration, selected-model BIC, complete original-data BIC
-#' enumeration, and effects estimated at minus infinity. The default is
+#' enumeration, and effects represented at minus infinity. The default is
 #' \code{FALSE}.
 #'
 #' @details
@@ -62,15 +67,16 @@
 #' the 100 models with the smallest BIC values are retained.  Focusing attention
 #' on a subset of all possible models enables considerable computational economies.
 #'
-#' The possible hierarchical models are drawn from an exhaustive model
-#' catalogue within the package. This contains all hierarchical models for up
-#' to five lists, but for six lists is restricted to models with interactions
-#' of order at most 2. There are 32,768 such six-list models. Allowing
-#' interactions of order 3 would increase this to 3,702,013 models, making
-#' exhaustive enumeration and fitting computationally impractical.
+#' Models are generated directly. When their number exceeds maxmodel, the
+#' maximum interaction order is reduced until a complete collection fits.
+#' This may reduce the search to the main-effects-only model. Requested and
+#' actual orders are recorded in details; no console notice is issued.
 #'
-#' For data with more than six lists, the routine stops with an informative
-#' error.
+#' A masked interaction is a higher-order effect whose contribution cannot
+#' change any extended fitted mean because a lower-order effect is
+#' already represented at minus infinity. For example, if AB has zero
+#' sufficient statistic, adding ABC is masked. The two hierarchies can
+#' have the same maximised likelihood but different nominal BIC penalties.
 #'
 #' A small value of \code{nboot}, such as that used in the example, is useful
 #' only for checking that the routine runs. A substantially larger number of
@@ -90,8 +96,10 @@
 #'   explanatory character string.}
 #'   \item{\code{details}}{If \code{return_details = TRUE}, a list containing
 #'   \code{minus_infinity_effects}, \code{bootstrap_estimates},
-#'   \code{bca_acceleration}, \code{BIC}, and \code{bic_results}. The last is
-#'   the complete original-data enumeration, with one row per eligible model
+#'   \code{bca_acceleration}, \code{BIC}, \code{maxorder},
+#'   \code{requested_maxorder}, and \code{bic_results}. The last is
+#'   the original-data enumeration after masked enlargements are excluded,
+#'   with one row per eligible model
 #'   giving its total-population estimate, BIC and maximum interaction order,
 #'   ordered by increasing BIC. Otherwise \code{"not requested"}.}
 #' }
@@ -118,7 +126,8 @@ estimate_population_bic <- function(
     alpha = c(0.025, 0.1, 0.9, 0.975),
     maxorder = NULL,
     ntopmodels = NULL,
-    return_details = FALSE
+    return_details = FALSE,
+    maxmodel = 100000L
 ) {
   call <- match.call()
   nlists <- ncol(zdat) - 1L
@@ -130,59 +139,23 @@ estimate_population_bic <- function(
     stop("`nboot` must be a non-negative integer.", call. = FALSE)
   }
 
-  if (nlists > 6L) {
-    stop(
-      paste0(
-        "The BIC enumeration approach is available only for data with at ",
-        "most six lists. For six lists, only models with interactions of ",
-        "order at most 2 are available."
-      ),
-      call. = FALSE
-    )
-  }
-
   if (is.null(maxorder)) {
-    maxorder <- switch(
-      as.character(nlists),
-      "2" = 1L,
-      "3" = 2L,
-      "4" = 3L,
-      "5" = 3L,
-      "6" = 2L
-    )
+    maxorder <- if (nlists == 2L) 1L else if (nlists <= 3L) 2L else
+      if (nlists <= 5L) 3L else 2L
   }
-
-  if (nlists == 6L && maxorder > 2L) {
-    warning(
-      paste0(
-        "For six-list data, the stored hierarchical-model catalogue contains ",
-        "only models with interactions of order at most 2. ",
-        "`maxorder` has therefore been reduced from ",
-        maxorder, " to 2."
-      ),
-      call. = FALSE,
-      immediate. = TRUE
-    )
-    maxorder <- 2L
-  }
-
-  if (nlists == 6L) {
-    warning(
-      paste0(
-        "Six-list BIC enumeration requires fitting 32,768 hierarchical ",
-        "pairwise-interaction models. This may take a considerable time."
-      ),
-      call. = FALSE,
-      immediate. = TRUE
-    )
-  }
+  requested_maxorder <- maxorder
 
   # Fit all models allowed by maxorder and rank them by BIC.
   bic_results <- assemble_bic(
     zdat,
     maxorder = maxorder,
-    checkexist = TRUE
+    checkexist = TRUE,
+    maxmodel = maxmodel
   )
+
+  maxorder <- bic_results$enumeration_maxorder
+  if (!nrow(bic_results$res))
+    stop("No candidate model has a valid identifiable fit.", call. = FALSE)
 
   # The first row is the best-BIC model.
   popest <- unname(bic_results$res[1L, "abundance"])
@@ -204,6 +177,8 @@ estimate_population_bic <- function(
         bootstrap_estimates = "not generated because nboot = 0",
         bca_acceleration = "not calculated because nboot = 0",
         BIC = BIC,
+        maxorder = maxorder,
+        requested_maxorder = requested_maxorder,
         bic_results = public_bic_results
       )
     } else {
@@ -228,7 +203,8 @@ estimate_population_bic <- function(
       "3" = Inf,
       "4" = 20L,
       "5" = 100L,
-      "6" = 100L
+      "6" = 100L,
+      100L
     )
   }
 
@@ -310,6 +286,8 @@ estimate_population_bic <- function(
       bootstrap_estimates = bootreps,
       bca_acceleration = ahat,
       BIC = BIC,
+      maxorder = maxorder,
+      requested_maxorder = requested_maxorder,
       bic_results = public_bic_results
     )
   } else {

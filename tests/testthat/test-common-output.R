@@ -12,8 +12,12 @@ test_that("likelihood methods use the common outer structure", {
     "details"
   )
 
-  for (result in list(fixed, stepwise, bic)) {
+  expect_named(fixed, append(expected_names, "masked_effects", after = 4L))
+  for (result in list(stepwise, bic)) {
     expect_named(result, expected_names)
+  }
+
+  for (result in list(fixed, stepwise, bic)) {
     expect_named(result$input, c("call", "data"))
     expect_identical(result$input$data, Korea)
     expect_named(result$estimate, c("dark_figure", "total"))
@@ -57,7 +61,9 @@ test_that("return_details exposes only the agreed method-specific objects", {
     fixed$details,
     c(
       "minus_infinity_effects",
+      "masked_effects",
       "bootstrap_estimates",
+      "bootstrap_failed",
       "bca_acceleration",
       "glm_fit"
     )
@@ -77,6 +83,8 @@ test_that("return_details exposes only the agreed method-specific objects", {
       "bootstrap_estimates",
       "bca_acceleration",
       "BIC",
+      "maxorder",
+      "requested_maxorder",
       "bic_results"
     )
   )

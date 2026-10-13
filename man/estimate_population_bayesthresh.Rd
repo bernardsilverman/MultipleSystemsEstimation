@@ -27,7 +27,7 @@ proper prior is used.}
 \item{threshold}{Threshold applied to the absolute ratio of posterior mean
 to posterior standard deviation for interaction parameters.}
 
-\item{maxorder}{Maximum interaction order, either 2 or 3.}
+\item{maxorder}{Maximum interaction order, 2, 3 or 4.}
 
 \item{alpha}{Numeric vector of cumulative probability levels at which
 posterior credible-interval endpoints are to be reported. The default is
@@ -68,7 +68,7 @@ A list with components:
   \item{\code{details}}{If \code{return_details = TRUE}, a list containing
   \code{minus_infinity_effects}, pairwise \code{threshold_statistics},
   applicable \code{eligible_triples}, \code{retained_triples}, and
-  \code{triple_threshold_statistics}, and \code{posterior}, the complete
+  \code{triple_threshold_statistics}, \code{triple_status}, and when order four is requested, \code{eligible_quads}, \code{retained_quads}, \code{quad_threshold_statistics}, and \code{quad_status}, and \code{posterior}, the complete
   MCMC sample of total population size. Otherwise \code{"not requested"}.}
 }
 }
@@ -94,23 +94,34 @@ By default, independent zero-centred normal priors are used for the
 interaction parameters, with variance specified by \code{prior_variance}.
 Setting \code{prior = "improper"} instead uses independent improper flat
 priors for the interaction parameters. In that case, interactions having
-zero sufficient statistic have posterior distribution concentrated at
+zero sufficient statistic are represented at
 minus infinity. Such effects are retained in the model but are accounted
 for separately before carrying out the actual MCMC, as set out in
-Silverman (2020).
+Silverman (2020). For a masked effect, the individual canonical parameter
+is not identifiable: any finite value would give the same fitted
+distribution. This method does not propose masked descendants.
 
-If \code{maxorder = 3}, three-list interactions are also considered.
+If \code{maxorder >= 3}, three-list interactions are also considered.
 Two-list interactions are thresholded first. A three-list interaction is
 eligible for consideration only if all three of its constituent two-list
-interactions have been retained. The model containing the retained
-two-list interactions and all eligible three-list interactions is then
-fitted, the three-list interactions are thresholded in the same way, and
-the resulting hierarchical model is refitted.
+interactions have been retained with finite parameters. With improper
+priors, a retained two-list interaction represented at minus infinity
+does not generate higher-order candidates: its descendants are masked
+and cannot affect the fitted distribution. The model containing retained
+finite and sparse two-list interactions and all eligible three-list
+interactions is fitted; the eligible triples are then thresholded, apart
+from newly minimal sparse effects handled separately at minus infinity.
+
+With \code{maxorder = 4}, four-list interactions are considered after
+thresholding the three-list interactions. All four constituent triples
+must be retained with finite parameters. Eligible four-list interactions
+are fitted and thresholded in the same way. With an improper prior, failure
+of the existence check returns the completed order-three analysis.
 
 When improper priors are used for the interaction parameters, the model
 containing all two-list interactions is checked for identifiability and
 for the Fienberg--Rinaldo existence criterion before thresholding begins.
-If it fails, the procedure stops. With \code{maxorder = 3}, the model
+If it fails, the procedure stops. With \code{maxorder >= 3}, the model
 containing the retained two-list interactions and all eligible three-list
 interactions is also checked. If this model fails the Fienberg--Rinaldo
 criterion, the proposed three-list extension is not carried out and the

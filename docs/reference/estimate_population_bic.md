@@ -22,7 +22,8 @@ estimate_population_bic(
   alpha = c(0.025, 0.1, 0.9, 0.975),
   maxorder = NULL,
   ntopmodels = NULL,
-  return_details = FALSE
+  return_details = FALSE,
+  maxmodel = 100000L
 )
 ```
 
@@ -59,23 +60,31 @@ estimate_population_bic(
   Maximum order of interaction to include in the hierarchical models
   considered. If `NULL`, an automatic choice is made according to the
   number of lists: 1 for two lists, 2 for three lists, 3 for four or
-  five lists, and 2 for six lists.
+  five lists, and 2 for six or more lists.
 
 - ntopmodels:
 
   Number of models, ranked by BIC on the original data, to retain for
   bootstrap inference. If `NULL`, an automatic choice is made when
   `nboot > 0`: all available models for two or three lists, 20 models
-  for four lists, and 100 models for five or six lists. This argument is
-  irrelevant when `nboot = 0`, because no model subsetting is then
-  performed. If `ntopmodels` is greater than the total number of
-  available models, then all models are considered.
+  for four lists, and 100 models for five or more lists. This argument
+  is irrelevant when `nboot = 0`, because no model subsetting is then
+  performed. Masked enlargements are excluded from the initial
+  enumeration before any model is fitted. If `ntopmodels` is greater
+  than the number of remaining models, then all remaining models are
+  considered.
 
 - return_details:
 
   Logical. If `TRUE`, include the bootstrap estimates, BCa acceleration,
   selected-model BIC, complete original-data BIC enumeration, and
-  effects estimated at minus infinity. The default is `FALSE`.
+  effects represented at minus infinity. The default is `FALSE`.
+
+- maxmodel:
+
+  Maximum number of candidate models to generate. If this limit would be
+  exceeded, the maximum interaction order is reduced until the complete
+  set of eligible models is within the limit.
 
 ## Value
 
@@ -108,10 +117,11 @@ A list with components:
 
   If `return_details = TRUE`, a list containing
   `minus_infinity_effects`, `bootstrap_estimates`, `bca_acceleration`,
-  `BIC`, and `bic_results`. The last is the complete original-data
-  enumeration, with one row per eligible model giving its
-  total-population estimate, BIC and maximum interaction order, ordered
-  by increasing BIC. Otherwise `"not requested"`.
+  `BIC`, `maxorder`, `requested_maxorder`, and `bic_results`. The last
+  is the original-data enumeration after masked enlargements are
+  excluded, with one row per eligible model giving its total-population
+  estimate, BIC and maximum interaction order, ordered by increasing
+  BIC. Otherwise `"not requested"`.
 
 ## Details
 
@@ -128,16 +138,16 @@ and six-list data the 100 models with the smallest BIC values are
 retained. Focusing attention on a subset of all possible models enables
 considerable computational economies.
 
-The possible hierarchical models are drawn from an exhaustive model
-catalogue within the package. This contains all hierarchical models for
-up to five lists, but for six lists is restricted to models with
-interactions of order at most 2. There are 32,768 such six-list models.
-Allowing interactions of order 3 would increase this to 3,702,013
-models, making exhaustive enumeration and fitting computationally
-impractical.
+Models are generated directly. When their number exceeds maxmodel, the
+maximum interaction order is reduced until a complete collection fits.
+This may reduce the search to the main-effects-only model. Requested and
+actual orders are recorded in details; no console notice is issued.
 
-For data with more than six lists, the routine stops with an informative
-error.
+A masked interaction is a higher-order effect whose contribution cannot
+change any extended fitted mean because a lower-order effect is already
+represented at minus infinity. For example, if AB has zero sufficient
+statistic, adding ABC is masked. The two hierarchies can have the same
+maximised likelihood but different nominal BIC penalties.
 
 A small value of `nboot`, such as that used in the example, is useful
 only for checking that the routine runs. A substantially larger number

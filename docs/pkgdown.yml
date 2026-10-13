@@ -1,13 +1,14 @@
-pandoc: 3.8.3
+pandoc: '3.10'
 pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   bayesian-threshold: bayesian-threshold.html
-  capture-hierarchy-encoding: capture-hierarchy-encoding.html
-  reproduce-2021: reproduce-2021.html
-  reproduce-2024: reproduce-2024.html
+  bic-model-selection-and-bootstrap-inference: bic-model-selection-and-bootstrap-inference.html
+  captures-and-models: captures-and-models.html
+  reproduce-2024-bic-bootstrap: reproduce-2024-bic-bootstrap.html
+  sparse-data-and-stepwise: sparse-data-and-stepwise.html
   user-guide: user-guide.html
-last_built: 2026-08-25T13:30Z
+last_built: 2026-10-13T10:11Z
 urls:
   reference: https://bernardsilverman.github.io/MultipleSystemsEstimation/reference
   article: https://bernardsilverman.github.io/MultipleSystemsEstimation/articles

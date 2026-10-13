@@ -38,7 +38,8 @@ vary_ntop_bca(
   degree = 1,
   nboot = 1000,
   iseed = 1234,
-  alpha = c(0.025, 0.1, 0.9, 0.975)
+  alpha = c(0.025, 0.1, 0.9, 0.975),
+  maxmodel = 100000L
 )
 ```
 
@@ -82,6 +83,10 @@ vary_ntop_bca(
 
   The cumulative probability levels at which the endpoints of the BCa
   confidence intervals are required.
+
+- maxmodel:
+
+  Maximum number of models stored during enumeration.
 
 ## Value
 

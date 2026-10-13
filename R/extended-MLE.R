@@ -15,7 +15,7 @@
 #'
 #' The Fienberg--Rinaldo condition determines whether the required
 #' extended maximum-likelihood fit exists, accounting for parameters
-#' whose extended-MLE value is minus infinity because the
+#' represented at minus infinity when the
 #' corresponding observed margins are zero.
 #'
 #' The relevant model matrix is also checked for full column rank. Failure
@@ -98,6 +98,7 @@ check_extended_MLE <- function(data, model) {
 
   npar <- nrow(amat)
   nobs <- ncol(amat)
+  if (!npar || !nobs) return(3L)
 
   f.obj <- c(rep(0, nobs), 1)
 
@@ -183,7 +184,8 @@ find_unique_patterns = function(x) {
 #' set of capture histories.
 #' @param xcap Binary matrix defining the capture histories corresponding to
 #' the rows of \code{x}.
-#' @param zmods Character vector of hierarchical-model strings.
+#' @param zmods Named list of encoded effect vectors, or a character vector
+#' of hierarchy strings.
 #'
 #' @return A logical matrix with models in rows and data vectors in columns.
 #' An element is \code{TRUE} when both extended-MLE conditions are satisfied
@@ -205,14 +207,16 @@ check_extended_MLE_batch = function(x, xcap, zmods) {
   nyuniq = dim(yuniq)[2]
   # first convert all models from hierarchy
   nmods = length(zmods)
-  zmodsc = lapply(zmods, convert_from_hierarchy)
+  zmodsc <- if (is.character(zmods)) {
+    setNames(lapply(zmods, convert_from_hierarchy), zmods)
+  } else zmods
   # carry out F-R procedure for each column of yuniq for each model
   # set up results matrix
   frmaty = matrix(
     NA,
     nrow = nmods,
     ncol = nyuniq,
-    dimnames = list(zmods, 1:nyuniq)
+    dimnames = list(names(zmodsc), 1:nyuniq)
   )
   # consider unique data patterns in turn and solve the FR criterion over the various models
 
@@ -224,6 +228,6 @@ check_extended_MLE_batch = function(x, xcap, zmods) {
   }
   # construct the results matrix for the original data
   frmaty = (frmaty == 0)
-  frmat = frmaty[, zu$pointers]
+  frmat = frmaty[, zu$pointers, drop = FALSE]
   return(frmat)
 }

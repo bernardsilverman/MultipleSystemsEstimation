@@ -59,12 +59,11 @@ there are six or more lists.
 For six-list data, the BIC method remains available by specifying
 \code{method = "bic"}, but exhaustive BIC enumeration is computationally
 burdensome. Accordingly, \code{method = "auto"} selects the stepwise
-method for six-list data and issues an informational message.
+method for six-list data.
 
 The estimation method can be selected explicitly using
 \code{method = "bic"}, \code{"stepwise"}, \code{"bayesthresh"}, or
-\code{"fixed"}. The \code{"bayesthresh"} method requires the suggested
-package \pkg{MCMCpack}.
+\code{"fixed"}. 
 
 Through their respective \code{maxorder} arguments,
 the stepwise, BIC and Bayesian-threshold methods can all be restricted to
@@ -94,15 +93,13 @@ estimate_population(
   pthresh = 0.02
 )
 
-# The bayesthresh method requires the suggested MCMCpack package.
-if (requireNamespace("MCMCpack", quietly = TRUE)) {
-  estimate_population(
+# The bayesthresh method
+   estimate_population(
     Western,
     method = "bayesthresh",
     burnin = 100,
     mcmc = 1000
   )
-}
 
 # Pass a fixed-model specification through ...
 estimate_population(

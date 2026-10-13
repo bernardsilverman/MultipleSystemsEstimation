@@ -15,7 +15,7 @@ each resampled data set."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">MultipleSystemsEstimation</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,14 +24,7 @@ each resampled data set."></head><body>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/user-guide.html">A User Guide to MultipleSystemsEstimation</a></li>
-    <li><a class="dropdown-item" href="../articles/bayesian-threshold.html">Bayesian-thresholding multiple systems estimation</a></li>
-    <li><a class="dropdown-item" href="../articles/capture-hierarchy-encoding.html">Working with hierarchical models and capture histories</a></li>
-    <li><a class="dropdown-item" href="../articles/reproduce-2021.html">Reproducing Chan, Silverman and Vincent (2021)</a></li>
-    <li><a class="dropdown-item" href="../articles/reproduce-2024.html">Reproducing Silverman, Chan and Vincent (2024)</a></li>
-  </ul></li>
+<li class="nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
@@ -61,7 +54,7 @@ each resampled data set.</p>
 <span>  <span class="va">zdat</span>,</span>
 <span>  nboot <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  pthresh <span class="op">=</span> <span class="fl">0.02</span>,</span>
-<span>  maxorder <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  maxorder <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>  iseed <span class="op">=</span> <span class="fl">1234</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.025</span>, <span class="fl">0.1</span>, <span class="fl">0.9</span>, <span class="fl">0.975</span><span class="op">)</span>,</span>
 <span>  return_details <span class="op">=</span> <span class="cn">FALSE</span></span>
@@ -97,7 +90,7 @@ procedure. The default is 0.02.</p></dd>
 <dt id="arg-maxorder">maxorder<a class="anchor" aria-label="anchor" href="#arg-maxorder"></a></dt>
 <dd><p>Maximum order of interactions considered for selection.
 An integer of at least 2, or <code>Inf</code> to allow interactions of any order.
-The default is 2.</p></dd>
+The default is <code>Inf</code>.</p></dd>
 
 
 <dt id="arg-iseed">iseed<a class="anchor" aria-label="anchor" href="#arg-iseed"></a></dt>
@@ -115,7 +108,7 @@ argument is used only when
 
 <dt id="arg-return-details">return_details<a class="anchor" aria-label="anchor" href="#arg-return-details"></a></dt>
 <dd><p>Logical. If <code>TRUE</code>, include the bootstrap
-estimates, BCa acceleration, and effects estimated at minus infinity. The
+estimates, BCa acceleration, and effects represented at minus infinity. The
 default is <code>FALSE</code>.</p></dd>
 
 </dl></div>
@@ -150,12 +143,14 @@ default is <code>FALSE</code>.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>By default, the procedure considers two-list interactions only, reproducing
-the method of Chan, Silverman and Vincent (2021). Higher-order interactions
-may be considered by increasing <code>maxorder</code>, or by setting
-<code>maxorder = Inf</code>. An interaction is considered only when all its
-lower-order terms are already present, so every candidate model is
-hierarchical.</p>
+    <p>By default, interactions of any order may be considered.
+Setting <code>maxorder = 2</code> restricts the procedure to the
+pairwise method of Chan, Silverman and Vincent (2021).
+An interaction is considered only when all its
+lower-order terms are already present, so every candidate
+model is hierarchical.
+A masked sparse interaction
+is not eligible for selection, including when <code>pthresh = 1</code>.</p>
 <p>The procedure starts with a main-effects model. At each stage it considers
 eligible interactions not already included and adds the interaction having
 the smallest p-value if that p-value does not exceed <code>pthresh</code>. It

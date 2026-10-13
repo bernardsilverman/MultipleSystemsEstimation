@@ -56,7 +56,8 @@ bcaconfvalues<-function(bootreps, popest, ahat, alpha=c(0.025, 0.05, 0.1, 0.16, 
 #' extended MLE for each model and support pattern before fitting.
 #' @param saveinterval If finite, save the accumulating result whenever the
 #' replication number is a multiple of this value.
-#' @param savefile File used when \code{saveinterval} is finite.
+#' @param savefile File used when \code{saveinterval} is finite. Must be
+#'   supplied explicitly when checkpoint saving is requested.
 #'
 #' @return The input list \code{z}, with the following components added or
 #' replaced:
@@ -82,7 +83,18 @@ bootstrapcal <- function(z,
                            iseed = 1234,
                            checkexist=TRUE,
                            saveinterval = Inf,
-                           savefile = "bootout.Rdata") {
+                           savefile = NULL) {
+  if (!is.numeric(saveinterval) || length(saveinterval) != 1L ||
+      is.na(saveinterval) || saveinterval <= 0 ||
+      (is.finite(saveinterval) && saveinterval != floor(saveinterval))) {
+    stop("saveinterval must be a positive integer or Inf")
+  }
+  if (is.finite(saveinterval)) {
+    if (!is.character(savefile) || length(savefile) != 1L ||
+        is.na(savefile) || !nzchar(savefile)) {
+      stop("supply a nonempty savefile path when saveinterval is finite")
+    }
+  }
   set.seed(iseed)
   zdat = tidy_lists(z$xdata, includezerocounts = TRUE)
   n1 = dim(zdat)[1]
@@ -90,13 +102,14 @@ bootstrapcal <- function(z,
   countsobserved = zdat[, n2]
   z$countsobserved = countsobserved
   nobs = sum(countsobserved)
-  topmodels = dimnames(z$res)[[1]]
+  topmodels <- .mse_result_models(z)
+  z$models <- topmodels
   ntopmodels = length(topmodels)
   z$bootabund = matrix(
     NA,
     nrow = ntopmodels,
     ncol = nboot,
-    dimnames = list(topmodels, 1:nboot)
+    dimnames = list(names(topmodels), 1:nboot)
   )
   z$bootbic = z$bootabund
   # construct all the bootstrap data
@@ -115,7 +128,7 @@ bootstrapcal <- function(z,
     for (imod in (1:ntopmodels)) {
       if (!checkexist || frmat[imod, j]) {
         zfit = fit_hier_model(xdatin = ing_dat,
-                              hiermod = topmodels[imod],
+                              hiermod = topmodels[[imod]],
                               checkid = FALSE)
         z$bootabund[imod, j] = zfit$abundance
         z$bootbic[imod, j] = zfit$bic
@@ -124,7 +137,6 @@ bootstrapcal <- function(z,
     # note that z$bootabund and z$bootbic are initialised to NA, so there is no need to do anything if frmat[imod, j] is FALSE
     if (j %% saveinterval == 0) {
       save(z, file = savefile)
-      cat("File saved for j = ", j, "\n")
     }
   }
   return (z)
@@ -167,13 +179,14 @@ jackknifecal <- function(z, checkexist = TRUE) {
   countsobserved = zdat[, n2]
   nobs = sum(countsobserved)
   jest = (countsobserved > 0)
-  topmodels = dimnames(z$res)[[1]]
+  topmodels <- .mse_result_models(z)
+  z$models <- topmodels
   ntopmodels = length(topmodels)
   jackabund = matrix(
     NA,
     nrow = ntopmodels,
     ncol = n1,
-    dimnames = list(topmodels, 1:n1)
+    dimnames = list(names(topmodels), 1:n1)
   )
   jackbic = jackabund
 
@@ -186,7 +199,7 @@ jackknifecal <- function(z, checkexist = TRUE) {
     # make sure that if a new zero has been introduced the check is carried out
     checkidj = (checkexist & (yy[j]==0))
     for (imod in (1:ntopmodels)) {
-      zfit = fit_hier_model(xdatin = ing_dat, hiermod = topmodels[imod],checkid=checkidj)
+      zfit = fit_hier_model(xdatin = ing_dat, hiermod = topmodels[[imod]],checkid=checkidj)
       jackabund[imod, j] = zfit$abundance
       jackbic[imod, j] = zfit$bic
     }

@@ -1,68 +1,52 @@
-# Reproducing Chan, Silverman and Vincent (2021)
+# Sparse data, stepwise model selection and the bootstrap
 
 ## Introduction
 
-Chan, Silverman and Vincent (2021), *Multiple Systems Estimation for
-Sparse Capture Data: Inferential Challenges When There Are
-Nonoverlapping Lists*, develops methodology for multiple systems
-estimation when the observed capture table is sparse.
+The published paper Chan, Silverman and Vincent (2021) develops
+methodology for multiple systems estimation when the observed capture
+table is sparse.
 
 The paper has two principal themes. First, sparse tables require
 explicit attention to the existence and identifiability of maximum
 likelihood estimates, including the possibility of extended maximum
 likelihood estimates in which some log-linear parameters are equal to
-$`-\infty`$. Second, the paper develops a forward stepwise
-model-selection procedure and uses the BCa bootstrap to obtain
-population-size confidence intervals that allow for the model-selection
-process.
+$`-\infty`$. Second, the paper develops a BCa bootstrap approach that
+takes account of model selection, in the context of a forward stepwise
+model-selection procedure.
 
-The present vignette shows how the principal numerical results and
-procedures in the paper can be reproduced and extended using
-`MultipleSystemsEstimation`.
+This vignette describes the treatment of sparse capture data and the
+stepwise model-selection and BCa inference procedure implemented in
+`MultipleSystemsEstimation`, using examples from the paper to illustrate
+the methods and reproduce selected results.
 
-The package has developed since the original paper was published. Where
-possible, this vignette uses the current public interface. Some compact
-internal functions are retained where they are useful for reproducing
-particular calculations, but the original simulation and supplementary
-routines are not all carried forward into `MultipleSystemsEstimation`.
-For full reproduction of the original computational material, including
-routines specific to the paper, see the now-deprecated `SparseMSE`
-package. Internal functions used below should not be taken as the
-recommended interface for new analyses; see the main user guide for
-current usage.
+The package has developed these approaches further since the original
+paper was published. Where possible, this vignette uses the current
+public interface, and the original simulation and supplementary routines
+are not all carried forward into `MultipleSystemsEstimation`. For full
+reproduction of the original computational material, including routines
+specific to the paper, see the historical `SparseMSE` package (now
+deprecated for current analyses).
 
 ## Sparse capture data and extended maximum likelihood
 
-Suppose there are $`t`$ lists. For a capture history $`\omega`$, write
-$`N_\omega`$ for the number of individuals observed on exactly that
-combination of lists, and
+The general treatment of capture histories, hierarchical log-linear
+models and sparse interactions is given in [Capture histories and
+hierarchical
+models](https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/captures-and-models.md).
+Here we concentrate on the consequences of sparsity for estimation and
+stepwise model selection.
 
-``` math
-N^*_\omega =
-\sum_{\psi\supseteq\omega,\;\psi\ne\emptyset}N_\psi
-```
+Two lists are said to be *nonoverlapping* if no individual appears on
+both. The corresponding pairwise interaction is then minimal sparse, and
+its extended maximum likelihood estimate is minus infinity. The package
+handles such cases explicitly, rather than relying on numerical
+iteration towards increasingly negative values.
 
-for the number observed on all lists in $`\omega`$, whether or not they
-also occur on other lists.
-
-A pair of lists $`i,j`$ is nonoverlapping if $`N^*_{ij}=0`$.
-
-Under the Poisson log-linear model,
-
-\$\$ N\_\omega\sim{\rm Poisson}(\mu\_\omega), \qquad
-\log\mu\_\omega=\sum\_{\theta\subseteq\omega}\alpha\_\theta . \$\$
-
-If a nonoverlapping pair $`i,j`$ is included as an interaction in the
-model, the extended maximum likelihood estimate of $`\alpha_{ij}`$ is
-$`-\infty`$. The package handles this boundary value explicitly rather
-than relying on numerical iteration towards an increasingly negative
-value.
-
-The treatment builds on the general theory of Fienberg and Rinaldo
+This treatment builds on the general theory of Fienberg and Rinaldo
 (2012), specialised to multiple systems estimation in Chan, Silverman
 and Vincent (2021).
 
-## Existence and identifiability: Tables 2 and 3
+### Existence and identifiability
 
 Section 2.6 of the paper distinguishes two problems:
 
@@ -91,105 +75,51 @@ if both conditions are satisfied, 1 for failure of the Fienberg–Rinaldo
 existence condition, 2 for failure of identifiability, and 3 if both
 fail.
 
-The model containing all three two-list interactions is nonidentifiable:
+The model containing all three two-list interactions is nonidentifiable,
+while the model containing only the AB interaction fails the
+Fienberg–Rinaldo existence condition. The model containing AC and BC,
+but not AB, passes both tests.
 
 ``` r
 
-MultipleSystemsEstimation::check_extended_MLE(
-  Artificial_3,
-  "[12,13,23]"
-)
+MultipleSystemsEstimation::check_extended_MLE(Artificial_3, "[12,13,23]")
 #> [1] 2
-```
 
-This returns 2.
-
-The model containing only the AB interaction has no extended maximum
-likelihood estimate:
-
-``` r
-
-MultipleSystemsEstimation::check_extended_MLE( Artificial_3, "[12,3]")
+MultipleSystemsEstimation::check_extended_MLE(Artificial_3, "[12,3]")
 #> [1] 1
-```
 
-This returns 1.
-
-Finally, the model containing AC and BC, but not AB, passes both tests:
-
-``` r
-
-MultipleSystemsEstimation::check_extended_MLE( Artificial_3, "[13,23,1,2]")
+MultipleSystemsEstimation::check_extended_MLE(Artificial_3, "[13,23]")
 #> [1] 0
 ```
-
-This returns 0.
 
 These examples reproduce the three distinct behaviours displayed in
 Table 3 of the paper.
 
-## Checking all possible models
-
-Section 2.7 develops an efficient procedure for determining whether the
-extended maximum likelihood estimate exists for every possible model
-containing main effects and an arbitrary subset of the two-list
-interactions.
-
-The key observation is that, once existence has been established for a
-model, removing an interaction corresponding to an *overlapping* pair
-cannot destroy existence. Consequently, if there are $`M`$
-nonoverlapping pairs, it is sufficient initially to investigate only
-$`2^M`$ top-level models containing all the overlapping pairs.
-
-The original `checkallmodels()` routine implemented this search. It is
-part of the historical computational machinery for Chan, Silverman and
-Vincent (2021) and is retained in the now-deprecated `SparseMSE` package
-rather than in `MultipleSystemsEstimation`.
-
-For the full New Orleans data there are eight lists and 28 possible
-two-list effects, of which 18 correspond to nonoverlapping pairs. Thus
-there are $`2^{28}`$ possible two-list models in total, but the initial
-existence search requires only $`2^{18}`$ linear-programming checks.
-
-The paper reports that neither nonexistence nor nonidentifiability
-arises for any model for these data. The same conclusion is reported for
-the five-list Western data.
-
-For current analyses there is no need to carry out this global search.
-The estimation routines in `MultipleSystemsEstimation` check the
-particular candidate models required by their algorithms using
-[`check_extended_MLE()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/check_extended_MLE.md).
-
 ## The stepwise model-selection procedure
 
-Section 3.2 proposes a forward stepwise procedure.
+Section 3.2 of the paper proposes a forward stepwise procedure.
 
 Starting with the main-effects model, every two-list effect not already
 included is considered. A candidate is discarded if adding it would lead
 to nonexistence or nonidentifiability. Among the remaining candidates,
 the effect with the smallest p-value is selected if that p-value is no
-greater than a specified threshold.
+greater than a specified threshold. The procedure stops when no
+remaining candidate meets this criterion.
 
-The paper ultimately recommends the threshold
-
-``` math
-p=0.02.
-```
+The paper ultimately recommends the threshold `pthresh = 0.02`.
 
 The current high-level implementation is
 [`estimate_population_stepwise()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_stepwise.md).
-In the package, the approach has been extended to allow hierarchical
-models containing interactions up to any specified order, or
-interactions of any order by setting `maxorder = Inf`. For a point
-estimate without bootstrapping:
+The package extends the original pairwise procedure to hierarchical
+models containing higher-order interactions. By default,
+`maxorder = Inf`, allowing interactions of any order to be considered.
+
+For a point estimate without bootstrapping, restricting the model to
+pairwise interactions:
 
 ``` r
 
-fit <- estimate_population_stepwise(
-  Korea,
-  pthresh = 0.02,
-  maxorder = 2
-)
+fit <- estimate_population_stepwise(Korea, pthresh = 0.02, maxorder = 2)
 
 fit$estimate
 #> dark_figure       total 
@@ -212,10 +142,16 @@ fit <- estimate_population(
 
 ### Allowing higher-order interactions
 
-The package also extends the stepwise procedure beyond the pairwise
-models considered in the paper. Setting `maxorder = Inf` allows
-interactions of any order to be considered, subject to the hierarchy and
-extended-MLE checks.
+At each iteration, an interaction is eligible for inclusion only if all
+its lower-order interactions are already included in the model. Masked
+sparse interactions are excluded from consideration. Eligible
+interactions of different orders are considered together, rather than
+completing selection at one order before proceeding to the next. Thus
+the procedure preserves hierarchy throughout.
+
+For further details of hierarchy and masked sparse interactions, see
+[Capture histories and hierarchical
+models](https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/captures-and-models.md).
 
 For the Kosovo data, the pairwise and unrestricted searches give
 different results:
@@ -255,11 +191,7 @@ The pairwise search selects `[12,13,14,23,34]`, whereas the unrestricted
 search selects `[134,12,23]`. The latter model includes interactions 13,
 14 and 34 implicitly, so its additional maximal interaction is the
 three-list term 134. The corresponding population estimates are
-approximately 14,342 and 18,393.
-
-This higher-order extension is available for current analyses; the
-remaining calculations in this vignette use `maxorder = 2` in order to
-reproduce the procedure studied in the 2021 paper.
+approximately 14,342 and 18,393 respectively.
 
 ## Bootstrap inference
 
@@ -272,10 +204,7 @@ for each bootstrap sample.
 
 The bootstrap samples are obtained by multinomial resampling of the
 observed capture histories. The BCa acceleration is calculated using a
-delete-one jackknife, exploiting the fact that only distinct observed
-capture histories need to be considered explicitly.
-
-The current implementation is:
+delete-one jackknife.
 
 ``` r
 
@@ -296,16 +225,16 @@ fit_boot$uncertainty
 #> total       123.3274105 193.82153 358.3031 399.828
 ```
 
-To keep the vignette quick, the bootstrap calculations run below use
-only 100 replications. The resulting BCa confidence intervals are
-included only to demonstrate the operation of the code and may differ
-considerably from the published intervals quoted in the text, which are
-based on 1000 replications. A substantially larger number of bootstrap
-replications should be used for substantive inference. The bootstrap
-code for the full eight-list New Orleans data is displayed but not run
-at all, because even a small value of `nboot` leads to slow computation.
+To keep the vignette quick, the bootstrap calculations within this
+vignette use only 100 replications. A substantially larger number of
+bootstrap replications should be used for substantive inference. The
+resulting BCa confidence intervals are included only to demonstrate the
+operation of the code and may differ considerably from the published
+intervals quoted in the text, which are based on 1000 replications.
 
-## New Orleans: Section 4.1
+## Applications and published results
+
+### New Orleans: Section 4.1
 
 The New Orleans dataset in Section 4.1 contains eight lists.
 
@@ -321,7 +250,7 @@ sum(NewOrl[, ncol(NewOrl)])
 
 There are 28 possible pairs of lists, of which 18 are nonoverlapping.
 
-Applying the stepwise procedure with $`p=0.02`$:
+Applying the stepwise procedure with `pthresh = 0.02`:
 
 ``` r
 
@@ -339,10 +268,10 @@ NewOrl_fit$fitted_model
 ```
 
 The paper reports that the selected model contains the two-list effect
-DE and gives a total population estimate of **1184**.
+DE and gives a total population estimate of 1184.
 
 The published BCa 95% confidence interval, based on 1000 bootstrap
-replications, is **(717, 1657)**.
+replications, is (717, 1657).
 
 The corresponding calculation with the current package is:
 
@@ -358,11 +287,16 @@ NewOrl_boot <- estimate_population_stepwise(
 NewOrl_boot$uncertainty
 ```
 
-The paper also considers the main-effects-only model, obtained when the
-threshold is 0.01 or smaller. It reports a point estimate of **997** and
-a 95% confidence interval of **(644, 1618)**.
+The bootstrap code for the full eight-list New Orleans data is displayed
+but not run at all, because even a small value of `nboot` leads to slow
+computation.
 
-This can be examined by setting the threshold to zero:
+The paper also considers the main-effects-only model, obtained when the
+threshold is 0.01 or smaller. It reports a point estimate of 997 and a
+95% confidence interval of (644, 1618).
+
+Setting `pthresh = 0` ensures that no interactions are selected, giving
+the main-effects model. This can be examined as follows:
 
 ``` r
 
@@ -377,7 +311,7 @@ NewOrl_main$estimate
 NewOrl_main$uncertainty
 ```
 
-## Five-list New Orleans data
+### Five-list New Orleans data
 
 Because several individual lists in the New Orleans data are very small,
 the paper also combines the four smallest lists to obtain a five-list
@@ -401,8 +335,8 @@ NewOrl5_fit$fitted_model
 ```
 
 The paper reports that no two-list parameter is significant even at the
-5% level. The point estimate is **1034**, with BCa 95% confidence
-interval **(589, 1703)**.
+5% level. The point estimate is 1034, with BCa 95% confidence interval
+(589, 1703).
 
 The bootstrap calculation is:
 
@@ -421,7 +355,7 @@ NewOrl5_boot$uncertainty
 #> total       601.0089 601.0089 1295.799 1836.069
 ```
 
-## Western site data: Section 4.2
+### Western site data: Section 4.2
 
 The Western site data contain five lists.
 
@@ -443,9 +377,9 @@ Western_fit$fitted_model
 ```
 
 The paper reports that the selected model contains the two-list effect
-AE and that the resulting point estimate is **2483**.
+AE and that the resulting point estimate is 2483.
 
-The reported BCa 95% confidence interval is **(1293, 3670)**.
+The reported BCa 95% confidence interval is (1293, 3670).
 
 It can be recalculated using:
 
@@ -464,7 +398,9 @@ Western_boot$uncertainty
 #> total       1550.954 1550.954 2869.327 3409.25
 ```
 
-## Comparison with the BIC approach: Section 3.4
+## Simulation studies
+
+### Comparison with the BIC approach: Section 3.4
 
 Section 3.4 compares the stepwise/BCa procedure with the BIC approach
 then implemented in `Rcapture`.
@@ -488,20 +424,27 @@ retained in the now-deprecated `SparseMSE` package rather than in
 used for full reproduction of the computational and supplementary
 material associated with the 2021 paper.
 
-The paper reports population-scale root mean square errors of **3057**
-for the stepwise method and **5834** for BIC. On the logarithmic scale
-the corresponding values are **0.19** and **0.34**.
+The paper reports population-scale root mean square errors of 3057 for
+the stepwise method and 5834 for BIC. On the logarithmic scale the
+corresponding values are 0.19 and 0.34.
 
 The paper also reports that the nominal 95% BCa interval covered the
-true value in **90%** of the 500 simulations, compared with **61.4%**
-for the `Rcapture` method. For nominal 80% intervals, the corresponding
-coverage rates were approximately **70%** and **42.8%**.
+true value in 90% of the 500 simulations, compared with 61.4% for the
+`Rcapture` method. For nominal 80% intervals, the corresponding coverage
+rates were approximately 70% and 42.8%.
+
+The BIC procedure used in this comparison was that implemented in
+`Rcapture` at the time of the original investigation. It should not be
+confused with the BIC model-selection and bootstrap procedure
+implemented in `MultipleSystemsEstimation`, which incorporates
+subsequent developments; see [BIC model selection and bootstrap
+inference](https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/bic-model-selection-and-bootstrap-inference.md).
 
 The purpose of this simulation was not to establish universal
 superiority of one procedure, but to demonstrate the importance of
 allowing model-selection uncertainty to enter the inference.
 
-## Choosing the threshold: Section 4.3
+### Choosing the threshold: Section 4.3
 
 The paper uses a larger simulation study to investigate the choice of
 the stepwise threshold.
@@ -523,27 +466,15 @@ For each dataset four generating models are considered:
 This gives 28 simulation scenarios.
 
 For each scenario the paper generates 1000 datasets and obtains
-estimates using thresholds
-
-``` math
-0,\ 0.001,\ 0.002,\ 0.005,\ 0.01,\ 0.02,\ 0.05,\ 0.1,\ 1,
-```
-
-where zero corresponds to the main-effects model and one to the full
-two-list model.
+estimates using thresholds 0, 0.001, 0.002, 0.005, 0.01, 0.02, 0.05,
+0.1, 1, where zero corresponds to the main-effects model and one to the
+full two-list model.
 
 Accuracy is assessed using the mean squared error of the logarithm of
 the estimated dark figure. Because the overall level of mean squared
 error differs substantially between scenarios, the paper combines the
 results by averaging the logarithm of the mean squared error across the
-28 scenarios.
-
-The minimum overall score occurs at
-
-``` math
-\boxed{p=0.02},
-```
-
+28 scenarios. The minimum overall score occurs at `pthresh = 0.02`,
 which motivates the default threshold used by the package.
 
 The full threshold simulation is deliberately not run as part of the
@@ -559,40 +490,15 @@ reproducibility of the paper.
 ## Relation to the current package
 
 The original `SparseMSE` package accompanied Chan, Silverman and Vincent
-(2021). It is now deprecated for current analysis, but is retained as
-the historical reproducibility package for the original computational
-and supplementary material. The present `MultipleSystemsEstimation`
-package retains the methodology while providing a more unified
-interface.
+(2021). It is now deprecated for current analysis, but is retained for
+historical reproducibility. The present `MultipleSystemsEstimation`
+package provides a unified interface to this and other estimation
+methods.
 
-For a new analysis using the 2021 method, the recommended call is now
-
-``` r
-
-fit_current <- estimate_population(
-  Korea,
-  method = "stepwise",
-  maxorder = 2
-)
-
-fit_current$estimate
-#> dark_figure       total 
-#>    145.7778    268.7778
-fit_current$fitted_model
-#> [1] "[12,3]"
-```
-
-or, equivalently, by calling
-`estimate_population_stepwise(Korea, maxorder = 2)` directly.
-
-The default package interface is
-`estimate_population(..., method = "auto")`; this uses the BIC-based
-approach for up to five lists and the stepwise approach for six or more.
-The main user guide discusses the current choice of methods in detail.
-
-The purpose of the present vignette is different: it records the
-connection between the current implementation and the calculations in
-the 2021 paper.
+The default interface is `estimate_population(..., method = "auto")`,
+which uses the BIC-based approach for up to five lists and the stepwise
+approach for six or more. The main user guide discusses the choice of
+methods in more detail.
 
 ## References
 
@@ -600,7 +506,7 @@ Chan, L., Silverman, B. W. and Vincent, K. (2021). *Multiple Systems
 Estimation for Sparse Capture Data: Inferential Challenges When There
 Are Nonoverlapping Lists*. *Journal of the American Statistical
 Association*, **116**(535), 1297–1306.
-<doi:10.1080/01621459.2019.1708748>.
+[doi:10.1080/01621459.2019.1708748.](https://doi.org/10.1080/01621459.2019.1708748).
 
 DiCiccio, T. J. and Efron, B. (1996). *Bootstrap Confidence Intervals*.
 *Statistical Science*, **11**(3), 189–228.

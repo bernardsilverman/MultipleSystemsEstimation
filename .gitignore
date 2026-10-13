@@ -1,6 +1,4 @@
-inst/doc
-.Rproj.user
-.RData
-.Rhistory
 /doc/
 /Meta/
+.Rproj.user
+.Rhistory

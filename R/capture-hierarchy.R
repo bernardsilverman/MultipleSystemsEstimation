@@ -56,7 +56,7 @@ parent_captures <- function(k) {
   nbits <- ceiling(log2(k))
   z <- decode_capture(k, nbits)
 
-  k - 2^(which(z) - 1L)
+  k - 2^(rev(which(z)) - 1L)
 }
 
 #' Find the children of an encoded capture history
@@ -117,6 +117,19 @@ ancestors <- function(k) {
   sort(result)
 }
 
+.mse_masked_effects <- function(effects, nstar) {
+  sparse <- effects[nstar[effects] == 0]
+  sparse[vapply(
+    sparse,
+    function(effect) any(parent_captures(effect) %in% sparse),
+    logical(1)
+  )]
+}
+
+.mse_has_masked_interaction <- function(model, nstar) {
+  length(.mse_masked_effects(convert_from_hierarchy(model), nstar)) > 0L
+}
+
 #' Find descendants of an encoded capture history
 #'
 #' Finds all encoded histories that contain the supplied history.
@@ -134,18 +147,26 @@ ancestors <- function(k) {
 #'
 #'
 #' @keywords internal
-descendants = function(k,nlists, omitk = FALSE) {
-  if (length(k)==0) return(numeric(0))
-  z = decode_capture(k, nlists)
-  jz = sum(z)
-  kdesc = as.vector(k)
-  if (omitk) kd1 = numeric(0) else kd1 = kdesc
-  for (i in ((jz+1):nlists)) {
-    kd2 = NULL
-    for (j in (1:length(kdesc))) kd2 = c(kd2, child_captures(kdesc[j], nlists))
-    kdesc = unique(kd2)
-    kd1 = c(kd1, kdesc) }
-  return(sort(kd1))
+descendants <- function(k, nlists, omitk = FALSE) {
+  if (length(k) == 0L) return(numeric(0))
+  
+  single_descendants <- function(ki) {
+    z <- decode_capture(ki, nlists)
+    weights <- 2^(which(!z) - 1L)
+    
+    additions <- 0
+    for (w in weights)
+      additions <- c(additions, additions + w)
+    
+    if (omitk) additions <- additions[additions != 0]
+    
+    ki + additions
+  }
+  
+  sort(unique(unlist(
+    lapply(k, single_descendants),
+    use.names = FALSE
+  )))
 }
 
 #' Convert a hierarchy string to encoded parameters

@@ -1,10 +1,11 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/404.html</loc></url>
 <url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/bayesian-threshold.html</loc></url>
-<url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/capture-hierarchy-encoding.html</loc></url>
+<url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/bic-model-selection-and-bootstrap-inference.html</loc></url>
+<url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/captures-and-models.html</loc></url>
 <url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/index.html</loc></url>
-<url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/reproduce-2021.html</loc></url>
-<url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/reproduce-2024.html</loc></url>
+<url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/reproduce-2024-bic-bootstrap.html</loc></url>
+<url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/sparse-data-and-stepwise.html</loc></url>
 <url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/user-guide.html</loc></url>
 <url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/authors.html</loc></url>
 <url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/index.html</loc></url>
@@ -34,7 +35,6 @@
 <url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/find_unique_patterns.html</loc></url>
 <url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/fit_hier_model.html</loc></url>
 <url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/get_hierarchical_models.html</loc></url>
-<url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/hiermodels.html</loc></url>
 <url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/index.html</loc></url>
 <url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/ingest_data.html</loc></url>
 <url><loc>https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/jackknifecal.html</loc></url>

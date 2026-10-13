@@ -42,6 +42,10 @@ components are:
 
   The original-data model results.
 
+- `models`:
+
+  Encoded models subsetted in the same order.
+
 - `xdata`:
 
   The original capture history data.

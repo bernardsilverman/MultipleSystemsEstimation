@@ -22,23 +22,34 @@
 #' interaction parameters, with variance specified by \code{prior_variance}.
 #' Setting \code{prior = "improper"} instead uses independent improper flat
 #' priors for the interaction parameters. In that case, interactions having
-#' zero sufficient statistic have posterior distribution concentrated at
+#' zero sufficient statistic are represented at
 #' minus infinity. Such effects are retained in the model but are accounted
 #' for separately before carrying out the actual MCMC, as set out in
-#' Silverman (2020).
+#' Silverman (2020). For a masked effect, the individual canonical parameter
+#' is not identifiable: any finite value would give the same fitted
+#' distribution. This method does not propose masked descendants.
 #'
-#' If \code{maxorder = 3}, three-list interactions are also considered.
+#' If \code{maxorder >= 3}, three-list interactions are also considered.
 #' Two-list interactions are thresholded first. A three-list interaction is
 #' eligible for consideration only if all three of its constituent two-list
-#' interactions have been retained. The model containing the retained
-#' two-list interactions and all eligible three-list interactions is then
-#' fitted, the three-list interactions are thresholded in the same way, and
-#' the resulting hierarchical model is refitted.
+#' interactions have been retained with finite parameters. With improper
+#' priors, a retained two-list interaction represented at minus infinity
+#' does not generate higher-order candidates: its descendants are masked
+#' and cannot affect the fitted distribution. The model containing retained
+#' finite and sparse two-list interactions and all eligible three-list
+#' interactions is fitted; the eligible triples are then thresholded, apart
+#' from newly minimal sparse effects handled separately at minus infinity.
+#'
+#' With \code{maxorder = 4}, four-list interactions are considered after
+#' thresholding the three-list interactions. All four constituent triples
+#' must be retained with finite parameters. Eligible four-list interactions
+#' are fitted and thresholded in the same way. With an improper prior, failure
+#' of the existence check returns the completed order-three analysis.
 #'
 #' When improper priors are used for the interaction parameters, the model
 #' containing all two-list interactions is checked for identifiability and
 #' for the Fienberg--Rinaldo existence criterion before thresholding begins.
-#' If it fails, the procedure stops. With \code{maxorder = 3}, the model
+#' If it fails, the procedure stops. With \code{maxorder >= 3}, the model
 #' containing the retained two-list interactions and all eligible three-list
 #' interactions is also checked. If this model fails the Fienberg--Rinaldo
 #' criterion, the proposed three-list extension is not carried out and the
@@ -68,7 +79,7 @@
 #'   proper prior is used.
 #' @param threshold Threshold applied to the absolute ratio of posterior mean
 #'   to posterior standard deviation for interaction parameters.
-#' @param maxorder Maximum interaction order, either 2 or 3.
+#' @param maxorder Maximum interaction order, 2, 3 or 4.
 #' @param alpha Numeric vector of cumulative probability levels at which
 #'   posterior credible-interval endpoints are to be reported. The default is
 #'   \code{c(0.025, 0.1, 0.9, 0.975)}. The posterior median used for the point
@@ -105,7 +116,7 @@
 #'   \item{\code{details}}{If \code{return_details = TRUE}, a list containing
 #'   \code{minus_infinity_effects}, pairwise \code{threshold_statistics},
 #'   applicable \code{eligible_triples}, \code{retained_triples}, and
-#'   \code{triple_threshold_statistics}, and \code{posterior}, the complete
+#'   \code{triple_threshold_statistics}, \code{triple_status}, and when order four is requested, \code{eligible_quads}, \code{retained_quads}, \code{quad_threshold_statistics}, and \code{quad_status}, and \code{posterior}, the complete
 #'   MCMC sample of total population size. Otherwise \code{"not requested"}.}
 #' }
 #'
@@ -157,8 +168,9 @@ estimate_population_bayesthresh <- function(
 
   prior <- match.arg(prior, c("proper", "improper"))
 
-    if (!maxorder %in% c(2, 3))
-        stop("maxorder must be either 2 or 3.")
+    if (length(maxorder) != 1L || is.na(maxorder) ||
+        !maxorder %in% c(2, 3, 4))
+        stop("maxorder must be 2, 3 or 4.")
 
     zfull <- tidy_lists(
         zdat,
@@ -167,8 +179,10 @@ estimate_population_bayesthresh <- function(
 
     nlists <- ncol(zfull) - 1
 
-    if (maxorder == 3 && nlists < 3)
+    if (maxorder >= 3 && nlists < 3)
         stop("Three-list interactions require at least three lists.")
+    if (maxorder == 4 && nlists < 4)
+        stop("Four-list interactions require at least four lists.")
 
     if (prior == "improper")
       .bayesthresh_check_pair_start(zfull)
@@ -206,10 +220,10 @@ estimate_population_bayesthresh <- function(
     triples <- character(0)
     removed_triples <- character(0)
 
-    # For maxorder = 3, try the three-way extension before doing the
+    # For maxorder at least 3, try the three-way extension before doing the
     # retained-pairwise refit.  This avoids an unnecessary MCMC fit when
     # the three-way extension is successfully carried through.
-    if (maxorder == 3) {
+    if (maxorder >= 3) {
         triple_candidates <- .bayesthresh_eligible_triples(
             pairs,
             nlists
@@ -219,7 +233,7 @@ estimate_population_bayesthresh <- function(
     triple_start_ok <- TRUE
 
     if (prior == "improper" &&
-        maxorder == 3 &&
+        maxorder >= 3 &&
         length(triple_candidates)) {
 
       triple_start_ok <- .bayesthresh_check_triple_start(
@@ -227,19 +241,10 @@ estimate_population_bayesthresh <- function(
         c(pairs, triple_candidates)
       )
 
-      if (!triple_start_ok) {
-        warning(
-          paste(
-            "The maximal three-list extension fails the",
-            "Fienberg-Rinaldo existence criterion;",
-            "reverting to maxorder = 2."
-          ),
-          call. = FALSE
-        )
-      }
     }
 
-    if (maxorder == 3 && length(triple_candidates) && triple_start_ok) {
+    zquadbase <- NULL
+    if (maxorder >= 3 && length(triple_candidates) && triple_start_ok) {
         fit3 <- .bayesthresh_fit(
             zrefit,
             c(pairs, triple_candidates),
@@ -261,6 +266,7 @@ estimate_population_bayesthresh <- function(
         )
 
         triples <- triple_threshold$retained
+        zquadbase <- fit3$data
 
         final_fit <- .bayesthresh_fit(
             fit3$data,
@@ -284,6 +290,38 @@ estimate_population_bayesthresh <- function(
         )
     }
 
+    quad_candidates <- character(0)
+    quad_threshold <- NULL
+    quads <- character(0)
+    removed_quads <- character(0)
+    quad_start_ok <- TRUE
+    if (maxorder == 4 && length(triples)) {
+        quad_candidates <- .bayesthresh_eligible_quads(triples, nlists)
+        if (prior == "improper" && length(quad_candidates)) {
+            quad_start_ok <- .bayesthresh_check_triple_start(
+                zfull, c(pairs, triples, quad_candidates)
+            )
+        }
+        if (length(quad_candidates) && quad_start_ok) {
+            fit4 <- .bayesthresh_fit(
+                zquadbase, c(pairs, triples, quad_candidates),
+                prior, prior_variance,
+                prune_improper = (prior == "improper"), ...
+            )
+            removed_quads <- fit4$removed[
+                .bayesthresh_order(fit4$removed) == 4
+            ]
+            quad_threshold <- .bayesthresh_threshold(
+                fit4$fit, fit4$effects, 4, threshold
+            )
+            quads <- quad_threshold$retained
+            final_fit <- .bayesthresh_fit(
+                fit4$data, c(pairs, triples, quads),
+                prior, prior_variance, prune_improper = FALSE, ...
+            )
+        }
+    }
+
     population <- .bayesthresh_population(
         final_fit$fit,
         zfull,
@@ -302,9 +340,9 @@ estimate_population_bayesthresh <- function(
     ]
     names(uncertainty_total) <- as.character(alpha)
 
-    minus_infinity <- unique(c(removed_pairs, removed_triples))
+    minus_infinity <- unique(c(removed_pairs, removed_triples, removed_quads))
     fitted_model <- .bayesthresh_hierarchy(
-      c(pairs, triples, minus_infinity),
+      c(pairs, triples, quads, minus_infinity),
       nlists
     )
 
@@ -318,13 +356,22 @@ estimate_population_bayesthresh <- function(
           pair_threshold$ratios,
           zfull
         ),
-        posterior = population$total_population
+        posterior = population$total_population,
+        triple_status = if (maxorder < 3) {
+          "not requested"
+        } else if (!triple_start_ok) {
+          "Fienberg-Rinaldo check failed; fitted pairwise model"
+        } else if (!length(triple_candidates)) {
+          "no eligible triples"
+        } else {
+          "three-list extension fitted"
+        }
       )
     } else {
       "not requested"
     }
 
-    if (maxorder == 3) {
+    if (maxorder >= 3) {
         if (return_details) details$eligible_triples <-
             .bayesthresh_pretty(
                 triple_candidates,
@@ -343,6 +390,25 @@ estimate_population_bayesthresh <- function(
                 triple_threshold$ratios,
                 zfull
             )
+    }
+
+    if (maxorder == 4 && return_details) {
+        details$eligible_quads <- .bayesthresh_pretty(quad_candidates, zfull)
+        details$retained_quads <- .bayesthresh_pretty(quads, zfull)
+        details$quad_threshold_statistics <- if (is.null(quad_threshold)) {
+            numeric(0)
+        } else {
+            .bayesthresh_pretty_named(quad_threshold$ratios, zfull)
+        }
+        details$quad_status <- if (!triple_start_ok) {
+            "three-list extension unavailable; fitted pairwise model"
+        } else if (!length(quad_candidates)) {
+            "no eligible four-list interactions"
+        } else if (!quad_start_ok) {
+            "Fienberg-Rinaldo check failed; fitted order-three model"
+        } else {
+            "four-list extension fitted"
+        }
     }
 
     list(

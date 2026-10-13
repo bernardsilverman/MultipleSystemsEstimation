@@ -10,7 +10,7 @@ bootstrapcal(
   iseed = 1234,
   checkexist = TRUE,
   saveinterval = Inf,
-  savefile = "bootout.Rdata"
+  savefile = NULL
 )
 }
 \arguments{
@@ -26,7 +26,8 @@ extended MLE for each model and support pattern before fitting.}
 \item{saveinterval}{If finite, save the accumulating result whenever the
 replication number is a multiple of this value.}
 
-\item{savefile}{File used when \code{saveinterval} is finite.}
+\item{savefile}{File used when \code{saveinterval} is finite. Must be
+supplied explicitly when checkpoint saving is requested.}
 }
 \value{
 The input list \code{z}, with the following components added or

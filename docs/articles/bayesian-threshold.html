@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">MultipleSystemsEstimation</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -30,16 +30,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="active nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/user-guide.html">A User Guide to MultipleSystemsEstimation</a></li>
-    <li><a class="dropdown-item" href="../articles/bayesian-threshold.html">Bayesian-thresholding multiple systems estimation</a></li>
-    <li><a class="dropdown-item" href="../articles/capture-hierarchy-encoding.html">Working with hierarchical models and capture histories</a></li>
-    <li><a class="dropdown-item" href="../articles/reproduce-2021.html">Reproducing Chan, Silverman and Vincent (2021)</a></li>
-    <li><a class="dropdown-item" href="../articles/reproduce-2024.html">Reproducing Silverman, Chan and Vincent (2024)</a></li>
-  </ul>
-</li>
+<li class="active nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -59,8 +50,6 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Bayesian-thresholding multiple systems estimation</h1>
-                        <h4 data-toc-skip class="author">Bernard W.
-Silverman</h4>
             
       
 
@@ -76,14 +65,14 @@ Silverman</h4>
 systems estimation developed in Silverman (2020), together with its
 implementation in <code><a href="../reference/estimate_population_bayesthresh.html">estimate_population_bayesthresh()</a></code>.</p>
 <p>Only the aspects specific to Bayesian thresholding are considered
-here. General background on multiple systems estimation and Poisson
-log-linear models is given elsewhere in the
-<code>MultipleSystemsEstimation</code> package.</p>
+here. General background on capture histories, hierarchical log-linear
+models and sparse interactions is given in the package vignette <a href="captures-and-models.html">Capture histories and hierarchical
+models</a>.</p>
 <p>The basic Bayesian-threshold procedure described here follows
-Silverman (2020). The extension to three-list interactions, and the
-appropriate use of the Fienberg-Rinaldo existence check within this
-Bayesian-threshold implementation, were not part of the original paper
-and are additions in the present implementation.</p>
+Silverman (2020). The hierarchical extensions to three- and four-list
+interactions, and the Fienberg-Rinaldo existence checks used with
+improper interaction priors, are additions in the present
+implementation; they were not part of the original paper.</p>
 </div>
 <div class="section level2">
 <h2 id="the-bayesian-threshold-procedure">The Bayesian-threshold procedure<a class="anchor" aria-label="anchor" href="#the-bayesian-threshold-procedure"></a>
@@ -95,8 +84,13 @@ and are additions in the present implementation.</p>
 the log-linear model can have a substantial effect on the estimate of
 the unobserved population. Bayesian thresholding provides a way of
 selecting these interactions using a posterior distribution rather than
-repeated significance testing or some other model selection
-approach.</p>
+repeated significance testing or an information criterion.</p>
+<p>The thresholding approach is a posterior-based method of model
+selection, rather than full Bayesian model averaging. Once the
+interactions have been selected, subsequent posterior inference is
+Bayesian, conditional on the selected model. It can be understood as an
+approximation to selection under a mixture prior with a point mass at
+zero and a symmetric continuous component; see Silverman (2020).</p>
 <p>Initially, consider models which only have main effects and two-list
 interactions. The approach begins with a model containing all possible
 interactions, fits that model using MCMC, and then removes interactions
@@ -122,40 +116,43 @@ interactions.</p>
 <p>The default threshold is 2. Thus the procedure retains interactions
 for which the absolute posterior mean is at least two posterior standard
 deviations from zero.</p>
-<p>The method can also be extended to allow three-list interactions
-while preserving the hierarchical structure of the log-linear model. The
+<p>The method can also be extended to higher-order interactions. The
 two-list interactions are thresholded first, as described above. A
-three-list interaction is then eligible for consideration only if all
-three of its constituent two-list interactions have been retained. The
-model containing the retained two-list interactions together with all
-eligible three-list interactions is fitted, and the three-list
+higher-order interaction is eligible for consideration only if all its
+constituent lower-order interactions have been included. With improper
+interaction priors it must, in addition, be non-masked: masked sparse
+interactions are never eligible for inclusion. For the definitions of
+minimal sparse and masked sparse interactions, see <a href="captures-and-models.html">Capture histories and hierarchical
+models</a>.</p>
+<p>The model containing the retained two-list interactions together with
+all eligible three-list interactions is fitted, and the three-list
 interactions are thresholded using the same posterior mean to posterior
 standard deviation ratio. The resulting hierarchical model is then
 fitted once more to obtain the final population estimate and selected
 posterior quantiles.</p>
-<p>For example, a three-list interaction
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>j</mi><mi>k</mi></mrow><annotation encoding="application/x-tex">ijk</annotation></semantics></math>
-is eligible for inclusion only if the interactions
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>j</mi></mrow><annotation encoding="application/x-tex">ij</annotation></semantics></math>,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>k</mi></mrow><annotation encoding="application/x-tex">ik</annotation></semantics></math>,
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mi>k</mi></mrow><annotation encoding="application/x-tex">jk</annotation></semantics></math>
-have all been retained at the first stage. At the second stage, only the
-eligible three-list terms are thresholded; the two-list terms that
-survived the initial thresholding are kept regardless of their new
-posterior means. This ensures that the selected model remains
-hierarchical.</p>
+<p>Note that all two-list interactions previously retained remain in the
+model, regardless of their threshold statistics in the subsequent fit.
+This ensures that the selected model remains hierarchical.</p>
+<p>With <code>maxorder = 4</code>, the process is repeated after the
+three-list stage. A four-list interaction ijkl is eligible only if all
+four constituent triples, ijk, ijl, ikl, and jkl, have been retained
+and, with improper priors, the four-list interaction is non-masked. The
+model containing all eligible four-list interactions is fitted, and
+these interactions are thresholded as before. The selected hierarchical
+model is then refitted to obtain the population posterior. If no
+four-list interactions are eligible, the completed lower-order fit
+supplies the result.</p>
 </div>
 <div class="section level3">
 <h3 id="mcmc-estimation">MCMC estimation<a class="anchor" aria-label="anchor" href="#mcmc-estimation"></a>
 </h3>
-<p>Posterior sampling is carried out using
-<code><a href="https://rdrr.io/pkg/MCMCpack/man/MCMCpoisson.html" class="external-link">MCMCpack::MCMCpoisson()</a></code>, which applies Markov chain Monte
-Carlo to the Poisson log-linear model. The MCMC run produces posterior
-draws for the intercept, the main effects, and the interaction
-parameters in the model. These draws are used both for the thresholding
-step described above and, after the selected model has been refitted,
-for inference about population size.</p>
+<p>Posterior sampling is carried out using <code>MCMCpoisson()</code>,
+which applies Markov chain Monte Carlo to the Poisson log-linear model.
+The MCMC run produces posterior draws for the intercept, the main
+effects, and the interaction parameters in the model. These draws are
+used both for the thresholding step described above and, after the
+selected model has been refitted, for inference about population
+size.</p>
 <p>In the log-linear formulation, the intercept determines the fitted
 mean of the unobserved cell, corresponding to individuals appearing on
 none of the lists. For each posterior draw of the intercept
@@ -170,18 +167,27 @@ posterior medians of the dark figure and total population, together with
 posterior quantiles at the probabilities supplied through
 <code>alpha</code>. The full set of posterior draws can also be returned
 if required.</p>
-<p>The thresholding step approximates a Bayesian model with a mixed
-prior for the parameters of an atom of probability at zero and some
-other symmetric density, hence modelling a parsimonious interaction
-structure; see Silverman (2020) for further discussion.</p>
+</div>
+<div class="section level3">
+<h3 id="mcmc-settings-and-posterior-output">MCMC settings and posterior output<a class="anchor" aria-label="anchor" href="#mcmc-settings-and-posterior-output"></a>
+</h3>
+<p>The principal MCMC settings can be controlled through arguments
+passed to <code>MCMCpoisson()</code>, including <code>burnin</code>,
+<code>mcmc</code>, <code>thin</code>, <code>tune</code>, and
+<code>seed</code>. The defaults are intended for routine use.
+<code>MCMCpoisson()</code> uses a reproducible default seed when
+<code>seed</code> is not specified.</p>
+<p>By default, the full posterior sample of total population size is not
+returned. It can be retained as <code>details$posterior</code>, when
+required, by setting <code>return_details = TRUE</code>.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="a-basic-analysis">A basic analysis<a class="anchor" aria-label="anchor" href="#a-basic-analysis"></a>
 </h2>
 <p>The Kosovo data provide a useful illustration because allowing
-three-list interactions leads to a genuinely different selected
-model.</p>
+three-list interactions leads to a genuinely different selected model
+and a materially different population estimate.</p>
 <p>We first fit the Bayesian-threshold procedure using only two-list
 interactions.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
@@ -199,11 +205,6 @@ interactions.</p>
 <span><span class="co">#&gt;                 0.025   0.975</span></span>
 <span><span class="co">#&gt; dark_figure  7836.223 11989.4</span></span>
 <span><span class="co">#&gt; total       12236.223 16389.4</span></span>
-<span><span class="va">fit_bayes</span><span class="op">$</span><span class="va">fitted_model</span></span>
-<span><span class="co">#&gt; [1] "[12,13,14,23,34]"</span></span>
-<span><span class="va">fit_bayes</span><span class="op">$</span><span class="va">estimate</span></span>
-<span><span class="co">#&gt; dark_figure       total </span></span>
-<span><span class="co">#&gt;    9571.481   13971.481</span></span>
 <span><span class="va">fit_bayes</span><span class="op">$</span><span class="va">fitted_model</span></span>
 <span><span class="co">#&gt; [1] "[12,13,14,23,34]"</span></span>
 <span><span class="va">fit_bayes</span><span class="op">$</span><span class="va">details</span><span class="op">$</span><span class="va">threshold_statistics</span></span>
@@ -230,10 +231,10 @@ thresholding of eligible three-list interactions.</p>
 <span><span class="va">fit_bayes3</span><span class="op">$</span><span class="va">estimate</span></span>
 <span><span class="co">#&gt; dark_figure       total </span></span>
 <span><span class="co">#&gt;    5913.857   10313.857</span></span>
-<span><span class="va">fit_bayes</span><span class="op">$</span><span class="va">uncertainty</span></span>
-<span><span class="co">#&gt;                 0.025   0.975</span></span>
-<span><span class="co">#&gt; dark_figure  7836.223 11989.4</span></span>
-<span><span class="co">#&gt; total       12236.223 16389.4</span></span>
+<span><span class="va">fit_bayes3</span><span class="op">$</span><span class="va">uncertainty</span></span>
+<span><span class="co">#&gt;                0.025     0.975</span></span>
+<span><span class="co">#&gt; dark_figure 4631.819  7694.699</span></span>
+<span><span class="co">#&gt; total       9031.819 12094.699</span></span>
 <span><span class="va">fit_bayes3</span><span class="op">$</span><span class="va">fitted_model</span></span>
 <span><span class="co">#&gt; [1] "[123,14,34]"</span></span>
 <span><span class="va">fit_bayes3</span><span class="op">$</span><span class="va">details</span><span class="op">$</span><span class="va">threshold_statistics</span></span>
@@ -257,21 +258,22 @@ retained and others thresholded. The default threshold of 2 retains both
 eligible three-list interactions and yields an estimate of 11,800; the
 2.5% and 97.5% posterior quantiles are about 10,000 and 14,600, still
 substantially different from the two-list result.</p>
-<div class="section level4">
-<h4 id="improper-priors">Improper priors<a class="anchor" aria-label="anchor" href="#improper-priors"></a>
-</h4>
+<div class="section level3">
+<h3 id="improper-priors">Improper priors<a class="anchor" aria-label="anchor" href="#improper-priors"></a>
+</h3>
 <p>The preceding analysis used proper normal priors for the interaction
 parameters. The same thresholding procedure can instead be used with
 improper flat priors for the interaction parameters.</p>
-<p>Some additional care is needed because an interaction whose
-sufficient statistic is zero has its posterior distribution concentrated
-at minus infinity. Such terms are accounted for before the MCMC fit is
-carried out. Effects whose posterior distribution is concentrated at
-minus infinity are identified automatically and reported in the
-<code>details$minus_infinity_effects</code> component of the returned
-object. The effects are still retained in the fitted hierarchy and are
-reported separately from interaction effects estimated by MCMC. For
-example, with the five-list UK data:</p>
+<p>With improper interaction priors, the posterior distribution of a
+minimal sparse interaction coefficient is concentrated at minus
+infinity: it takes that value with posterior probability one (Silverman,
+2020). Such effects are therefore handled before the MCMC fit, rather
+than sampled. They remain part of the fitted hierarchy and are reported
+in <code>details$minus_infinity_effects</code>, separately from effects
+estimated by MCMC. For the distinction between minimal sparse and masked
+sparse interactions, see <a href="captures-and-models.html">Capture
+histories and hierarchical models</a>. For example, with the five-list
+UK data:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">fit_improper</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_population_bayesthresh.html">estimate_population_bayesthresh</a></span><span class="op">(</span></span>
@@ -293,19 +295,62 @@ example, with the five-list UK data:</p>
 <span><span class="co">#&gt; [1] "LA:GP"</span></span></code></pre></div>
 <p>Here <code>LA:GP</code>, corresponding to the interaction
 <code>15</code> in the numerical hierarchy notation, is retained in the
-model with its effect estimated as minus infinity, and is therefore
+model with its effect represented at minus infinity, and is therefore
 reported in <code>details$minus_infinity_effects</code>.</p>
 </div>
-<div class="section level4">
-<h4 id="checking-existence-with-improper-interaction-priors">Checking existence with improper interaction priors<a class="anchor" aria-label="anchor" href="#checking-existence-with-improper-interaction-priors"></a>
-</h4>
-<p>When improper flat priors are used for the interaction parameters,
-some additional existence checks are required. For some datasets there
-are log-linear models for which there is no maximum likelihood solution
-even after allowing some parameters to take the value
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mi>∞</mi></mrow><annotation encoding="application/x-tex">-\infty</annotation></semantics></math>.
-This can be checked using the criterion of Fienberg and Rinaldo
-(2012).</p>
+<div class="section level3">
+<h3 id="four-list-interactions">Four-list interactions<a class="anchor" aria-label="anchor" href="#four-list-interactions"></a>
+</h3>
+<p>The following call extends the Kosovo analysis to order four. Its
+output shows which four-list interactions, if any, pass the eligibility
+rule after the pairs and triples have been selected. Whether a candidate
+is ultimately retained depends on its posterior threshold statistic.
+This example illustrates how to inspect the stages; it does not require
+a four-list term to survive.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fit_bayes4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_population_bayesthresh.html">estimate_population_bayesthresh</a></span><span class="op">(</span></span>
+<span>  <span class="va">Kosovo</span>,</span>
+<span>  maxorder <span class="op">=</span> <span class="fl">4</span>, threshold <span class="op">=</span> <span class="fl">2.5</span>, alpha <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.025</span>, <span class="fl">0.975</span><span class="op">)</span>,</span>
+<span>  return_details <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">fit_bayes4</span><span class="op">$</span><span class="va">details</span><span class="op">$</span><span class="va">triple_status</span></span>
+<span><span class="co">#&gt; [1] "three-list extension fitted"</span></span>
+<span><span class="va">fit_bayes4</span><span class="op">$</span><span class="va">details</span><span class="op">$</span><span class="va">quad_status</span></span>
+<span><span class="co">#&gt; [1] "no eligible four-list interactions"</span></span>
+<span><span class="va">fit_bayes4</span><span class="op">$</span><span class="va">details</span><span class="op">$</span><span class="va">eligible_quads</span></span>
+<span><span class="co">#&gt; character(0)</span></span>
+<span><span class="va">fit_bayes4</span><span class="op">$</span><span class="va">details</span><span class="op">$</span><span class="va">quad_threshold_statistics</span></span>
+<span><span class="co">#&gt; numeric(0)</span></span>
+<span><span class="va">fit_bayes4</span><span class="op">$</span><span class="va">details</span><span class="op">$</span><span class="va">retained_quads</span></span>
+<span><span class="co">#&gt; character(0)</span></span>
+<span><span class="va">fit_bayes4</span><span class="op">$</span><span class="va">fitted_model</span></span>
+<span><span class="co">#&gt; [1] "[123,14,34]"</span></span>
+<span><span class="va">fit_bayes4</span><span class="op">$</span><span class="va">estimate</span></span>
+<span><span class="co">#&gt; dark_figure       total </span></span>
+<span><span class="co">#&gt;    5913.857   10313.857</span></span>
+<span><span class="va">fit_bayes4</span><span class="op">$</span><span class="va">uncertainty</span></span>
+<span><span class="co">#&gt;                0.025     0.975</span></span>
+<span><span class="co">#&gt; dark_figure 4631.819  7694.699</span></span>
+<span><span class="co">#&gt; total       9031.819 12094.699</span></span></code></pre></div>
+<p>For <code>maxorder = 4</code>, these detail fields distinguish
+eligibility from selection: <code>eligible_quads</code> lists
+candidates, <code>quad_threshold_statistics</code> gives the statistics
+from the extension fit, and <code>retained_quads</code> lists those kept
+in the final hierarchy. <code>quad_status</code> explains when the
+four-list stage was not fitted. In particular, an empty
+<code>eligible_quads</code> means that no set of four lists had all four
+required triples; it does not mean that a four-list coefficient was
+tested and found too small.</p>
+</div>
+<div class="section level3">
+<h3 id="checking-existence-with-improper-interaction-priors">Checking existence with improper interaction priors<a class="anchor" aria-label="anchor" href="#checking-existence-with-improper-interaction-priors"></a>
+</h3>
+<p>With improper flat interaction priors, additional existence checks
+are needed. Some models lack a maximum likelihood solution even with
+parameters allowed to equal minus infinity. The criterion of Fienberg
+and Rinaldo (2012) detects this situation; see also <a href="captures-and-models.html">Capture histories and hierarchical
+models</a>.</p>
 <p>With improper priors on the interaction parameters, failure of this
 criterion also implies that the posterior distribution is not proper.
 The package therefore applies the Fienberg-Rinaldo check when
@@ -315,90 +360,61 @@ The package therefore applies the Fienberg-Rinaldo check when
 all two-list interactions fails the Fienberg-Rinaldo check, the
 procedure stops before thresholding the two-list interactions.</p></li>
 <li><p><strong>Three-list extension.</strong> With
-<code>maxorder = 3</code>, the model containing the retained two-list
-interactions and all eligible three-list interactions is also checked.
-If it fails the criterion, the proposed three-list extension is not
-fitted and the completed two-list analysis is returned.</p></li>
+<code>maxorder &gt;= 3</code>, the model containing the retained
+two-list interactions and all eligible three-list interactions is also
+checked. If it fails the criterion, the proposed three-list extension is
+not fitted and the completed two-list analysis is returned.</p></li>
+<li><p><strong>Four-list extension.</strong> With
+<code>maxorder = 4</code>, if eligible four-list terms remain after the
+three-list stage, the model containing the retained pairs and triples
+and all eligible four-list terms is checked. If it fails, the completed
+three-list analysis is returned. The four-list stage cannot proceed if
+the three-list extension was unavailable.</p></li>
 </ul>
-<p>These checks are not required when proper priors are used for the
-interaction parameters. Results on posterior propriety for Poisson
-log-linear models, including those of Forster (2010), show that proper
-priors can yield a proper posterior even when the corresponding maximum
-likelihood estimate does not exist. The proper-prior Bayesian procedure
-therefore proceeds without applying the Fienberg-Rinaldo criterion.</p>
+<p>The check is not applied with proper interaction priors: a posterior
+can be proper even when the corresponding maximum likelihood estimate
+does not exist (Forster, 2010).</p>
 </div>
-<div class="section level4">
-<h4 id="examples-with-improper-priors">Examples with improper priors<a class="anchor" aria-label="anchor" href="#examples-with-improper-priors"></a>
-</h4>
+<div class="section level3">
+<h3 id="examples-with-improper-priors">Examples with improper priors<a class="anchor" aria-label="anchor" href="#examples-with-improper-priors"></a>
+</h3>
 <p>The two possible failures can be illustrated with the
 <code>Korea</code> and <code>Western</code> datasets.</p>
 <p>For <code>Korea</code>, the model containing all two-list
 interactions fails the Fienberg-Rinaldo criterion. Thus the
 improper-prior analysis stops before the two-list interactions can be
 thresholded.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/estimate_population_bayesthresh.html">estimate_population_bayesthresh</a></span><span class="op">(</span></span>
 <span>  <span class="va">Korea</span>,</span>
 <span>  prior <span class="op">=</span> <span class="st">"improper"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Bayesian thresholding cannot be applied: the full pairwise model fails the extended-MLE check.</span></span></code></pre></div>
-<p>With the default proper prior, by contrast, the initial Bayesian fit
-can be carried out. In this example the interaction <code>b:d</code> is
-subsequently thresholded out, so that the retained model is no longer
-one of the models that fails the Fienberg-Rinaldo criterion.</p>
-<p>The second possibility is illustrated by Western. To make the issue
-visible, we use the unusually low value
-<code>threshold = 0.2</code>.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fit_western</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_population_bayesthresh.html">estimate_population_bayesthresh</a></span><span class="op">(</span></span>
-<span>  <span class="va">Western</span>,</span>
-<span>  prior <span class="op">=</span> <span class="st">"improper"</span>,</span>
-<span>  maxorder <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  threshold <span class="op">=</span> <span class="fl">0.2</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: The maximal three-list extension fails the Fienberg-Rinaldo existence</span></span>
-<span><span class="co">#&gt; criterion; reverting to maxorder = 2.</span></span>
-<span></span>
-<span><span class="va">fit_western</span><span class="op">$</span><span class="va">fitted_model</span></span>
-<span><span class="co">#&gt; [1] "[12,13,14,15,23,24,25,34,35,45]"</span></span></code></pre></div>
-<p>The initial two-list fit and thresholding are completed, but the
-model containing the retained two-list interactions and all eligible
-three-list interactions fails the Fienberg-Rinaldo criterion. The
-three-list extension is therefore not fitted and the completed two-list
-analysis is returned.</p>
-<p>With a proper interaction prior the same Fienberg-Rinaldo check is
-not applied, and the three-list fit and thresholding proceed.</p>
+<p>A failure can also occur at a higher-order stage. With the
+<code>Western</code> data, <code>prior = "improper"</code>,
+<code>maxorder = 3</code> and the unusually low threshold
+<code>0.2</code>, the initial two-list fit and thresholding complete,
+but the model containing the retained two-list interactions together
+with all eligible three-list interactions fails the Fienberg-Rinaldo
+criterion. The completed two-list analysis is therefore returned without
+fitting the three-list extension.</p>
 </div>
-</div>
-<div class="section level2">
-<h2 id="mcmc-settings-and-posterior-output">MCMC settings and posterior output<a class="anchor" aria-label="anchor" href="#mcmc-settings-and-posterior-output"></a>
-</h2>
-<p>The principal MCMC settings can be controlled through arguments
-passed to <code><a href="https://rdrr.io/pkg/MCMCpack/man/MCMCpoisson.html" class="external-link">MCMCpack::MCMCpoisson()</a></code>, including
-<code>burnin</code>, <code>mcmc</code>, <code>thin</code>,
-<code>tune</code>, and <code>seed</code>. The defaults are intended to
-be suitable for routine use, although longer runs may be appropriate for
-a substantive final analysis. <code><a href="https://rdrr.io/pkg/MCMCpack/man/MCMCpoisson.html" class="external-link">MCMCpack::MCMCpoisson()</a></code> uses
-a reproducible default seed when <code>seed</code> is not specified. A
-different seed can be supplied through <code>...</code> if a different
-MCMC run is required.</p>
-<p>By default, the full posterior sample of total population size is not
-returned. It can be retained as <code>details$posterior</code>, when
-required, by setting <code>return_details = TRUE</code>.</p>
 </div>
 <div class="section level2">
 <h2 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
 </h2>
 <p>Bayesian thresholding provides a parsimonious way to select
-interaction effects using posterior evidence. The implementation allows
+interaction effects using posterior evidence, followed by Bayesian
+inference conditional on the selected model. The implementation allows
 either proper or improper priors for interaction effects, can extend the
-thresholding procedure hierarchically to three-list interactions, and
-checks the relevant models against the Fienberg-Rinaldo existence
-criterion when improper priors are used for the interactions. The
-returned object reports the selected interaction structure and posterior
-inference for total population size, with the full posterior sample
-available optionally.</p>
+thresholding procedure hierarchically to three- and four-list
+interactions beyond the original pairwise formulation, and checks the
+relevant models against the Fienberg-Rinaldo existence criterion when
+improper priors are used for the interactions. The returned object
+reports the selected interaction structure and posterior inference for
+total population size, with the full posterior sample available
+optionally.</p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
@@ -406,7 +422,7 @@ available optionally.</p>
 <p>Silverman, B. W. (2020). <em>Multiple-systems analysis for the
 quantification of modern slavery: classical and Bayesian
 approaches</em>. <em>Journal of the Royal Statistical Society: Series A
-(Statistics in Society)</em>, <strong>183</strong>(3), 691–736. <a href="doi:10.1111/rssa.12505" class="uri">doi:10.1111/rssa.12505</a>.</p>
+(Statistics in Society)</em>, <strong>183</strong>(3), 691–736. <a href="https://doi.org/10.1111/rssa.12505" class="external-link">doi:10.1111/rssa.12505.</a>.</p>
 <p>Fienberg, S. E. and Rinaldo, A. (2012). <em>Maximum likelihood
 estimation in log-linear models</em>. <em>The Annals of Statistics</em>,
 <strong>40</strong>, 996–1023.</p>

@@ -48,9 +48,8 @@ A single integer status code:
 Two distinct conditions are checked.
 
 The Fienberg–Rinaldo condition determines whether the required extended
-maximum-likelihood fit exists, accounting for parameters whose
-extended-MLE value is minus infinity because the corresponding observed
-margins are zero.
+maximum-likelihood fit exists, accounting for parameters represented at
+minus infinity when the corresponding observed margins are zero.
 
 The relevant model matrix is also checked for full column rank. Failure
 of this condition means that the model parameters are not identifiable.

@@ -130,8 +130,6 @@ tidy_lists <- function(
 #'   \item{\code{listnames}}{List names, constructed as A, B, and so on if
 #'   necessary.}
 #'   \item{\code{data}}{The input data.}
-#'   \item{\code{notestimable}}{Logical vector identifying parameters that
-#'   are strict descendants of parameters having zero sufficient statistic.}
 #'   \item{\code{masterdesign}}{The inclusion matrix constructed by
 #'   \code{make_master_design()}.}
 #' }
@@ -156,9 +154,7 @@ ingest_data = function(xdat)  {
   for (j in (1:length(ncount))) nobs[xcap[j]] = nobs[xcap[j]]+ ncount[j]
   nobs[1]=0
   for (i in (1:ncaps)) nstar[i] = sum(nobs[descendants(i, nlists)])
-  notestimable = rep(FALSE, ncaps)
-  notestimable[descendants((1:ncaps)[nstar==0], nlists, omitk=TRUE)] = TRUE
   masterdesign = make_master_design(nlists)
   return(list(nobs=nobs, nstar=nstar, nlists=nlists, listnames=listnames, data=xdat,
-              notestimable = notestimable, masterdesign= masterdesign))
+              masterdesign= masterdesign))
 }

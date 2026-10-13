@@ -40,11 +40,6 @@ A list with components:
 
   The input data.
 
-- `notestimable`:
-
-  Logical vector identifying parameters that are strict descendants of
-  parameters having zero sufficient statistic.
-
 - `masterdesign`:
 
   The inclusion matrix constructed by

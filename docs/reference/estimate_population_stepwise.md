@@ -13,7 +13,7 @@ estimate_population_stepwise(
   zdat,
   nboot = 0,
   pthresh = 0.02,
-  maxorder = 2,
+  maxorder = Inf,
   iseed = 1234,
   alpha = c(0.025, 0.1, 0.9, 0.975),
   return_details = FALSE
@@ -47,7 +47,7 @@ estimate_population_stepwise(
 
   Maximum order of interactions considered for selection. An integer of
   at least 2, or `Inf` to allow interactions of any order. The default
-  is 2.
+  is `Inf`.
 
 - iseed:
 
@@ -64,7 +64,7 @@ estimate_population_stepwise(
 - return_details:
 
   Logical. If `TRUE`, include the bootstrap estimates, BCa acceleration,
-  and effects estimated at minus infinity. The default is `FALSE`.
+  and effects represented at minus infinity. The default is `FALSE`.
 
 ## Value
 
@@ -101,12 +101,12 @@ A list with components:
 
 ## Details
 
-By default, the procedure considers two-list interactions only,
-reproducing the method of Chan, Silverman and Vincent (2021).
-Higher-order interactions may be considered by increasing `maxorder`, or
-by setting `maxorder = Inf`. An interaction is considered only when all
+By default, interactions of any order may be considered. Setting
+`maxorder = 2` restricts the procedure to the pairwise method of Chan,
+Silverman and Vincent (2021). An interaction is considered only when all
 its lower-order terms are already present, so every candidate model is
-hierarchical.
+hierarchical. A masked sparse interaction is not eligible for selection,
+including when `pthresh = 1`.
 
 The procedure starts with a main-effects model. At each stage it
 considers eligible interactions not already included and adds the

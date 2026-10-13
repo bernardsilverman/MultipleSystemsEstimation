@@ -10,12 +10,11 @@
 #' For six-list data, the BIC method remains available by specifying
 #' \code{method = "bic"}, but exhaustive BIC enumeration is computationally
 #' burdensome. Accordingly, \code{method = "auto"} selects the stepwise
-#' method for six-list data and issues an informational message.
+#' method for six-list data.
 #'
 #' The estimation method can be selected explicitly using
 #' \code{method = "bic"}, \code{"stepwise"}, \code{"bayesthresh"}, or
-#' \code{"fixed"}. The \code{"bayesthresh"} method requires the suggested
-#' package \pkg{MCMCpack}.
+#' \code{"fixed"}. 
 #'
 #' Through their respective \code{maxorder} arguments,
 #' the stepwise, BIC and Bayesian-threshold methods can all be restricted to
@@ -86,15 +85,13 @@
 #'   pthresh = 0.02
 #' )
 #'
-#' # The bayesthresh method requires the suggested MCMCpack package.
-#' if (requireNamespace("MCMCpack", quietly = TRUE)) {
-#'   estimate_population(
+#' # The bayesthresh method
+#'    estimate_population(
 #'     Western,
 #'     method = "bayesthresh",
 #'     burnin = 100,
 #'     mcmc = 1000
 #'   )
-#' }
 #'
 #' # Pass a fixed-model specification through ...
 #' estimate_population(
@@ -132,28 +129,13 @@ estimate_population <- function(
       resolved_method <- "bic"
     } else {
       resolved_method <- "stepwise"
-
       if (nlists == 6L) {
-        message(
-          paste0(
-            "For six-list data, `method = \"auto\"` uses the stepwise method. ",
-            "The BIC method is available by specifying `method = \"bic\"`, ",
-            "but exhaustive six-list BIC enumeration is computationally ",
-            "burdensome."
-          )
-        )
+        message("Automatic selection uses the stepwise method for six-list data.")
       }
     }
   }
 
   if (resolved_method == "bic") {
-    if (nlists > 6L) {
-      stop(
-        "The BIC method is available only for data with at most six lists.",
-        call. = FALSE
-      )
-    }
-
     result <- estimate_population_bic(
       zdat = zdat,
       ...

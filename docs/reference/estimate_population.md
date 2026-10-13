@@ -83,11 +83,10 @@ are six or more lists.
 For six-list data, the BIC method remains available by specifying
 `method = "bic"`, but exhaustive BIC enumeration is computationally
 burdensome. Accordingly, `method = "auto"` selects the stepwise method
-for six-list data and issues an informational message.
+for six-list data.
 
 The estimation method can be selected explicitly using `method = "bic"`,
-`"stepwise"`, `"bayesthresh"`, or `"fixed"`. The `"bayesthresh"` method
-requires the suggested package MCMCpack.
+`"stepwise"`, `"bayesthresh"`, or `"fixed"`.
 
 Through their respective `maxorder` arguments, the stepwise, BIC and
 Bayesian-threshold methods can all be restricted to two-list
@@ -221,15 +220,13 @@ estimate_population(
 #> [1] "not requested"
 #> 
 
-# The bayesthresh method requires the suggested MCMCpack package.
-if (requireNamespace("MCMCpack", quietly = TRUE)) {
-  estimate_population(
+# The bayesthresh method
+   estimate_population(
     Western,
     method = "bayesthresh",
     burnin = 100,
     mcmc = 1000
   )
-}
 #> $input
 #> $input$call
 #> estimate_population(zdat = Western, method = "bayesthresh", burnin = 100, 
@@ -301,6 +298,9 @@ estimate_population(
 #> 
 #> $fitted_model
 #> [1] "[12,23]"
+#> 
+#> $masked_effects
+#> character(0)
 #> 
 #> $uncertainty
 #> [1] "not calculated because nboot = 0"

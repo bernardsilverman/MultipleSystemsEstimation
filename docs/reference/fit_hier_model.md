@@ -19,7 +19,7 @@ fit_hier_model(xdatin, hiermod, bicRcap = TRUE, checkid = FALSE)
 
 - hiermod:
 
-  Character string specifying the hierarchical model.
+  Full encoded effect vector or hierarchy string.
 
 - bicRcap:
 
@@ -48,7 +48,13 @@ An object returned by
 
 - `neginfpars`:
 
-  Encoded parameters whose extended-MLE values are minus infinity.
+  Encoded parameters represented at minus infinity on the extended-model
+  boundary.
+
+- `maskedpars`:
+
+  Encoded masked parameters assigned the conventional coefficient zero;
+  their values are not identifiable.
 
 ## References
 

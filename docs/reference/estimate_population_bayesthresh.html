@@ -31,7 +31,7 @@ observed population to the posterior estimate of the unobserved cell."></head><b
 
     <a class="navbar-brand me-2" href="../index.html">MultipleSystemsEstimation</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,14 +40,7 @@ observed population to the posterior estimate of the unobserved cell."></head><b
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/user-guide.html">A User Guide to MultipleSystemsEstimation</a></li>
-    <li><a class="dropdown-item" href="../articles/bayesian-threshold.html">Bayesian-thresholding multiple systems estimation</a></li>
-    <li><a class="dropdown-item" href="../articles/capture-hierarchy-encoding.html">Working with hierarchical models and capture histories</a></li>
-    <li><a class="dropdown-item" href="../articles/reproduce-2021.html">Reproducing Chan, Silverman and Vincent (2021)</a></li>
-    <li><a class="dropdown-item" href="../articles/reproduce-2024.html">Reproducing Silverman, Chan and Vincent (2024)</a></li>
-  </ul></li>
+<li class="nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
@@ -117,7 +110,7 @@ to posterior standard deviation for interaction parameters.</p></dd>
 
 
 <dt id="arg-maxorder">maxorder<a class="anchor" aria-label="anchor" href="#arg-maxorder"></a></dt>
-<dd><p>Maximum interaction order, either 2 or 3.</p></dd>
+<dd><p>Maximum interaction order, 2, 3 or 4.</p></dd>
 
 
 <dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
@@ -173,7 +166,7 @@ Useful arguments include:</p><ul><li><p><code>burnin</code>: number of burn-in i
 <dd><p>If <code>return_details = TRUE</code>, a list containing
   <code>minus_infinity_effects</code>, pairwise <code>threshold_statistics</code>,
   applicable <code>eligible_triples</code>, <code>retained_triples</code>, and
-  <code>triple_threshold_statistics</code>, and <code>posterior</code>, the complete
+  <code>triple_threshold_statistics</code>, <code>triple_status</code>, and when order four is requested, <code>eligible_quads</code>, <code>retained_quads</code>, <code>quad_threshold_statistics</code>, and <code>quad_status</code>, and <code>posterior</code>, the complete
   MCMC sample of total population size. Otherwise <code>"not requested"</code>.</p></dd>
 
 
@@ -184,21 +177,31 @@ Useful arguments include:</p><ul><li><p><code>burnin</code>: number of burn-in i
 interaction parameters, with variance specified by <code>prior_variance</code>.
 Setting <code>prior = "improper"</code> instead uses independent improper flat
 priors for the interaction parameters. In that case, interactions having
-zero sufficient statistic have posterior distribution concentrated at
+zero sufficient statistic are represented at
 minus infinity. Such effects are retained in the model but are accounted
 for separately before carrying out the actual MCMC, as set out in
-Silverman (2020).</p>
-<p>If <code>maxorder = 3</code>, three-list interactions are also considered.
+Silverman (2020). For a masked effect, the individual canonical parameter
+is not identifiable: any finite value would give the same fitted
+distribution. This method does not propose masked descendants.</p>
+<p>If <code>maxorder &gt;= 3</code>, three-list interactions are also considered.
 Two-list interactions are thresholded first. A three-list interaction is
 eligible for consideration only if all three of its constituent two-list
-interactions have been retained. The model containing the retained
-two-list interactions and all eligible three-list interactions is then
-fitted, the three-list interactions are thresholded in the same way, and
-the resulting hierarchical model is refitted.</p>
+interactions have been retained with finite parameters. With improper
+priors, a retained two-list interaction represented at minus infinity
+does not generate higher-order candidates: its descendants are masked
+and cannot affect the fitted distribution. The model containing retained
+finite and sparse two-list interactions and all eligible three-list
+interactions is fitted; the eligible triples are then thresholded, apart
+from newly minimal sparse effects handled separately at minus infinity.</p>
+<p>With <code>maxorder = 4</code>, four-list interactions are considered after
+thresholding the three-list interactions. All four constituent triples
+must be retained with finite parameters. Eligible four-list interactions
+are fitted and thresholded in the same way. With an improper prior, failure
+of the existence check returns the completed order-three analysis.</p>
 <p>When improper priors are used for the interaction parameters, the model
 containing all two-list interactions is checked for identifiability and
 for the Fienberg–Rinaldo existence criterion before thresholding begins.
-If it fails, the procedure stops. With <code>maxorder = 3</code>, the model
+If it fails, the procedure stops. With <code>maxorder &gt;= 3</code>, the model
 containing the retained two-list interactions and all eligible three-list
 interactions is also checked. If this model fails the Fienberg–Rinaldo
 criterion, the proposed three-list extension is not carried out and the

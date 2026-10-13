@@ -1,60 +1,70 @@
-# Extract hierarchical models from a catalogue
+# Generate hierarchical models
 
-Selects all hierarchical models for a specified number of lists and
-maximum interaction order from a catalogue of model strings.
+Generates all hierarchical models satisfying specified criteria. The
+user can specify the number of lists, the maximum order of models to be
+considered, and (optionally) a data set for which any masked sparse
+interactions will not be included in the models. Intercept and main
+effects are always included.
 
 ## Usage
 
 ``` r
-get_hierarchical_models(nlists, maxorder = nlists - 1, modelvec = hiermodels)
+get_hierarchical_models(
+  nlists,
+  maxorder = nlists - 1L,
+  xdata = NULL,
+  maxmodel = 100000L
+)
 ```
 
 ## Arguments
 
 - nlists:
 
-  Number of lists.
+  Number of lists (an integer from 2 to 9).
 
 - maxorder:
 
-  Maximum interaction order. The default is `nlists - 1`.
+  Maximum interaction order; Inf permits all orders.
 
-- modelvec:
+- xdata:
 
-  A character vector containing the catalogue of hierarchical-model
-  strings from which models are selected. The default is the precomputed
-  package catalogue `hiermodels`. An alternative catalogue using the
-  same hierarchy-string notation may be supplied. The default catalogue
-  contains all hierarchical models for two to five lists, and all
-  six-list hierarchical models with interaction order at most 2.
+  Optional capture history data. If supplied, models including masked
+  sparse interactions for this data set will not be included. Minimal
+  sparse interactions remain eligible.
+
+- maxmodel:
+
+  Maximum number of models to be generated. If exceeded, the maximum
+  order will be reduced, if necessary as far as 1, to bring the number
+  of models below the specified limit.
 
 ## Value
 
-A character vector containing the models satisfying the specified
-number-of-lists and maximum-interaction-order restrictions.
+A named list of integer vectors specifying the hierarchical models. The
+name of each vector in the list is the hierarchy string representation
+of the model, and the vector itself is the vector of encoded capture
+histories included in the model. A capture history is encoded as the
+integer \\1 + \sum\_{i \in S} 2^{i-1}\\, where \\S\\ is the set of
+capture lists in the history. The returned list has two attributes:
 
-## References
+- `requested_maxorder`:
 
-Silverman, B. W., Chan, L. and Vincent, K. (2024). Bootstrapping
-Multiple Systems Estimates to Account for Model Selection. *Statistics
-and Computing*, **34**, 44.
-[doi:10.1007/s11222-023-10346-9](https://doi.org/10.1007/s11222-023-10346-9)
-.
+  The value of `maxorder` supplied by the user, or its default value if
+  omitted.
+
+- `maxorder`:
+
+  The actual maximum interaction order of the generated models. This is
+  capped at `nlists` and may be reduced further to satisfy `maxmodel`.
 
 ## Examples
 
 ``` r
-# Three lists, all interaction orders
-get_hierarchical_models(nlists = 3, maxorder = Inf)
-#> [1] "[12,13,23]" "[12,13]"    "[12,23]"    "[13,23]"    "[12,3]"    
-#> [6] "[13,2]"     "[23,1]"     "[1,2,3]"   
-
-# Three lists with the default maximum interaction order of 2
-get_hierarchical_models(nlists = 3)
-#> [1] "[12,13,23]" "[12,13]"    "[12,23]"    "[13,23]"    "[12,3]"    
-#> [6] "[13,2]"     "[23,1]"     "[1,2,3]"   
-
-# Number of five-list models with maximum interaction order 3
-length(get_hierarchical_models(nlists = 5, maxorder = 3))
-#> [1] 6212
+models <- get_hierarchical_models(3)
+names(models)
+#> [1] "[1,2,3]"    "[23,1]"     "[13,2]"     "[13,23]"    "[12,3]"    
+#> [6] "[12,23]"    "[12,13]"    "[12,13,23]"
+models[[1]]
+#> [1] 1 2 3 5
 ```

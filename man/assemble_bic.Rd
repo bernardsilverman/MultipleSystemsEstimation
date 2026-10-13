@@ -9,6 +9,7 @@ assemble_bic(
   maxorder = dim(xdata)[2] - 2,
   checkexist = TRUE,
   removeFRfail = TRUE,
+  maxmodel = 100000L,
   ...
 )
 }
@@ -23,6 +24,8 @@ existence of the extended MLE for each model.}
 \item{removeFRfail}{If \code{TRUE}, remove models without a valid fit from
 the results.}
 
+\item{maxmodel}{Maximum number of models stored during enumeration.}
+
 \item{...}{Additional arguments passed to \code{fit_hier_model()}.}
 }
 \value{
@@ -34,7 +37,10 @@ A list with components:
   \item{\code{xdata}}{The original capture history data.}
   \item{\code{maxorder}}{The largest interaction order among the retained
   models, or 0 if no model is retained.}
-  \item{\code{best_neginfpars}}{Encoded effects estimated at minus infinity
+  \item{\code{models}}{Named encoded models in result-row order.}
+  \item{\code{requested_maxorder}, \code{enumeration_maxorder}}{Requested
+  and actual enumeration orders, before failed fits are removed.}
+  \item{\code{best_neginfpars}}{Encoded effects represented at minus infinity
   in the model with the smallest BIC, or an empty vector if there is no valid
   model or no such effect.}
 }

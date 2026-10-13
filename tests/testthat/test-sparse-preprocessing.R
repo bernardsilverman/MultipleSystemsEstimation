@@ -82,10 +82,11 @@ test_that("fit_hier_model records boundary parameters at minus infinity", {
 
   abc <- encode_capture(c(1, 1, 1))
 
-  expect_true(abc %in% fit$neginfpars)
+  expect_true(abc %in% fit$maskedpars)
+  expect_false(abc %in% fit$neginfpars)
   expect_identical(
     unname(fit$coefficients[as.character(abc)]),
-    -Inf
+    0
   )
 })
 

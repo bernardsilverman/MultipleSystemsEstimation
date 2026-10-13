@@ -9,7 +9,7 @@ maximum interaction order, and orders the valid fits by increasing BIC."></head>
 
     <a class="navbar-brand me-2" href="../index.html">MultipleSystemsEstimation</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -18,14 +18,7 @@ maximum interaction order, and orders the valid fits by increasing BIC."></head>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/user-guide.html">A User Guide to MultipleSystemsEstimation</a></li>
-    <li><a class="dropdown-item" href="../articles/bayesian-threshold.html">Bayesian-thresholding multiple systems estimation</a></li>
-    <li><a class="dropdown-item" href="../articles/capture-hierarchy-encoding.html">Working with hierarchical models and capture histories</a></li>
-    <li><a class="dropdown-item" href="../articles/reproduce-2021.html">Reproducing Chan, Silverman and Vincent (2021)</a></li>
-    <li><a class="dropdown-item" href="../articles/reproduce-2024.html">Reproducing Silverman, Chan and Vincent (2024)</a></li>
-  </ul></li>
+<li class="nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
@@ -53,6 +46,7 @@ maximum interaction order, and orders the valid fits by increasing BIC.</p>
 <span>  maxorder <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">xdata</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span> <span class="op">-</span> <span class="fl">2</span>,</span>
 <span>  checkexist <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  removeFRfail <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  maxmodel <span class="op">=</span> <span class="fl">100000L</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -79,6 +73,10 @@ existence of the extended MLE for each model.</p></dd>
 the results.</p></dd>
 
 
+<dt id="arg-maxmodel">maxmodel<a class="anchor" aria-label="anchor" href="#arg-maxmodel"></a></dt>
+<dd><p>Maximum number of models stored during enumeration.</p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional arguments passed to <code><a href="fit_hier_model.html">fit_hier_model()</a></code>.</p></dd>
 
@@ -97,8 +95,15 @@ the results.</p></dd>
 <dd><p>The largest interaction order among the retained
   models, or 0 if no model is retained.</p></dd>
 
+  <dt><code>models</code></dt>
+<dd><p>Named encoded models in result-row order.</p></dd>
+
+  <dt><code>requested_maxorder</code>, <code>enumeration_maxorder</code></dt>
+<dd><p>Requested
+  and actual enumeration orders, before failed fits are removed.</p></dd>
+
   <dt><code>best_neginfpars</code></dt>
-<dd><p>Encoded effects estimated at minus infinity
+<dd><p>Encoded effects represented at minus infinity
   in the model with the smallest BIC, or an empty vector if there is no valid
   model or no such effect.</p></dd>
 

@@ -15,7 +15,7 @@ bootstrapcal(
   iseed = 1234,
   checkexist = TRUE,
   saveinterval = Inf,
-  savefile = "bootout.Rdata"
+  savefile = NULL
 )
 ```
 
@@ -48,7 +48,8 @@ bootstrapcal(
 
 - savefile:
 
-  File used when `saveinterval` is finite.
+  File used when `saveinterval` is finite. Must be supplied explicitly
+  when checkpoint saving is requested.
 
 ## Value
 

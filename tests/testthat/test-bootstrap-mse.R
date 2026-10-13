@@ -63,31 +63,10 @@ test_that("BIC estimation uses the common alpha defaults", {
   )
 })
 
-test_that("six-list automatic maxorder is 2", {
-  z6 <- matrix(0, nrow = 1, ncol = 7)
-
-  local_mocked_bindings(
-    assemble_bic = function(zdat, maxorder, checkexist) {
-      list(
-        res = matrix(
-          c(1, 2, maxorder),
-          nrow = 1,
-          dimnames = list("[1,2,3,4,5,6]", c("abundance", "BIC", "modelsorder"))
-        ),
-        xdata = zdat,
-        maxorder = maxorder,
-        best_neginfpars = numeric(0)
-      )
-    },
-    .package = "MultipleSystemsEstimation"
-  )
-
-  expect_warning(
-    out <- estimate_population_bic(z6, nboot = 0, return_details = TRUE),
-    "32,768"
-  )
-
-  expect_equal(out$details$bic_results$maxorder, 2L)
+test_that("six-list default enumeration order is pairwise", {
+  models <- get_hierarchical_models(6, maxorder = 2)
+  expect_length(models, 32768L)
+  expect_equal(attr(models, "maxorder"), 2L)
 })
 
 test_that("ntopmodels has no effect when nboot is zero", {
@@ -127,43 +106,11 @@ test_that("estimate_population_bic does not subset models when nboot is zero", {
   )
 })
 
-test_that("six-list maxorder above 2 is reduced with a warning", {
-  z6 <- matrix(0, nrow = 1, ncol = 7)
-
-  local_mocked_bindings(
-    assemble_bic = function(zdat, maxorder, checkexist) {
-      list(
-        res = matrix(
-          c(1, 2, maxorder),
-          nrow = 1,
-          dimnames = list("[1,2,3,4,5,6]", c("abundance", "BIC", "modelsorder"))
-        ),
-        xdata = zdat,
-        maxorder = maxorder,
-        best_neginfpars = numeric(0)
-      )
-    },
-    .package = "MultipleSystemsEstimation"
-  )
-
-  warnings <- character()
-
-  out <- withCallingHandlers(
-    estimate_population_bic(
-      z6,
-      nboot = 0,
-      maxorder = 3,
-      return_details = TRUE
-    ),
-    warning = function(w) {
-      warnings <<- c(warnings, conditionMessage(w))
-      invokeRestart("muffleWarning")
-    }
-  )
-
-  expect_true(any(grepl("reduced from 3 to 2", warnings, fixed = TRUE)))
-  expect_true(any(grepl("32,768", warnings, fixed = TRUE)))
-  expect_equal(out$details$bic_results$maxorder, 2L)
+test_that("model limit replaces the hard six-list order restriction", {
+  models <- get_hierarchical_models(6, maxorder = 3, maxmodel = 40000)
+  expect_length(models, 32768L)
+  expect_equal(attr(models, "requested_maxorder"), 3)
+  expect_equal(attr(models, "maxorder"), 2L)
 })
 
 test_that("BIC estimation returns the best-BIC point estimate", {

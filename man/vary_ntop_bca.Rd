@@ -11,7 +11,8 @@ vary_ntop_bca(
   degree = 1,
   nboot = 1000,
   iseed = 1234,
-  alpha = c(0.025, 0.1, 0.9, 0.975)
+  alpha = c(0.025, 0.1, 0.9, 0.975),
+  maxmodel = 100000L
 )
 }
 \arguments{
@@ -39,6 +40,8 @@ Silverman, Chan and Vincent (2024).}
 
 \item{alpha}{The cumulative probability levels at which the endpoints of
 the BCa confidence intervals are required.}
+
+\item{maxmodel}{Maximum number of models stored during enumeration.}
 }
 \value{
 A list with two components:

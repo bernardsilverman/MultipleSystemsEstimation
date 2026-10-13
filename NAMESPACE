@@ -9,12 +9,14 @@ export(estimate_population_stepwise)
 export(find_neighbour_hierarchies)
 export(get_hierarchical_models)
 export(tidy_lists)
-importFrom(stats,glm.fit)
-importFrom(stats,na.omit)
-importFrom(stats,pnorm)
-importFrom(stats,poisson)
-importFrom(stats,qnorm)
-importFrom(stats,quantile)
-importFrom(stats,rmultinom)
-importFrom(stats,setNames)
-importFrom(stats,splinefun)
+importFrom(stats,
+  glm.fit,
+  na.omit,
+  pnorm,
+  poisson,
+  qnorm,
+  quantile,
+  rmultinom,
+  setNames,
+  splinefun
+)

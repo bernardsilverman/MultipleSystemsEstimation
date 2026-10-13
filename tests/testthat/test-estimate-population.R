@@ -30,13 +30,12 @@ test_that("explicit BIC is allowed for six lists", {
   expect_true(out$ok)
 })
 
-test_that("BIC is rejected for more than six lists", {
-  z7 <- matrix(0, nrow = 1, ncol = 8)
-
-  expect_error(
-    estimate_population(z7, method = "bic"),
-    "at most six lists"
+test_that("explicit BIC passes larger-list data to the bounded enumerator", {
+  local_mocked_bindings(
+    estimate_population_bic = function(zdat, ...) list(ok = TRUE),
+    .package = "MultipleSystemsEstimation"
   )
+  expect_true(estimate_population(matrix(0, 1, 8), method = "bic")$ok)
 })
 
 test_that("method-specific arguments are passed through", {

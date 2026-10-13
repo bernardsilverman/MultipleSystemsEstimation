@@ -13,7 +13,8 @@ set of capture histories.}
 \item{xcap}{Binary matrix defining the capture histories corresponding to
 the rows of \code{x}.}
 
-\item{zmods}{Character vector of hierarchical-model strings.}
+\item{zmods}{Named list of encoded effect vectors, or a character vector
+of hierarchy strings.}
 }
 \value{
 A logical matrix with models in rows and data vectors in columns.

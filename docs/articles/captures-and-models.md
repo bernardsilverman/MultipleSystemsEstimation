@@ -1,0 +1,502 @@
+# Capture histories and hierarchical models
+
+## Capture histories
+
+Multiple systems estimation is based on recording the pattern of
+*captures* of individuals on a number of lists. These will be called
+*capture lists* where there is any possible confusion with R lists.
+Suppose there are $`n`$ capture lists, numbered $`1, 2, \ldots, n`$. The
+*capture history* of an individual is the subset of these lists on which
+the individual is observed. For example, {1,3} is the capture history of
+an individual observed on lists 1 and 3 and on no other list. This will
+normally be abbreviated to 13 rather than using full set notation.
+
+There are $`2^n`$ possible capture histories, including the empty
+history $`\varnothing`$, which corresponds to an individual not observed
+on any list. The data give counts for the $`2^n - 1`$ nonempty
+histories; some of these counts may be zero. The aim of multiple systems
+estimation is to use these observed counts to estimate the *dark
+figure*, the number of individuals with the empty capture history.
+Adding this estimate to the number of distinct observed individuals
+gives an estimate of the total population.
+
+### Encoding capture histories
+
+In addition to specifying its members as a set, a capture history $`S`$
+can be represented in two ways within the package. Its *vector encoding*
+is a vector of length $`n`$ whose $`j`$th element is 1 if $`j \in S`$
+and 0 otherwise. An equivalent logical vector uses `TRUE` and `FALSE` in
+place of 1 and 0. The *integer encoding* is
+
+``` math
+k = 1 + \sum_{i \in S} 2^{i-1}.
+```
+
+The possible histories are thus encoded by the integers
+$`1, \ldots, 2^n`$, with 1 representing the empty history. For example,
+{1,3} has vector encoding `c(1, 0, 1)` in a three-list system and
+integer encoding $`1 + 2^0 + 2^2 = 6`$. The integer encoding should not
+be confused with the abbreviated notation, so {1,3} has abbreviated
+representation 13 but integer encoding 6.
+
+The internal functions
+[`encode_capture()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/encode_capture.md)
+and
+[`decode_capture()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/decode_capture.md)
+convert between these representations. The function
+[`decode_capture()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/decode_capture.md)
+requires the total number of lists, `nlists`. For example, encoded value
+6 represents {1,3} in both a three-list system and a five-list system,
+but the decoded vectors have different lengths:
+
+``` r
+
+encode_capture(c(1, 0, 1))
+#> [1] 6
+encode_capture(c(TRUE, FALSE, TRUE))
+#> [1] 6
+decode_capture(6, nlists = 3)
+#> [1]  TRUE FALSE  TRUE
+decode_capture(6, nlists = 5)
+#> [1]  TRUE FALSE  TRUE FALSE FALSE
+```
+
+### Parents, children, ancestors and descendants
+
+A *child* of a capture history is obtained by adding one previously
+absent list, and a *parent* by removing one included list. Thus, in a
+three-list system, 13 has one child 123, and two parents 1 and 3.
+
+More generally, if $`S_1 \subseteq S_2`$, then $`S_1`$ is an *ancestor*
+of $`S_2`$, and $`S_2`$ is a *descendant* of $`S_1`$. Ancestors can be
+obtained by repeatedly taking parents, and descendants by repeatedly
+taking children.
+
+The following internal functions take integer-encoded histories and
+return integer encodings.
+
+- [`parent_captures()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/parent_captures.md)
+  returns the parents of a history
+- [`child_captures()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/child_captures.md)
+  returns the children of a history
+- [`ancestors()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/ancestors.md)
+  returns all ancestors of a history, or of a vector of histories
+- [`descendants()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/descendants.md)
+  returns all descendants of a history, or of a vector of histories.
+
+Both
+[`child_captures()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/child_captures.md)
+and
+[`descendants()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/descendants.md)
+require the number of lists to be specified.
+
+For {1,3}, encoded as 6, its parents {1} and {3} are encoded as 2 and 5.
+In a three-list system, the only child of {1,3} is {1,2,3}, encoded as
+8. In a four-list system, {1,3,4}, encoded as 14, is also a child:
+
+``` r
+
+parent_captures(6)
+#> [1] 2 5
+child_captures(6, nlists = 3)
+#> [1] 8
+child_captures(6, nlists = 4)
+#> [1]  8 14
+```
+
+The function
+[`ancestors()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/ancestors.md)
+returns all subsets of the supplied history, including the empty history
+and the history itself. The ancestors of {1,3} are $`\varnothing`$, {1},
+{3} and {1,3}, encoded as 1, 2, 5 and 6. Similarly
+[`descendants()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/descendants.md)
+returns all integer encodings of histories containing the supplied
+history, for the specified number of lists; setting `omitk = TRUE`
+excludes the history itself.
+
+Both functions can accept a vector of encoded histories, and will return
+the union of all ancestors or descendants of the histories within the
+supplied vector, with duplicates removed. With vector input,
+`omitk = TRUE` can still return a supplied history if it is a proper
+descendant of another supplied history.
+
+``` r
+
+ancestors(6)
+#> [1] 1 2 5 6
+descendants(6, nlists = 4)
+#> [1]  6  8 14 16
+descendants(6, nlists = 4, omitk = TRUE)
+#> [1]  8 14 16
+
+ancestors(c(6,10))
+#> [1]  1  2  5  6  9 10
+descendants(c(6,10), nlists=4)
+#> [1]  6  8 10 12 14 16
+descendants(c(4, 8), nlists = 4, omitk = TRUE)
+#> [1]  8 12 16
+```
+
+## Hierarchical log-linear models
+
+Capture histories are also used within our methodology to index the
+parameters of the models fitted to the data. There is one possible
+parameter $`\beta_T`$ for each of the $`2^n`$ capture histories $`T`$.
+The empty history indexes the intercept $`\beta_{\varnothing}`$; a
+history containing one list indexes that list’s main effect; and a
+history containing two or more lists indexes an interaction between
+those lists.
+
+The standard log-linear model is specified by a subset $`\mathcal{M}`$
+of the $`2^n`$ possible capture histories, indicating which parameters
+are included. Let $`N_S`$ denote the count for capture history $`S`$,
+and let $`\mu_S`$ be its expected value. The model treats the counts for
+the nonempty histories as independent Poisson random variables, with
+
+``` math
+N_S \sim \operatorname{Poisson}(\mu_S), \qquad
+\log \mu_S = \sum_{\substack{T \in \mathcal{M} \\ T \subseteq S}} \beta_T.
+```
+
+Thus, for parameters $`T`$ in $`\mathcal{M}`$, the parameter $`\beta_T`$
+contributes to the log expected count for $`S`$ exactly when $`T`$ is an
+ancestor of $`S`$. The intercept contributes to every history, a main
+effect contributes to every history containing its list, and an
+interaction contributes to every history containing all the lists
+involved in that interaction.
+
+The count for the empty history is unobserved and is not used in fitting
+the model. When the intercept is included, the same expression gives
+$`\mu_{\varnothing} = \exp(\beta_{\varnothing})`$. The fitted value of
+this mean estimates the dark figure.
+
+A model is *hierarchical* if a capture history can be included in
+$`\mathcal{M}`$ only if all its ancestors are also included. For
+example, including 123 requires the inclusion of 12, 13, 23, 1, 2, 3 and
+$`\varnothing`$. In terms of parameters, including a three-list
+interaction therefore requires all three corresponding two-list
+interactions, all three main effects and the intercept.
+
+The models considered by the package include the intercept and all $`n`$
+main effects. (This is an additional requirement: the definition of a
+hierarchical model alone does not require a main effect for a list that
+does not occur in any of its included histories.)
+
+### Describing a hierarchical model
+
+A hierarchical model as specified above can be described simply by
+giving its *maximal histories*: included histories that are not
+contained in any other included history. They and all their ancestors
+make up the set $`\mathcal{M}`$. We write the maximal histories in
+abbreviated form inside square brackets. For example \[123, 24, 5\]
+specifies the model with maximal histories the three-list interaction
+between lists 1, 2 and 3, the pairwise interaction between lists 2 and
+4, and the main effect for list 5.
+
+The full collection of encoded histories in the model can be obtained by
+using the
+[`ancestors()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/ancestors.md)
+function. For \[123, 24, 5\], the maximal histories are encoded as 8, 11
+and 17:
+
+``` r
+
+maximal_histories <- c(8, 11, 17)
+model_histories <- ancestors(maximal_histories)
+model_histories
+#>  [1]  1  2  3  4  5  6  7  8  9 11 17
+```
+
+Thus the same model can be described either by all its included
+histories or by its maximal histories. The bracket notation gives only
+the maximal histories; a vector giving all the model’s histories
+includes the encoded version of those and the lower-order terms
+explicitly.
+
+### Neighbouring hierarchies
+
+Two hierarchical models are *neighbours* if one can be obtained from the
+other by adding or removing a single interaction term. The resulting
+model must still be hierarchical, and the intercept and all main effects
+must remain included. An *outer neighbour* is obtained by adding a term,
+and an *inner neighbour* by removing one.
+
+To add an interaction, all its parents must already be in the model. For
+example, we can add 123 only when 12, 13 and 23 are present. Their own
+ancestors are already present because the starting model is
+hierarchical.
+
+An interaction can be removed only if no other included interaction
+requires it. These are precisely the maximal histories that contain two
+or more lists. Only the interaction itself is removed; the resulting
+model will in general need new maximal interactions in its bracket
+notation representation.
+
+For example, the four-list model \[123, 24\] has four neighbours:
+
+| Change | Interaction | Resulting model    |
+|:-------|:------------|:-------------------|
+| Add    | 14          | \[123, 14, 24\]    |
+| Add    | 34          | \[123, 24, 34\]    |
+| Remove | 123         | \[12, 13, 23, 24\] |
+| Remove | 24          | \[123, 4\]         |
+
+Removing 123 leaves its pairwise interactions in place. Removing 24
+leaves list 4’s main effect in place, so 4 appears separately in the
+resulting bracket notation. A change to one model term can therefore
+change several entries in the bracket description.
+
+The package function
+[`find_neighbour_hierarchies()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/find_neighbour_hierarchies.md)
+finds neighbouring hierarchical models, if required restricting to only
+outer or inner neighbours.
+
+### Generating hierarchical models
+
+The function
+[`get_hierarchical_models()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/get_hierarchical_models.md)
+generates hierarchical models for a specified number of lists. The
+intercept and all main effects are always included. The argument
+`maxorder` sets the largest interaction order allowed: `maxorder = 1`
+gives only the main-effects model, `maxorder = 2` allows pairwise
+interactions, and `maxorder = 3` also allows three-list interactions.
+Setting `maxorder = Inf` allows all orders, including the fully
+saturated model; not every generated model is suitable for estimating
+the dark figure.
+
+Models are generated by starting with the intercept and all main
+effects, but no interactions. Larger models are built by successively
+adding the outer neighbours of models already found. In this way every
+model generated is hierarchical. Each model is generated only once.
+
+For example, the following generates the eight hierarchical models for
+three lists with interactions of order at most two:
+
+``` r
+
+models <- get_hierarchical_models(nlists = 3, maxorder = 2)
+length(models)
+#> [1] 8
+```
+
+The result is a named R list, with one member for each model. Each
+element in the list is a vector of the integer encodings of its included
+capture histories; the names are the bracket notation of the models
+showing their maximal interactions.
+
+``` r
+
+names(models)
+#> [1] "[1,2,3]"    "[23,1]"     "[13,2]"     "[13,23]"    "[12,3]"    
+#> [6] "[12,23]"    "[12,13]"    "[12,13,23]"
+models[[1]]
+#> [1] 1 2 3 5
+```
+
+The argument `maxmodel` limits the number of models generated. If the
+requested collection exceeds this limit, the function reduces the
+maximum order until the collection fits, if necessary reducing it to
+one. Thus the models returned may have a smaller maximum order than
+requested. This safeguard matters because, as explained in the appendix,
+the number of models grows very rapidly as the number of lists
+increases.
+
+## Sparse and masked interactions
+
+The observed data may contain capture histories with zero counts, and
+this can have important consequences for the estimation of log-linear
+models. We illustrate these consequences using an example with four
+lists, A, B, C and D. Suppose that the observed capture histories and
+their frequencies are as follows:
+
+| Capture history    | Observed count | Total including descendants |
+|:-------------------|---------------:|----------------------------:|
+| A                  |             12 |                          23 |
+| B                  |              8 |                          14 |
+| C                  |              6 |                          11 |
+| D                  |              9 |                          11 |
+| AB                 |              4 |                           6 |
+| AC                 |              3 |                           5 |
+| AD                 |              2 |                           2 |
+| BC                 |              0 |                           2 |
+| ABC                |              2 |                           2 |
+| **Total observed** |         **46** |                             |
+
+The total including descendants gives the number of individuals observed
+on **all the lists specified by the interaction**, whether or not they
+also appear on other lists. For example, the total for AB includes
+individuals observed on AB and ABC, giving 4 + 2 = 6. Although the
+observed count for BC is zero, its total including descendants is 2,
+because two individuals were observed on ABC. The full list of
+descendants of BC is BC, ABC, BCD and ABCD, but the only non-zero
+observed count is for ABC.
+
+All capture histories omitted from the table have both an observed count
+and a total including descendants of zero.
+
+An interaction is called **sparse** if its total including descendants
+is zero. This means there are no observed individuals appearing on all
+the lists involved in that interaction, regardless of whether they also
+appear on other lists. For example, BD is sparse because no individuals
+appear on both lists B and D.
+
+The interaction BCD is also sparse, but this follows automatically from
+the sparsity of BD, because the descendants of BCD are necessarily a
+subset of the descendants of BD. We say that BCD is **masked** by BD.
+Similarly, ABD and ABCD are masked by BD. In general, a **masked sparse
+interaction** is any proper descendant of a sparse interaction.
+
+Conversely, if none of the parents of a sparse interaction is sparse,
+the interaction is a **minimal sparse interaction**.
+
+In our example, the minimal sparse interactions are BD and CD, while the
+remaining sparse interactions ABD, ACD, BCD and ABCD are masked. Note
+that BCD and ABCD are masked by both BD and CD, illustrating that an
+interaction can be masked by more than one sparse interaction.
+
+### Implications for the log-linear model
+
+In a hierarchical Poisson log-linear model, an interaction effect
+contributes to the fitted mean only for capture histories containing all
+its lists, in other words, to its descendants (including itself).
+
+If the effect corresponding to a minimal sparse interaction is included
+in the model, the log likelihood increases towards its supremum as the
+parameter tends to minus infinity. The natural approach, called
+**extended maximum likelihood**, is therefore to allow minus infinity as
+a parameter value. When a parameter takes this value, the fitted means
+for the corresponding capture history and all its descendants are zero,
+regardless of the other terms in the model.
+
+If a masked sparse interaction is also included in the model, its
+parameter cannot be estimated separately. For example, if BD is included
+in the model, its parameter takes the value minus infinity, forcing the
+fitted means for BD, ABD, BCD and ABCD to zero. The parameter for BCD
+then has no effect on any fitted mean or on the likelihood, because all
+the capture histories to which it contributes already have fitted means
+of zero.
+
+Thus, under extended maximum likelihood, masked sparse interactions are
+redundant. Including them does not change the fitted model, and their
+parameters cannot be separately identified. Similar considerations apply
+for Bayesian approaches using improper flat priors.
+
+The **non-masked reduction** of a hierarchical model is the model
+obtained by removing all its masked interactions. It remains
+hierarchical and has the same maximised likelihood as the original
+model.
+
+This provides a reason for excluding models containing masked sparse
+interactions from the models considered by some of the estimation
+methods implemented in the package. The function
+[`get_hierarchical_models()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/get_hierarchical_models.md)
+allows the user to supply observed data through the optional `xdata`
+argument. If this argument is supplied, models containing masked sparse
+interactions are excluded, but minimal sparse interactions remain
+eligible for inclusion.
+
+For our four-list example, we can compare the number of hierarchical
+models generated with and without excluding masked sparse interactions.
+
+``` r
+
+captures <- c("A", "B", "C", "D", "AB", "AC", "AD", "ABC")
+counts <- c(12, 8, 6, 9, 4, 3, 2, 2)
+
+xdata <- data.frame(
+  A = as.integer(grepl("A", captures)),
+  B = as.integer(grepl("B", captures)),
+  C = as.integer(grepl("C", captures)),
+  D = as.integer(grepl("D", captures)),
+  count = counts
+)
+
+all_models <- get_hierarchical_models(4, maxorder = 3)
+filtered_models <- get_hierarchical_models(4, maxorder = 3,
+                                           xdata = xdata)
+
+c(all = length(all_models),
+  filtered = length(filtered_models))
+#>      all filtered 
+#>      113       72
+```
+
+Any model containing ABD, ACD, BCD or ABCD is excluded. However, models
+containing BD or CD are retained, provided they satisfy the usual
+hierarchical requirements. Overall, excluding masked sparse interactions
+reduces the number of models from 113 to 72. These are counts of
+generated models; existence and identifiability of the fitted estimates
+still need to be checked. Although the total number of models for four
+lists is already small, a comparable reduction may be particularly
+valuable for five or six lists.
+
+The treatment of sparse interactions under extended maximum likelihood
+is discussed in more detail by Chan, Silverman and Vincent (2021). The
+situation is different for Bayesian methods using proper priors of
+finite variance, where the parameters remain finite and masked
+interactions need not be redundant. The implications for the different
+estimation methods implemented in the package are discussed further in
+the vignettes describing those methods.
+
+------------------------------------------------------------------------
+
+## Appendix: The number of hierarchical models
+
+The following table counts all hierarchical models including the
+intercept and all main effects, before any reduction imposed by
+`maxmodel`. A maximum order greater than the number of lists allows the
+same models as a maximum order equal to the number of lists.
+
+| Number of lists | `maxorder = 1` | `maxorder = 2` | `maxorder = 3` | `maxorder = 4` |
+|---:|---:|---:|---:|---:|
+| 2 | 1 | 2 | 2 | 2 |
+| 3 | 1 | 8 | 9 | 9 |
+| 4 | 1 | 64 | 113 | 114 |
+| 5 | 1 | 1,024 | 6,212 | 6,893 |
+| 6 | 1 | 32,768 | 3,702,013 | 7,741,776 |
+| 7 | 1 | $`2^{21}`$ | 75,268,594,037 | — |
+| 8 | 1 | $`2^{28}`$ | $`C_8 \times 10^{17}`$ | — |
+| 9 | 1 | $`2^{36}`$ | $`C_9 \times 10^{25}`$ | — |
+| large n | 1 | $`2^{\binom{n}{2}}`$ | $`\sim(1+\delta_2)2^{\binom{n}{3}}`$ | $`\sim(1+\delta_3) 2^{\binom{n}{4}}`$ |
+
+A dash means that an exact count has not been calculated here. For large
+$`n`$, the correction factors are specified by
+
+``` math
+\delta_2=\binom{n}{2}2^{-(n-2)},\qquad
+\delta_3=\binom{n}{3}2^{-(n-3)}.
+```
+The expressions give lower bounds that are asymptotically equivalent to
+the exact counts. Each correction counts models in which exactly one
+interaction of the next lower order is omitted, while all lower-order
+interactions are retained. Any higher-order interactions containing the
+omitted interaction must also be excluded. Further corrections are
+possible by considering two or more omitted interactions, but the
+expressions become more complicated.
+
+For maximum order two, each of the $`\binom{n}{2}`$ pairwise
+interactions can independently be included or omitted. The number of
+models is therefore exactly $`2^{\binom{n}{2}}`$.
+
+For maximum order three, the constants for eight and nine lists satisfy
+$`1.13 < C_8 < 1.90`$ and $`2.58 < C_9 < 3.67`$; these are rigorous
+bounds. The lower bounds are obtained by counting models containing all
+pairwise interactions, together with those omitting one or two pairs.
+The upper bounds are obtained by considering every possible selection of
+pairwise interactions and bounding the number of three-way interactions
+that can be included for each such selection.
+
+The table demonstrates why approaches that consider all hierarchical
+models up to order 3 become impractical with more than five or possibly
+six lists. Even when only pairwise interactions are considered, the
+number of models becomes substantial by eight lists.
+
+------------------------------------------------------------------------
+
+## Reference
+
+Chan, L., Silverman, B. W. and Vincent, K. (2021). Multiple systems
+estimation for sparse capture data: Inferential challenges when there
+are nonoverlapping lists. *Journal of the American Statistical
+Association*, **116**(535), 1297–1306.
+[doi:10.1080/01621459.2019.1708748](https://doi.org/10.1080/01621459.2019.1708748)

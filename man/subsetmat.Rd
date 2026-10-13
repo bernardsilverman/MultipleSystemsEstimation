@@ -22,6 +22,7 @@ The input list \code{z}, subsetted to the retained models. Its
 possible components are:
 \describe{
   \item{\code{res}}{The original-data model results.}
+  \item{\code{models}}{Encoded models subsetted in the same order.}
   \item{\code{xdata}}{The original capture history data.}
   \item{\code{maxorder}}{The largest retained interaction order.}
   \item{\code{best_neginfpars}}{Encoded minus-infinity effects for the

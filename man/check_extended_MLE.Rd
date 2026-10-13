@@ -33,7 +33,7 @@ Two distinct conditions are checked.
 
 The Fienberg--Rinaldo condition determines whether the required
 extended maximum-likelihood fit exists, accounting for parameters
-whose extended-MLE value is minus infinity because the
+represented at minus infinity when the
 corresponding observed margins are zero.
 
 The relevant model matrix is also checked for full column rank. Failure

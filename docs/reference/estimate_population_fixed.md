@@ -80,6 +80,12 @@ A list with components:
 
   The hierarchy fitted to the original data.
 
+- `masked_effects`:
+
+  Effects masked in the original data, whose reported coefficients are
+  zero by convention. Always returned, including when
+  `return_details = FALSE`.
+
 - `uncertainty`:
 
   A two-row matrix of BCa endpoints for the dark figure and total
@@ -89,9 +95,11 @@ A list with components:
 - `details`:
 
   If `return_details = TRUE`, a list containing
-  `minus_infinity_effects`, `bootstrap_estimates`, `bca_acceleration`,
-  and `glm_fit`. The last is the complete conditional GLM fit for the
-  fixed model. Otherwise `"not requested"`.
+  `minus_infinity_effects`, `masked_effects`, `bootstrap_estimates`,
+  `bootstrap_failed`, `bca_acceleration`, and `glm_fit`. The last is the
+  complete conditional GLM fit for the fixed model. Masked effects have
+  conventional coefficient zero and are listed separately in
+  `masked_effects`. Otherwise `"not requested"`.
 
 ## Details
 
@@ -102,8 +110,15 @@ set.
 The specified hierarchical model is fitted to the observed data.
 Parameter identifiability and existence of the extended MLE are checked
 for the original data and for every bootstrap and jackknife data set.
-Parameters whose extended-MLE values are minus infinity are handled by
-the fitting routine.
+Minimal zero-sufficient-statistic effects are represented at minus
+infinity by the fitting routine.
+
+A masked interaction is a higher-order effect whose contribution cannot
+change any extended fitted mean because a lower-order effect is already
+represented at minus infinity. For example, if AB has zero sufficient
+statistic, adding ABC is masked. Its individual canonical coefficient is
+not uniquely determined; representation at minus infinity is replaced by
+the conventional value zero in the reported coefficients.
 
 If `nboot > 0`, multinomial bootstrap samples are generated from the
 observed capture history counts. The same fixed hierarchical model is
@@ -112,7 +127,8 @@ fitted to every bootstrap sample. Unlike
 there is no model-selection step within the bootstrap replications.
 
 Bootstrap replications for which the fixed model cannot be fitted are
-omitted with a warning. If the model cannot be fitted to any bootstrap
+omitted; their number is available as `details$bootstrap_failed` when
+`return_details = TRUE`. If the model cannot be fitted to any bootstrap
 sample, the routine stops with an error.
 
 A delete-one jackknife calculation is also carried out to estimate the
@@ -168,6 +184,9 @@ estimate_population_fixed(Korea)
 #> $fitted_model
 #> [1] "[1,2,3]"
 #> 
+#> $masked_effects
+#> character(0)
+#> 
 #> $uncertainty
 #> [1] "not calculated because nboot = 0"
 #> 
@@ -201,6 +220,9 @@ estimate_population_fixed(Korea, model = "[23,1]")
 #> 
 #> $fitted_model
 #> [1] "[23,1]"
+#> 
+#> $masked_effects
+#> character(0)
 #> 
 #> $uncertainty
 #> [1] "not calculated because nboot = 0"
@@ -240,6 +262,9 @@ estimate_population_fixed(
 #> 
 #> $fitted_model
 #> [1] "[23,1]"
+#> 
+#> $masked_effects
+#> character(0)
 #> 
 #> $uncertainty
 #>                  0.025        0.1        0.9      0.975

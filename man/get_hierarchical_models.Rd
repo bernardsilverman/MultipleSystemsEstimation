@@ -2,45 +2,54 @@
 % Please edit documentation in R/hierarchical-models.R
 \name{get_hierarchical_models}
 \alias{get_hierarchical_models}
-\title{Extract hierarchical models from a catalogue}
+\title{Generate hierarchical models}
 \usage{
-get_hierarchical_models(nlists, maxorder = nlists - 1, modelvec = hiermodels)
+get_hierarchical_models(
+  nlists,
+  maxorder = nlists - 1L,
+  xdata = NULL,
+  maxmodel = 100000L
+)
 }
 \arguments{
-\item{nlists}{Number of lists.}
+\item{nlists}{Number of lists (an integer from 2 to 9).}
 
-\item{maxorder}{Maximum interaction order. The default is
-\code{nlists - 1}.}
+\item{maxorder}{Maximum interaction order; Inf permits all orders.}
 
-\item{modelvec}{A character vector containing the catalogue of
-hierarchical-model strings from which models are selected. The default is
-the precomputed package catalogue \code{hiermodels}. An alternative
-catalogue using the same hierarchy-string notation may be supplied.
-The default catalogue contains all hierarchical models for two to five
-lists, and all six-list hierarchical models with interaction order at
-most 2.}
+\item{xdata}{Optional capture history data. If supplied, 
+models including masked sparse interactions for this data set will not 
+be included.  Minimal sparse interactions remain eligible.}
+
+\item{maxmodel}{Maximum number of models to be generated. 
+If exceeded, the maximum order will be reduced, if necessary as far as 1, to
+bring the number of models below the specified limit.}
 }
 \value{
-A character vector containing the models satisfying the specified
-number-of-lists and maximum-interaction-order restrictions.
+A named list of integer vectors specifying the hierarchical models.
+The name
+of each vector in the list is the hierarchy string representation of the model,
+and the vector itself is the vector of encoded capture histories
+included in the model.
+A capture history is encoded as the integer
+\eqn{1 + \sum_{i \in S} 2^{i-1}}, where \eqn{S} is the set of capture lists in
+the history. The returned list has two attributes:
+\describe{
+  \item{\code{requested_maxorder}}{The value of \code{maxorder} supplied
+    by the user, or its default value if omitted.}
+  \item{\code{maxorder}}{The actual maximum interaction order of the generated
+    models. This is capped at \code{nlists} and may be reduced
+    further to satisfy \code{maxmodel}.}
+}
 }
 \description{
-Selects all hierarchical models for a specified number of lists and
-maximum interaction order from a catalogue of model strings.
+Generates all hierarchical models satisfying specified criteria.
+ The user can specify the number
+of lists, the maximum order of models to be considered, and (optionally) a data set
+for which any masked sparse interactions will not be included in the models.
+Intercept and main effects are always included.
 }
 \examples{
-# Three lists, all interaction orders
-get_hierarchical_models(nlists = 3, maxorder = Inf)
-
-# Three lists with the default maximum interaction order of 2
-get_hierarchical_models(nlists = 3)
-
-# Number of five-list models with maximum interaction order 3
-length(get_hierarchical_models(nlists = 5, maxorder = 3))
-}
-\references{
-Silverman, B. W., Chan, L. and Vincent, K. (2024).
-Bootstrapping Multiple Systems Estimates to Account for Model Selection.
-\emph{Statistics and Computing}, \strong{34}, 44.
-\doi{10.1007/s11222-023-10346-9}.
+models <- get_hierarchical_models(3)
+names(models)
+models[[1]]
 }

@@ -40,8 +40,15 @@
 #' The specified hierarchical model is fitted to the observed data.
 #' Parameter identifiability and existence of the extended MLE are checked
 #' for the original data and for every bootstrap and jackknife data set.
-#' Parameters whose extended-MLE values are minus infinity are handled by
+#' Minimal zero-sufficient-statistic effects are represented at minus infinity by
 #' the fitting routine.
+#'
+#' A masked interaction is a higher-order effect whose contribution cannot
+#' change any extended fitted mean because a lower-order effect is
+#' already represented at minus infinity. For example, if AB has zero
+#' sufficient statistic, adding ABC is masked. Its individual canonical
+#' coefficient is not uniquely determined; representation at minus
+#' infinity is replaced by the conventional value zero in the reported coefficients.
 #'
 #' If \code{nboot > 0}, multinomial bootstrap samples are generated from the
 #' observed capture history counts. The same fixed hierarchical model is
@@ -50,7 +57,8 @@
 #' step within the bootstrap replications.
 #'
 #' Bootstrap replications for which the fixed model cannot be fitted are
-#' omitted with a warning. If the model cannot be fitted to any bootstrap
+#' omitted; their number is available as \code{details$bootstrap_failed}
+#' when \code{return_details = TRUE}. If the model cannot be fitted to any bootstrap
 #' sample, the routine stops with an error.
 #'
 #' A delete-one jackknife calculation is also carried out to estimate the
@@ -70,13 +78,16 @@
 #'   \item{\code{estimate}}{A named numeric vector containing the estimated
 #'   \code{dark_figure} and \code{total} population.}
 #'   \item{\code{fitted_model}}{The hierarchy fitted to the original data.}
+#'   \item{\code{masked_effects}}{Effects masked in the original data, whose
+#'   reported coefficients are zero by convention. Always returned, including
+#'   when \code{return_details = FALSE}.}
 #'   \item{\code{uncertainty}}{A two-row matrix of BCa endpoints for the dark
 #'   figure and total population when \code{nboot > 0}; otherwise an
 #'   explanatory character string.}
 #'   \item{\code{details}}{If \code{return_details = TRUE}, a list containing
-#'   \code{minus_infinity_effects}, \code{bootstrap_estimates},
-#'   \code{bca_acceleration}, and \code{glm_fit}. The last is the complete
-#'   conditional GLM fit for the fixed model. Otherwise
+#'   \code{minus_infinity_effects}, \code{masked_effects}, \code{bootstrap_estimates},
+#'   \code{bootstrap_failed}, \code{bca_acceleration}, and \code{glm_fit}. The last is the complete
+#'   conditional GLM fit for the fixed model. Masked effects have conventional coefficient zero and are listed separately in \code{masked_effects}. Otherwise
 #'   \code{"not requested"}.}
 #' }
 #'
@@ -155,12 +166,15 @@ estimate_population_fixed <- function(
       call. = FALSE
     )
   }
+  masked_effects <- .mse_effect_names(MSEfit$maskedpars, zdat)
 
   if (nboot == 0L) {
     details <- if (return_details) {
       list(
         minus_infinity_effects = .mse_effect_names(MSEfit$neginfpars, zdat),
+        masked_effects = masked_effects,
         bootstrap_estimates = "not generated because nboot = 0",
+        bootstrap_failed = 0L,
         bca_acceleration = "not calculated because nboot = 0",
         glm_fit = MSEfit
       )
@@ -173,6 +187,7 @@ estimate_population_fixed <- function(
       method = "fixed",
       estimate = .mse_estimate(popest, zdat),
       fitted_model = model,
+      masked_effects = masked_effects,
       uncertainty = .mse_uncertainty(NULL, zdat),
       details = details
     ))
@@ -225,15 +240,6 @@ estimate_population_fixed <- function(
   }
 
   if (nfailed > 0L) {
-    warning(
-      nfailed,
-      " of ",
-      nboot,
-      " bootstrap replications did not produce a finite population-size ",
-      "estimate under the specified fixed hierarchical model and were omitted.",
-      call. = FALSE
-    )
-
     bootreps <- bootreps[usable_bootreps]
   }
 
@@ -292,7 +298,9 @@ estimate_population_fixed <- function(
   details <- if (return_details) {
     list(
       minus_infinity_effects = .mse_effect_names(MSEfit$neginfpars, zdat),
+      masked_effects = masked_effects,
       bootstrap_estimates = bootreps,
+      bootstrap_failed = nfailed,
       bca_acceleration = ahat,
       glm_fit = MSEfit
     )
@@ -305,6 +313,7 @@ estimate_population_fixed <- function(
     method = "fixed",
     estimate = .mse_estimate(popest, zdat),
     fitted_model = model,
+    masked_effects = masked_effects,
     uncertainty = .mse_uncertainty(confquantiles, zdat),
     details = details
   )

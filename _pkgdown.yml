@@ -1,46 +1,44 @@
-template:
-  bootstrap: 5
 
 url: https://bernardsilverman.github.io/MultipleSystemsEstimation/
 
 articles:
-  - title: "Articles"
-    navbar: ~
+  - title: Documentation
     contents:
       - user-guide
+      - captures-and-models
+      - bic-model-selection-and-bootstrap-inference
+      - reproduce-2024-bic-bootstrap
+      - sparse-data-and-stepwise
       - bayesian-threshold
-      - capture-hierarchy-encoding
-      - reproduce-2021
-      - reproduce-2024
 
 reference:
-- title: "Population estimation"
-  contents:
-  - estimate_population
-  - estimate_population_bic
-  - estimate_population_stepwise
-  - estimate_population_fixed
-  - estimate_population_bayesthresh
+  - title: Population estimation
+    contents:
+      - estimate_population
+      - estimate_population_bic
+      - estimate_population_stepwise
+      - estimate_population_fixed
+      - estimate_population_bayesthresh
 
-- title: "Data preparation and model checking"
-  contents:
-  - tidy_lists
-  - check_extended_MLE
+  - title: Capture histories, models and diagnostics
+    contents:
+      - tidy_lists
+      - get_hierarchical_models
+      - find_neighbour_hierarchies
+      - check_extended_MLE
 
-- title: "Hierarchical models"
-  contents:
-  - get_hierarchical_models
-  - find_neighbour_hierarchies
-
-- title: "Data"
-  contents:
-  - Artificial_3
-  - Korea
-  - Kosovo
-  - Ned
-  - Ned_5
-  - NewOrl
-  - NewOrl_5
-  - UKdat
-  - UKdat_5
-  - Western
+  - title: Datasets
+    contents:
+      - Artificial_3
+      - Korea
+      - Kosovo
+      - Ned
+      - Ned_5
+      - NewOrl
+      - NewOrl_5
+      - UKdat
+      - UKdat_5
+      - Western
+      
+template:
+  bootstrap: 5

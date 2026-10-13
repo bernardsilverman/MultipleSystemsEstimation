@@ -36,6 +36,7 @@
 #' @param maxorder The maximum order of interaction allowed in the
 #'   hierarchical log-linear models considered. Must be at least 2.
 #'
+#' @param maxmodel Maximum number of models stored during enumeration.
 #' @param ntopmax The largest value of \code{ntop} to be considered.
 #'   Inference is calculated for every integer value of \code{ntop}
 #'   from 1 to \code{ntopmax}. If \code{ntopmax = Inf}, all candidate
@@ -120,7 +121,8 @@ vary_ntop_bca <- function(
     degree = 1,
     nboot = 1000,
     iseed = 1234,
-    alpha = c(0.025, 0.1, 0.9, 0.975)
+    alpha = c(0.025, 0.1, 0.9, 0.975),
+    maxmodel = 100000L
 ){
 
   ## Check arguments
@@ -163,7 +165,7 @@ vary_ntop_bca <- function(
 
   ## Fit and rank the full candidate model set on the original data
 
-  z <- assemble_bic(zdat, maxorder = maxorder)
+  z <- assemble_bic(zdat, maxorder = maxorder, maxmodel = maxmodel)
 
   nmodels <- nrow(z$res)
 
@@ -178,7 +180,7 @@ vary_ntop_bca <- function(
 
   if (degree == 2) {
 
-    models <- rownames(z$res)
+    models <- .mse_result_models(z)
     nlists <- ncol(zdat) - 1
 
     ord2 <- .degree2_order(
@@ -188,6 +190,7 @@ vary_ntop_bca <- function(
     )
 
     z$res <- z$res[ord2, , drop = FALSE]
+    z$models <- .mse_result_models(z)
   }
 
   if (is.infinite(ntopmax)) {
@@ -197,6 +200,7 @@ vary_ntop_bca <- function(
   }
 
   z$res <- z$res[seq_len(ntop_used), , drop = FALSE]
+  z$models <- .mse_result_models(z)
 
   ## Bootstrap and jackknife fits
 
@@ -345,33 +349,28 @@ vary_ntop_bca <- function(
 }
 
 .degree2_order <- function(models, nlists, maxorder) {
-
-  nmodels <- length(models)
-  bic_rank <- seq_len(nmodels)
-
-  neighbour_list <- lapply(
-    models,
-    find_neighbour_hierarchies,
-    nlists = nlists,
-    keepmaineffects = TRUE,
-    maxorder = maxorder
-  )
-
-  names(bic_rank) <- models
-
-  degree2_rank <- vapply(
-    seq_len(nmodels),
-    function(i) {
-      neighbours <- intersect(
-        c(models[i], neighbour_list[[i]]),
-        models
-      )
-      min(bic_rank[neighbours])
-    },
-    integer(1)
-  )
-
-  order(degree2_rank, bic_rank)
+  if (is.character(models)) models <- lapply(models, convert_from_hierarchy)
+  key <- function(effects) paste(sort(effects), collapse = ",")
+  keys <- vapply(models, key, character(1))
+  lookup <- new.env(hash = TRUE, parent = emptyenv())
+  for (i in seq_along(keys)) assign(keys[i], i, envir = lookup)
+  order_codes <- vapply(seq_len(2^nlists), function(code) {
+    sum(decode_capture(code, nlists))
+  }, numeric(1))
+  degree2_rank <- vapply(seq_along(models), function(i) {
+    effects <- models[[i]]
+    nonroots <- unique(unlist(lapply(effects, parent_captures), use.names = FALSE))
+    removable <- setdiff(effects[order_codes[effects] >= 2L], nonroots)
+    additions <- boundary_captures(effects, nlists)
+    additions <- additions[order_codes[additions] <= maxorder]
+    neighbours <- c(
+      lapply(removable, function(code) setdiff(effects, code)),
+      lapply(additions, function(code) sort(c(effects, code))))
+    ranks <- vapply(neighbours, function(effects) {
+      k <- key(effects)
+      if (exists(k, envir = lookup, inherits = FALSE)) get(k, envir = lookup) else Inf
+    }, numeric(1))
+    min(c(i, ranks))
+  }, numeric(1))
+  order(degree2_rank, seq_along(models))
 }
-
-

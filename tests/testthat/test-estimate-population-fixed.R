@@ -14,6 +14,7 @@ test_that("fixed-model estimation supports hierarchy notation", {
       "method",
       "estimate",
       "fitted_model",
+      "masked_effects",
       "uncertainty",
       "details"
     )

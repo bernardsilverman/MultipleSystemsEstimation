@@ -33,10 +33,26 @@ identifiability issues build on Chan, Silverman and Vincent (2021). The
 package also implements the Bayesian thresholding approach of Section 6
 of Silverman (2020).
 
-This vignette is intended as a guide to analysing data with the package.
-A separate vignette describes how hierarchical models are handled, and
-others discuss specific results from the three papers as well as
-subsequent methodological extensions.
+This vignette is intended as an overall introduction to the package.
+Five companion vignettes give further details and, in some cases,
+paper-specific workflows:
+
+- [Capture histories and hierarchical
+  models](https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/captures-and-models.md):
+  capture notation, hierarchical models and sparse interactions;
+- [BIC model selection and bootstrap
+  inference](https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/bic-model-selection-and-bootstrap-inference.md):
+  BIC methodology and routine use;
+- [Reproducing the 2024 BIC bootstrap
+  investigations](https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/reproduce-2024-bic-bootstrap.md):
+  selected computational investigations from the paper;
+- [Sparse data, stepwise model selection and the
+  bootstrap](https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/sparse-data-and-stepwise.md):
+  the sparse-data and stepwise methodology and selected published
+  results; and
+- [Bayesian-thresholding multiple systems
+  estimation](https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/bayesian-threshold.md):
+  prior specification, thresholding and higher-order interactions.
 
 ## Data format
 
@@ -71,25 +87,6 @@ Korea
 #> [7,] 1 1 1    12
 ```
 
-The number of lists and the total number of observed individuals can be
-obtained directly:
-
-``` r
-
-nlists <- ncol(Korea) - 1
-nobserved <- sum(Korea[, ncol(Korea)])
-
-nlists
-#> [1] 3
-nobserved
-#> [1] 123
-```
-
-For more specialised data manipulation,
-[`tidy_lists()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/tidy_lists.md)
-can be used to add explicitly the observable capture histories whose
-counts are zero.
-
 ## Start with `estimate_population()`
 
 For routine use, begin with the default call:
@@ -102,83 +99,102 @@ fit$estimate
 #>    34.16667   157.16667
 fit$method
 #> [1] "bic"
-ncol(fit$input$data) - 1
-#> [1] 3
 ```
 
 Because `Korea` has three lists, `method = "auto"` selects the BIC
 method. The returned `estimate` gives both the estimated dark figure and
 the estimated total population.
 
-The automatic rule is:
-
-| Number of lists | Method selected by `method = "auto"` |
-|----------------:|:-------------------------------------|
-|             2–5 | BIC                                  |
-|               6 | Stepwise                             |
-|     More than 6 | Stepwise                             |
-
-For six-list data the BIC method remains available by specifying
-`method = "bic"`, but exhaustive BIC enumeration is computationally
-burdensome. BIC enumeration is not available for more than six lists.
+BIC enumeration is generally practical only for up to five lists.
+Six-list BIC analyses are computationally demanding even when restricted
+to pairwise interactions, and enumeration beyond six lists is
+impractical because of the rapid growth in the number of models. The
+`auto` method therefore selects stepwise fitting for six or more lists.
+See the appendix to [Capture histories and hierarchical
+models](https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/captures-and-models.md)
+for model counts for different numbers of lists and orders of models.
 
 The rest of this vignette explains the available methods and the common
 inferential ideas behind them.
 
 ## Specifying log-linear models
 
-Hierarchical log-linear models are specified through their maximal
-interactions. The lists are numbered according to their order in the
-data. For example:
+For an observable capture history $`\omega`$, the log-linear model is
 
-``` text
-[1,2,3]    main effects only
-[12,3]     interaction 12, with main effect 3
-[12,23]    interactions 12 and 23
-[123,4]    three-list interaction 123, with main effect 4
+``` math
+N_\omega \sim \operatorname{Poisson}(\mu_\omega),
+\qquad
+\log \mu_\omega =
+\sum_{\substack{\theta \in \mathcal{M}\\ \theta \subseteq \omega}}
+\alpha_\theta.
 ```
 
-All lower-order terms implied by hierarchy are included automatically.
-Thus, for example, `[123,4]` includes the three two-list interactions
-among lists 1, 2 and 3, as well as their main effects and the intercept.
+Here $`\mathcal{M}`$ is the set of terms included in the model. The
+empty set $`\varnothing`$ corresponds to the intercept
+$`\alpha_\varnothing`$. The fitted expected count for the unobserved
+all-zero capture history is $`\exp(\hat\alpha_\varnothing)`$, and the
+population estimate is the total observed count plus this estimated
+unobserved count.
+
+Throughout the package, we consider only *hierarchical* log-linear
+models. In such a model, whenever an interaction is included, all its
+lower-order interactions and main effects are also included. The
+intercept and all main effects are always present. Thus, for example,
+including the three-way interaction between lists 1, 2 and 3 requires
+the inclusion of all three pairwise interactions between these lists.
+
+Hierarchical models can be specified by listing their highest-order
+terms in square brackets. For example, the model `[123, 24, 5]` includes
+the three-way interaction between lists 1, 2 and 3, the pairwise
+interaction between lists 2 and 4, and all five main effects, together
+with the intercept and the lower-order interactions implied by
+hierarchy.
+
+The [Capture histories and hierarchical
+models](https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/captures-and-models.md)
+vignette explains this notation in more detail, together with the
+generation of hierarchical models and the treatment of sparse
+interactions.
 
 ## BIC model selection
 
 The BIC approach is the method used automatically for data with up to
 five lists. It is based on the methodology of Silverman, Chan and
-Vincent (2024).
+Vincent (2024). For details of the method, see [BIC model selection and
+bootstrap
+inference](https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/bic-model-selection-and-bootstrap-inference.md)
+and the help page for
+[estimate_population_bic()](https://bernardsilverman.github.io/MultipleSystemsEstimation/help/estimate_population_bic).
 
-A hierarchical Poisson log-linear model is fitted to the capture-history
-counts. Different hierarchical models correspond to different sets of
-interactions among the lists. The candidate models are ranked by
-Bayesian information criterion (BIC), and the model with the smallest
-BIC gives the point estimate for the original data.
+A list of candidate hierarchical Poisson log-linear models is generated,
+in principle covering every possible model up to a specified maximum
+order, except those that cannot be fitted or are guaranteed to be
+outranked by other models. The candidates are fitted to the
+capture-history counts and ranked by Bayesian information criterion
+(BIC). The model with the smallest BIC gives the point estimate for the
+original data.
 
 The BIC method can be requested explicitly:
 
 ``` r
 
-fit_bic <- estimate_population(
-  Korea,
-  method = "bic",
-  return_details = TRUE
-)
+fit_bic <- estimate_population_bic(Korea)
 
 fit_bic$estimate
 #> dark_figure       total 
 #>    34.16667   157.16667
 fit_bic$fitted_model
 #> [1] "[12,23]"
-fit_bic$details$BIC
-#> [1] 57.14081
 ```
 
-The `bic_results` component contains the full BIC enumeration for the
-original data:
+With the appropriate calling arguments, the `bic_results` component
+contains the full list of models considered and their BIC values:
 
 ``` r
 
-head(fit_bic$details$bic_results$res)
+fit_bic <- estimate_population_bic(Korea, return_details = TRUE)
+
+fit_bic$details$bic_results$res
 #>         abundance       BIC modelsorder
 #> [12,23]  157.1667  57.14081           2
 #> [12,3]   268.7778  58.96860           2
@@ -201,43 +217,33 @@ package chooses:
 |             4–5 |                    3 |
 |               6 |                    2 |
 
-For up to five lists the package contains the required catalogue of
-hierarchical models. For six lists the catalogue is restricted to
-interactions of order at most two: even this requires fitting 32,768
-hierarchical models. This computational burden is why `method = "auto"`
-switches to stepwise fitting for six-list data.
-
-Users can specify `maxorder` explicitly when there is a substantive
-reason to restrict the interaction order.
+Candidate models are generated as needed. With six lists, even with
+`maxorder = 2` there are 32,768 possible pairwise hierarchical models
+before excluding any models, which explains the automatic choice of
+stepwise fitting.
 
 ## Bootstrap inference after BIC selection
 
 Choosing the best model and then calculating a confidence interval as
-though that model had been fixed in advance ignores uncertainty arising
-from the model-selection step. The bootstrap approach of Silverman, Chan
-and Vincent (2024) addresses this by repeating BIC model selection
-within bootstrap samples.
+though that model had been fixed in advance ignores the uncertainty
+arising from the model-selection step. The bootstrap approach of
+Silverman, Chan and Vincent (2024) addresses this by repeating BIC model
+selection within bootstrap samples.
 
 Bootstrap inference is requested through `nboot`; to keep the vignette
-quick, the examples below use only 100 bootstrap replications. A
-substantially larger number should be used for substantive inference.
+quick, the examples below use only 100 bootstrap replications. A much
+larger number, for example 1000 or more, should be used for substantive
+inference.
 
 ``` r
 
-fit_bic_boot <- estimate_population(
-  Korea,
-  method = "bic",
-  nboot = 100
-)
+fit_bic_boot <- estimate_population_bic(Korea,nboot = 100)
 
 fit_bic_boot$uncertainty
 #>                 0.025       0.1      0.9    0.975
 #> dark_figure   6.54714  13.09813 162.0565 294.0102
 #> total       129.54714 136.09813 285.0565 417.0102
 ```
-
-A small value of `nboot` is useful for checking code, but substantive
-inference should use substantially more bootstrap replications.
 
 ### Restricting model selection within the bootstrap
 
@@ -262,9 +268,7 @@ The number retained can be specified directly, for example:
 
 ``` r
 
-fit_bic_5 <- estimate_population(
-  Korea,
-  method = "bic",
+fit_bic_5 <- estimate_population_bic( Korea,
   nboot = 100,
   ntopmodels = 5
 )
@@ -281,75 +285,41 @@ is allowed among all models retained for the bootstrap calculation.
 
 ## Sparse capture data
 
-The log-linear model can be written, for an observable capture history
-$`\omega`$, as
+Sparse capture data require particular care. For example, suppose two
+lists A and B have no observed individuals in common. If the interaction
+AB is included in a fitted model, the likelihood increases towards its
+supremum as the corresponding parameter tends to $`-\infty`$. It is
+therefore natural to work in an *extended maximum likelihood* framework,
+in which the estimated parameter for AB explicitly takes the value
+$`-\infty`$. The fitted mean for the capture history AB, and for all
+capture histories containing both A and B, is then zero.
 
-``` math
-N_\omega \sim \operatorname{Poisson}(\mu_\omega),
-\qquad
-\log \mu_\omega = \sum_{\theta \subseteq \omega} \alpha_\theta.
-```
+AB is called a *minimal sparse interaction* because, by assumption,
+every individual list contains some observations, so neither A nor B is
+sparse. (Completely empty lists should simply be removed from
+consideration.)
 
-The intercept parameter determines the expected count for the unobserved
-all-zero capture history. The population estimate is the observed
-population plus the fitted value for that unobserved group.
+Now suppose AB is a sparse interaction and its parameter has been set to
+$`-\infty`$. If ABC is also included in the model, no finite value
+assigned to the parameter for ABC can affect the fitted means. ABC is
+called a *masked sparse interaction* because it has a proper subset, AB,
+which is itself sparse.
 
-Sparse capture data require particular care. Most importantly, two lists
-may have no observed individuals in common. If the interaction
-corresponding to such a pair is included in a fitted model, its extended
-maximum likelihood estimate can be $`-\infty`$. This is a boundary
-estimate, not merely a numerical convergence failure: it corresponds to
-fitted mean zero for capture histories containing that combination of
-lists.
-
-The treatment of extended maximum likelihood estimates and the existence
-of estimates in sparse log-linear models builds on the general results
-of Fienberg and Rinaldo (2012), specialised to the multiple systems
-setting by Chan, Silverman and Vincent (2021).
-
-The package handles such boundary estimates explicitly.
+The package handles sparse interactions explicitly. Fuller details are
+given in [Capture histories and hierarchical
+models](https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/captures-and-models.md).
 
 Two further problems can occur:
 
-1.  the maximum likelihood estimate may fail to exist, even allowing
-    extended boundary values; and
-2.  the model parameters may fail to be identifiable.
+1.  The maximum likelihood estimate may fail to exist, even allowing
+    extended boundary values.
+2.  The model parameters may fail to be identifiable.
 
-These are distinct issues. The package fitting routines check for them
-so that invalid model fits are not allowed to contaminate model
-selection or population estimation.
-
-The artificial three-list dataset supplied with the package was
-constructed to illustrate these possibilities:
-
-``` r
-
-data(Artificial_3)
-Artificial_3
-#>   A B C  n
-#> 1 1 0 0 40
-#> 2 0 1 0 30
-#> 3 0 0 1 20
-#> 4 1 1 0  6
-```
-
-Advanced users can check a particular model directly with
-[`check_extended_MLE()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/check_extended_MLE.md).
-For example, the model containing all three two-list interactions is not
-identifiable for these data:
-
-``` r
-
-check_extended_MLE(
-  Artificial_3,
-  "[12,13,23]"
-)
-#> [1] 2
-```
-
-Ordinary users do not normally need to call this function themselves:
-the relevant checks are incorporated into the package’s model-fitting
-procedures.
+The package’s fitting routines check for both, so that unsuitable models
+are excluded from model selection and population estimation. The
+treatment of these issues builds on the general results of Fienberg and
+Rinaldo (2012), specialised to multiple systems estimation by Chan,
+Silverman and Vincent (2021).
 
 ## The stepwise method
 
@@ -364,7 +334,9 @@ hierarchical structure of the model. Candidates that fail the existence
 or identifiability checks described above are discarded. Among the
 remaining candidates, the interaction with the smallest p-value is added
 if that p-value is below the threshold `pthresh`; otherwise the
-procedure stops.
+procedure stops. The procedure uses extended maximum likelihood,
+allowing minimal sparse interactions to be included in fitted models
+with their parameters estimated at $`-\infty`$.
 
 The default is `pthresh = 0.02`, following the simulation study reported
 by Chan, Silverman and Vincent (2021). Setting `maxorder = 2` means that
@@ -375,65 +347,50 @@ For example:
 
 ``` r
 
-fit_step <- estimate_population(
-  Korea,
-  method = "stepwise"
+data(Kosovo)
+
+fit_pairwise <- estimate_population_stepwise(
+  Kosovo,
+  maxorder = 2
 )
 
-fit_step$estimate
+fit_pairwise$estimate
 #> dark_figure       total 
-#>    145.7778    268.7778
-fit_step$fitted_model
-#> [1] "[12,3]"
+#>    9941.664   14341.664
+fit_pairwise$fitted_model
+#> [1] "[12,13,14,23,34]"
 ```
 
-The threshold can be varied explicitly:
+The threshold can be changed using `pthresh`; for example, setting
+`pthresh = 0.01` makes the procedure more conservative about adding
+interactions.
 
-``` r
-
-fit_step_01 <- estimate_population(
-  Korea,
-  method = "stepwise",
-  pthresh = 0.01
-)
-
-fit_step_01$estimate
-#> dark_figure       total 
-#>    145.7778    268.7778
-```
-
-Higher-order interactions can be allowed by increasing `maxorder`.
-Setting `maxorder = Inf` allows interactions of any order to be
-considered. A higher-order interaction becomes eligible only when its
-lower-order terms are already present, so every model considered by the
-procedure is hierarchical.
+By default, `maxorder = Inf`, so interactions of any order can be
+considered. Setting `maxorder = 2` restricts the procedure to pairwise
+interactions. Higher-order interactions become eligible only when all
+their lower-order terms are already present. Masked sparse interactions
+are excluded from consideration, since their parameters cannot affect
+the fitted means.
 
 For the Kosovo data, allowing interactions of any order changes both the
 selected model and the population estimate:
 
 ``` r
 
-fit_step_pairwise <- estimate_population(
+fit_step_unrestricted <- estimate_population_stepwise(
   Kosovo,
-  method = "stepwise",
-  maxorder = 2
-)
-
-fit_step_unrestricted <- estimate_population(
-  Kosovo,
-  method = "stepwise",
   maxorder = Inf
 )
 
 c(
-  pairwise = fit_step_pairwise$estimate["total"],
+  pairwise = fit_pairwise$estimate["total"],
   unrestricted = fit_step_unrestricted$estimate["total"]
 )
 #>     pairwise.total unrestricted.total 
 #>           14341.66           18393.31
 
 c(
-  pairwise = fit_step_pairwise$fitted_model,
+  pairwise = fit_pairwise$fitted_model,
   unrestricted = fit_step_unrestricted$fitted_model
 )
 #>           pairwise       unrestricted 
@@ -445,115 +402,40 @@ search selects `[134,12,23]`. The latter hierarchy includes interactions
 13, 14 and 34 implicitly and adds the three-list interaction 134. The
 corresponding population estimates are approximately 14,342 and 18,393.
 
-The stepwise method is not merely a computational fallback. It can be
-chosen deliberately when the 2021 pairwise procedure is scientifically
-preferred, when sensitivity to `pthresh` is of interest, or when a
-forward search over higher-order hierarchical models is desired. The
-2021 reproducibility vignette describes the published pairwise procedure
-in more detail. \# Bootstrap inference after stepwise selection
+The vignette [Sparse data, stepwise model selection and the
+bootstrap](https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/sparse-data-and-stepwise.md)
+describes the published pairwise procedure in more detail.
 
-As with the BIC approach, bootstrap inference repeats the complete
-model-selection procedure for every bootstrap sample rather than
-conditioning on the model selected from the original data.
+## Bootstrap inference after stepwise selection
+
+Bootstrap inference for the stepwise method follows the same general
+approach as for BIC model selection, described above. In each bootstrap
+replicate, the stepwise selection procedure is repeated, so that the
+resulting inference takes account of model-selection uncertainty. BCa
+confidence intervals are calculated in the same way.
 
 ``` r
 
-fit_step_boot <- estimate_population(
-  Korea,
-  method = "stepwise",
-  nboot = 100,
-  return_details = TRUE
-)
+fit_step_boot <- estimate_population_stepwise(
+  Kosovo,
+  maxorder = Inf,
+  nboot = 100)
 
 fit_step_boot$uncertainty
-#>                   0.025       0.1      0.9   0.975
-#> dark_figure   0.3274105  70.82153 235.3031 276.828
-#> total       123.3274105 193.82153 358.3031 399.828
+#>                0.025       0.1      0.9    0.975
+#> dark_figure 4607.159  7321.288 16176.66 17656.52
+#> total       9007.159 11721.288 20576.66 22056.52
 ```
 
-The bootstrap samples are generated by multinomial resampling of the
-observed capture-history counts. A delete-one jackknife calculation
-supplies the acceleration term for the BCa confidence intervals.
-
-The result also contains the bootstrap population estimates and the
-estimated acceleration parameter:
-
-``` r
-
-summary(fit_step_boot$details$bootstrap_estimates)
-#>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-#>   123.1   197.1   247.8   235.9   287.0   400.7
-fit_step_boot$details$bca_acceleration
-#> [1] -0.02877338
-```
-
-## The Bayesian thresholding method
-
-The package also provides the Bayesian thresholding method of Silverman
-(2020, Section 6). This is selected explicitly by setting
-`method = "bayesthresh"`; it is not selected by `method = "auto"`.
-
-The procedure starts by fitting the log-linear model containing all
-two-list interactions, using Markov chain Monte Carlo. Each interaction
-is then assessed by the absolute value of its posterior mean divided by
-its posterior standard deviation. Interactions whose value is below
-`threshold` are discarded, and the model containing the retained
-interactions is refitted.
-
-Improper priors are used for the intercept and main effects. By default,
-proper normal priors are used for the interaction parameters, although
-improper priors can also be specified. The method requires the suggested
-package `MCMCpack`, but only when `bayesthresh` is actually used.
-
-For example:
-
-``` r
-
-fit_bayes <- estimate_population(
-  Kosovo,
-  method = "bayesthresh",
-  maxorder = 3
-)
-
-fit_bayes$estimate
-#> dark_figure       total 
-#>    7414.249   11814.249
-fit_bayes$fitted_model
-#> [1] "[123,134]"
-fit_bayes$uncertainty
-#>             0.025       0.1       0.9    0.975
-#> dark_figure  5615  6030.242  9039.142 10167.56
-#> total       10015 10430.242 13439.142 14567.56
-```
-
-By default `maxorder = 2`, so only two-list interactions are considered.
-Setting `maxorder = 3` allows three-list interactions as well. A
-three-list interaction is eligible for consideration only when all three
-of its constituent two-list interactions have survived the first
-thresholding step. The eligible three-list interactions are then fitted
-and thresholded in the same way.
-
-With improper priors on the interaction parameters, models are checked
-for identifiability and for the Fienberg–Rinaldo existence criterion. If
-the initial full two-list model fails these checks, the procedure stops.
-If a proposed three-list extension fails the existence criterion, the
-completed two-list analysis is returned instead. These existence checks
-are not needed when proper priors are used for the interaction
-parameters.
-
-The returned `quantiles` are posterior quantiles of the total
-population, so no separate bootstrap calculation is required for
-uncertainty assessment.
-
-For a fuller account of the method, including prior specification,
-three-list interactions, and the treatment of sparse-data edge cases,
-see the vignette *Bayesian-thresholding multiple systems estimation*.
+Thus the BCa 95% confidence interval (based on only 100 bootstrap
+replications) for the total population is 9007 to 22057.
 
 ## Fitting a specified model
 
-Sometimes the log-linear model has been chosen independently of either
-automatic model-selection procedure. In that case use
-`method = "fixed"`.
+Sometimes a particular log-linear model is to be fitted without using
+either BIC or stepwise model selection. In that case, use
+`method = "fixed"` or the routine
+[`estimate_population_fixed()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_fixed.md).
 
 For example:
 
@@ -583,52 +465,105 @@ fit_fixed_boot <- estimate_population(
   Korea,
   method = "fixed",
   model = "[12,23]",
-  nboot = 100
+  nboot = 100,
+  return_details = TRUE
 )
-#> Warning: 3 of 100 bootstrap replications did not produce a finite
-#> population-size estimate under the specified fixed hierarchical model and were
-#> omitted.
 
 fit_fixed_boot$uncertainty
 #>                  0.025       0.1       0.9    0.975
 #> dark_figure   8.708197  12.68516  85.56239 121.9442
 #> total       131.708197 135.68516 208.56239 244.9442
+fit_fixed_boot$details$bootstrap_failed
+#> [1] 3
 ```
 
-Three bootstrap replications failed to produce a finite estimate under
-the specified fixed model and were omitted. With only 100 replications,
-the resulting interval is included to demonstrate the calculation and
-should not be used for substantive inference.
+With only 100 replications, the interval illustrates the calculation and
+should not be used for substantive inference. The displayed count
+records bootstrap replications that failed to give a finite population
+estimate and were omitted. Such failures can arise because resampling
+changes the pattern of zero counts, so that the specified model no
+longer yields a finite estimate.
 
-## Bootstrap and BCa inference for likelihood-based methods: a common view
+For all three likelihood-based methods (BIC, stepwise and fixed),
+bootstrap inference is optional, with `nboot = 0` by default. When
+bootstrap inference is requested, model selection is repeated in each
+replicate for BIC and stepwise estimation, whereas the specified model
+is retained for fixed-model estimation. All three methods use BCa
+confidence intervals, with the acceleration term calculated by a
+delete-one jackknife. The random-number seed can be controlled using
+`iseed`, and the probability levels for confidence limits can be changed
+using `alpha`.
 
-The BIC, stepwise and fixed routes can be used for point estimation with
-`nboot = 0`, which is the default.
+## The Bayesian thresholding method
 
-When `nboot > 0`:
+The package also provides the Bayesian thresholding method of Silverman
+(2020, Section 6). This can be selected by setting
+`method = "bayesthresh"` or by calling
+[`estimate_population_bayesthresh()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_bayesthresh.md)
+directly. It is not selected by `method = "auto"`.
 
-- **BIC:** model selection is repeated within each bootstrap sample,
-  over the retained top-BIC candidate set;
-- **Stepwise:** the complete stepwise selection procedure is repeated
-  within each bootstrap sample;
-- **Fixed:** the same specified model is fitted to every bootstrap
-  sample.
+The procedure starts with the log-linear model containing all two-list
+interactions, fitted using Markov chain Monte Carlo (MCMC). For each
+interaction parameter, the absolute value of its posterior mean is
+divided by its posterior standard deviation. Interactions for which this
+ratio is below `threshold` are discarded, and the model containing the
+retained interactions is refitted.
 
-In all cases the package uses a delete-one jackknife calculation to
-estimate the acceleration term required for BCa inference. The `iseed`
-argument controls the random-number seed and can be set to make
-bootstrap results reproducible.
-
-By default, confidence limits are returned at cumulative probability
-levels
+Improper priors are used for the intercept and main effects. By default,
+proper normal priors are used for the interaction parameters, although
+improper priors can also be specified. The MCMC calculations use the
+`MCMCpack` package.
 
 ``` r
 
-c(0.025, 0.1, 0.9, 0.975)
+fit_bayes <- estimate_population_bayesthresh(
+  Kosovo, maxorder = 3
+)
+
+fit_bayes$estimate
+#> dark_figure       total 
+#>    7414.249   11814.249
+fit_bayes$fitted_model
+#> [1] "[123,134]"
+fit_bayes$uncertainty
+#>             0.025       0.1       0.9    0.975
+#> dark_figure  5615  6030.242  9039.142 10167.56
+#> total       10015 10430.242 13439.142 14567.56
 ```
 
-corresponding to the endpoints of 95% and 80% intervals. Other
-probabilities can be supplied through `alpha`.
+The returned `uncertainty` component gives posterior quantiles for both
+the dark figure and the total population. These provide the endpoints of
+Bayesian credible intervals, rather than the bootstrap confidence
+intervals used by the other methods.
+
+In this example, the 95% credible interval for the total population is
+10,015 to 14,568.
+
+By default, `maxorder = 2`, so only two-list interactions are
+considered. Setting `maxorder = 3` allows three-list interactions, while
+`maxorder = 4` also permits four-list interactions. A higher-order
+interaction becomes eligible only if all its immediate lower-order
+interactions were retained at the preceding stage. At each stage,
+thresholding is applied only to the newly introduced interactions;
+lower-order interactions are not reconsidered.
+
+When improper priors are specified for the interaction parameters, the
+package checks models for identifiability and the Fienberg–Rinaldo
+existence criterion. If the initial model containing all two-list
+interactions fails either check, the procedure stops. If a proposed
+higher-order extension fails the existence check, the procedure returns
+the result from the preceding stage. These existence checks are not
+required when proper priors are used for the interaction parameters.
+With improper priors, masked sparse interactions are also excluded from
+consideration.
+
+For fuller details of the method, including prior specification,
+higher-order interactions and the treatment of sparse data, see
+[Bayesian-thresholding multiple systems
+estimation](https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/bayesian-threshold.md).
+The general treatment of sparse interactions is explained in [Capture
+histories and hierarchical
+models](https://bernardsilverman.github.io/MultipleSystemsEstimation/articles/captures-and-models.md).
 
 ## Which method should I use?
 
@@ -649,19 +584,14 @@ There are, however, reasons to choose explicitly:
   procedure is preferred, when sensitivity to `pthresh` is of interest,
   or for larger numbers of lists where BIC enumeration is unavailable or
   unattractive;
-- use `method = "bayesthresh"` if you prefer the Bayesian/thresholding
-  approach, including when three-list interactions are to be considered;
 - use `method = "fixed"` when the model has been specified independently
-  of these data-driven selection procedures.
-
-For six lists, `auto` deliberately chooses stepwise fitting. Explicit
-BIC fitting is possible, but requires enumeration of 32,768 two-list
-hierarchical models and may therefore take considerable time. For more
-than six lists, the BIC enumeration method is not available.
+  of these data-driven selection procedures;
+- use `method = "bayesthresh"` if you prefer the Bayesian thresholding
+  approach.
 
 ## Looking inside the result
 
-All four methods return the same top-level components:
+All four methods share the following top-level components:
 
 ``` r
 
@@ -674,8 +604,11 @@ names(fit_bic)
 - `method`: the method actually used, including after `method = "auto"`;
 - `estimate`: estimates of the dark figure and total population;
 - `fitted_model`: the supplied, selected or retained hierarchy;
-- `uncertainty`: confidence or credible endpoints for both estimates;
+- `uncertainty`: confidence or credible endpoints for both estimates, or
+  an explanatory message when bootstrap inference was not requested;
 - `details`: method-specific supporting output, or `"not requested"`.
+
+The fixed method also returns `masked_effects`.
 
 Set `return_details = TRUE` to retain supporting output. For BIC this
 includes the selected BIC and complete original-data enumeration; for
@@ -696,33 +629,13 @@ components:
 ?estimate_population_bayesthresh
 ```
 
-### Where next?
-
-This vignette has described the package as a tool for current analysis.
-Four companion vignettes give further details and, in some cases,
-paper-specific workflows:
-
-- *Working with hierarchical models and capture histories*: hierarchy
-  notation, model enumeration and navigation, and the package’s internal
-  encoding;
-- *Reproducing Silverman, Chan and Vincent (2024)*: the BIC/bootstrap
-  methodology and selected published results;
-- *Reproducing Chan, Silverman and Vincent (2021)*: the sparse-data and
-  stepwise methodology and selected published results; and
-- *Bayesian-thresholding multiple systems estimation*: the Bayesian
-  thresholding method, prior specification, three-list interactions, and
-  sparse-data edge cases.
-
-The reproducibility vignettes may use lower-level or historically
-oriented functions that are not part of the normal user workflow.
-
 ## References
 
 Chan, L., Silverman, B. W. and Vincent, K. (2021). Multiple Systems
 Estimation for Sparse Capture Data: Inferential Challenges When There
 Are Nonoverlapping Lists. *Journal of the American Statistical
 Association*, **116**(535), 1297–1306.
-<doi:10.1080/01621459.2019.1708748>.
+[doi:10.1080/01621459.2019.1708748.](https://doi.org/10.1080/01621459.2019.1708748).
 
 DiCiccio, T. J. and Efron, B. (1996). Bootstrap Confidence Intervals.
 *Statistical Science*, **11**(3), 189–228.
@@ -733,8 +646,10 @@ Log-Linear Models. *The Annals of Statistics*, **40**, 996–1023.
 Silverman, B. W. (2020). Multiple-systems analysis for the
 quantification of modern slavery: classical and Bayesian approaches.
 *Journal of the Royal Statistical Society: Series A (Statistics in
-Society)*, **183**(3), 691–736. <doi:10.1111/rssa.12505>.
+Society)*, **183**(3), 691–736.
+[doi:10.1111/rssa.12505.](https://doi.org/10.1111/rssa.12505).
 
 Silverman, B. W., Chan, L. and Vincent, K. (2024). Bootstrapping
 Multiple Systems Estimates to Account for Model Selection. *Statistics
-and Computing*, **34**, 44. <doi:10.1007/s11222-023-10346-9>.
+and Computing*, **34**, 44.
+[doi:10.1007/s11222-023-10346-9.](https://doi.org/10.1007/s11222-023-10346-9).

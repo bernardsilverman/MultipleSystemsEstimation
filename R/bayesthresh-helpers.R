@@ -404,6 +404,18 @@
     )]
 }
 
+.bayesthresh_eligible_quads <- function(triples, nlists) {
+    quads <- .bayesthresh_all_effects(nlists, 4)
+    if (!length(quads))
+        return(character(0))
+    quads[vapply(quads, function(quad) {
+        ii <- .bayesthresh_indices(quad)
+        parents <- apply(utils::combn(ii, 3), 2, function(jj)
+            paste0("x", jj, collapse = ":"))
+        all(parents %in% triples)
+    }, logical(1))]
+}
+
 
 .bayesthresh_population <- function(
     fit,

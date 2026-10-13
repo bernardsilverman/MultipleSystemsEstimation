@@ -19,8 +19,6 @@ A list with components:
   \item{\code{listnames}}{List names, constructed as A, B, and so on if
   necessary.}
   \item{\code{data}}{The input data.}
-  \item{\code{notestimable}}{Logical vector identifying parameters that
-  are strict descendants of parameters having zero sufficient statistic.}
   \item{\code{masterdesign}}{The inclusion matrix constructed by
   \code{make_master_design()}.}
 }

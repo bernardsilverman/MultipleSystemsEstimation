@@ -190,16 +190,3 @@
 "Korea"
 
 
-#' Catalogue of hierarchical models
-#'
-#' A precomputed catalogue of hierarchical-model strings used by
-#' \code{\link{get_hierarchical_models}}. It contains all hierarchical
-#' models with maximum interaction order at most one less than the number
-#' of lists for two to five lists. For six lists, it contains all
-#' hierarchical models with interaction order at most 2.
-#'
-#' @format A character vector of length 39,783 containing model
-#' specifications written in the package's hierarchy-string notation.
-#'
-#' @keywords internal
-"hiermodels"

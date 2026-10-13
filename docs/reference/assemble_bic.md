@@ -12,6 +12,7 @@ assemble_bic(
   maxorder = dim(xdata)[2] - 2,
   checkexist = TRUE,
   removeFRfail = TRUE,
+  maxmodel = 100000L,
   ...
 )
 ```
@@ -34,6 +35,10 @@ assemble_bic(
 - removeFRfail:
 
   If `TRUE`, remove models without a valid fit from the results.
+
+- maxmodel:
+
+  Maximum number of models stored during enumeration.
 
 - ...:
 
@@ -59,8 +64,17 @@ A list with components:
   The largest interaction order among the retained models, or 0 if no
   model is retained.
 
+- `models`:
+
+  Named encoded models in result-row order.
+
+- `requested_maxorder`, `enumeration_maxorder`:
+
+  Requested and actual enumeration orders, before failed fits are
+  removed.
+
 - `best_neginfpars`:
 
-  Encoded effects estimated at minus infinity in the model with the
+  Encoded effects represented at minus infinity in the model with the
   smallest BIC, or an empty vector if there is no valid model or no such
   effect.

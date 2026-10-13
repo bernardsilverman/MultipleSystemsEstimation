@@ -1,0 +1,278 @@
+---
+title: "BIC model selection and bootstrap inference"
+
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{BIC model selection and bootstrap inference}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+library(MultipleSystemsEstimation)
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+## Introduction
+
+BIC provides a standard criterion for selecting among log-linear models
+for multiple systems estimation. Inference conditional on a single selected
+model, however, fails to reflect uncertainty about the model selection.
+Silverman, Chan and Vincent (2024) investigate bootstrap inference in
+which model selection is repeated within each resample.
+
+This vignette describes the supported estimation and inference facilities
+in `MultipleSystemsEstimation`, including enhancements beyond the paper.
+Detailed reproductions of its numerical investigations are in the separate
+vignette [*Reproducing the 2024 BIC bootstrap investigations*](reproduce-2024-bic-bootstrap.html).
+
+## BIC model selection
+
+The Bayesian information criterion (BIC) provides a standard method
+for selecting among statistical models, balancing goodness of fit
+against model complexity. For multiple systems estimation, the
+candidate models are hierarchical log-linear models for the observed
+capture histories. The model with the lowest BIC is selected, and
+the corresponding fitted model is used to estimate the unobserved
+population.
+
+The package generates the candidate hierarchical models as required,
+rather than relying on a stored catalogue. The maximum interaction
+order can be specified using `maxorder`, allowing the search to be
+restricted to models of a specified complexity. The intercept and
+all main effects are always included.
+
+A novel feature of the implementation is the way it takes advantage
+of sparsity in the observed data by excluding hierarchical models
+containing masked sparse interactions. To see why this is justified,
+consider a model containing such interactions. Replacing it by its
+non-masked reduction, obtained by removing all masked sparse
+interactions, leaves the maximised log likelihood unchanged but
+reduces the number of parameters, and hence decreases the BIC.
+
+This reduces the number of candidate models and avoids considering
+models containing parameters that cannot be identified from the
+observed data. Models containing minimal sparse interactions remain eligible.
+The distinction between minimal and masked sparse
+interactions, and the construction of non-masked reductions, are
+explained in the vignette [*Capture histories and hierarchical models*](captures-and-models.html).
+
+
+The public interface for BIC model selection is
+`estimate_population_bic()`, or equivalently
+`estimate_population(..., method = "bic")`. For example:
+
+```{r bic-example}
+data(Korea)
+
+bic_fit <- estimate_population_bic(
+  Korea, maxorder = 2, return_details = TRUE
+)
+
+bic_fit$estimate
+bic_fit$fitted_model
+```
+
+The result contains the estimated population size, the selected
+model and other information about the estimation procedure.
+The restriction `maxorder = 2` allows pairwise interactions but
+excludes higher-order interactions.
+
+
+### Inspecting the fit
+
+The input is a capture-history data frame or matrix. Its first columns
+indicate membership of each list using zeros and ones, and its final column
+contains the number of observed individuals with each capture history.
+The all-zero history represents individuals observed on no list; their
+number is inferred from the fitted model rather than supplied as an
+observed count.
+
+The component `estimate` distinguishes the estimated number observed on
+no list (`dark_figure`) from the estimated total population (`total`).
+The latter adds the observed population to the dark figure. The component
+`fitted_model` identifies the selected hierarchy of interactions.
+
+Specifying `return_details = TRUE`, as in the example above, makes the
+original-data model comparisons available:
+
+```{r inspect-bic-fit}
+head(bic_fit$details$bic_results)
+```
+
+This table is ordered by increasing BIC and includes the population
+estimate and maximum interaction order for each eligible model. It allows
+the selected model to be viewed alongside its competitors. Models with
+similar BIC values can nevertheless give different population estimates;
+reporting only the estimate from the best model conceals that aspect of
+model uncertainty.
+
+### Choosing the interaction order
+
+The argument `maxorder` defines the model space before BIC selection.
+For example, `maxorder = 1` permits only the main-effects model, whereas
+`maxorder = 2` permits hierarchical models with pairwise interactions.
+Increasing the order allows more complex dependence between lists, but
+can greatly increase the number of candidate models. The choice should
+reflect both the data and the scientific context; BIC selects within the
+specified space, rather than establishing that the space itself is adequate.
+
+If `maxorder` is omitted, the package uses order 1 for two lists, order 2
+for three lists, order 3 for four or five lists, and order 2 for six or more
+lists. These defaults provide a starting point rather than a substitute
+for considering the dependence structure.
+
+The argument `maxmodel` limits the number of candidate hierarchical models generated. If the number would exceed this limit, the maximum interaction order is reduced, if necessary down to 1, until the number of models is within the limit. Thus the maximum order actually searched may be lower than the requested `maxorder`. The resulting search includes all eligible hierarchical models at the reduced maximum order, rather than an arbitrary subset of models at the originally requested order.
+When `return_details = TRUE`, the requested and actual maximum orders are recorded in `details$requested_maxorder` and `details$maxorder`, respectively.
+
+## Bootstrap inference
+
+Confidence intervals based on a single selected model do not account
+for the uncertainty arising from model selection. The bootstrap
+methodology developed in Silverman, Chan and Vincent (2024) addresses
+this by repeating model selection within each bootstrap sample,
+rather than treating the model selected from the original data as fixed.
+
+However, a full BIC search over all candidate models for every
+bootstrap sample would often be computationally prohibitive.
+The key computational device within the paper and this package
+is to rank the candidate models by
+their BIC values for the original data, and then restrict model
+selection within each bootstrap sample to the first `ntop` models
+in this ranking.
+
+With `ntop = 1`, the same model is used for every bootstrap sample,
+so no allowance is made for model selection uncertainty. Increasing
+`ntop` allows more models to be selected within bootstrap samples,
+while avoiding repeated searches over the entire model space.
+The choice `ntop = Inf` corresponds to unrestricted model selection
+within each bootstrap sample.
+
+The bootstrap distribution of the resulting population estimates
+is used to construct confidence intervals. The methodology uses
+bias-corrected and accelerated (BCa) intervals, which adjust for
+bias and asymmetry, making use of jackknife calculations in which
+observations are omitted in turn.
+
+The set of `ntop` models is determined from the original data and
+is retained throughout the bootstrap and jackknife calculations.
+Resampling can introduce additional masked sparse interactions, but
+cannot remove any already present in the original data. Although
+some of the retained models may therefore contain newly masked
+interactions, the candidate set is not revised: removing such models
+would introduce an additional data-dependent selection step, and
+their non-masked reductions have the same maximised likelihood.
+All `ntop` models are therefore considered in every resample.
+
+Bootstrap inference is provided by `estimate_population_bic()`, or via `estimate_population()` with `method= "bic"` and `nboot > 0`. The specialised internal computations used for the paper are documented in [*Reproducing the 2024 BIC bootstrap investigations*](reproduce-2024-bic-bootstrap.html).
+
+The package also supports bootstrap inference after stepwise model selection; see [*Sparse data, stepwise model selection and the bootstrap*](sparse-data-and-stepwise.html).
+
+The choice of `ntop` involves a trade-off between computational
+effort and the extent to which the bootstrap reproduces full
+model selection. The effect of this trade-off is investigated by Silverman, Chan and Vincent (2024).
+
+## Practical bootstrap inference
+
+The basic example above uses `nboot = 0`, the default, and therefore
+returns a point estimate without bootstrap inference. To obtain BCa
+confidence limits, specify a positive number of bootstrap replications:
+
+```{r bootstrap-example}
+bic_boot <- estimate_population_bic(
+  Korea,
+  maxorder = 2,
+  nboot = 10,
+  iseed = 1234
+)
+
+bic_boot$estimate
+bic_boot$uncertainty
+```
+
+Only 10 bootstrap replications are used here to keep the example quick.
+A substantially larger number, such as 1000, should be used for substantive
+inference. The argument `ntopmodels` controls how many models from the
+original-data BIC ranking are retained for bootstrap and jackknife
+calculations.
+
+### Reading the confidence limits
+
+The component `uncertainty` is a matrix with rows for the dark figure and
+total population. Its columns correspond to the cumulative probability
+levels supplied through `alpha`. The default levels, 0.025, 0.1, 0.9 and
+0.975, give endpoints for 95% and 80% BCa confidence intervals. To request
+only a 95% interval, use `alpha = c(0.025, 0.975)`.
+
+The point estimate continues to be based on the model selected from the
+original data. The confidence limits, however, use population estimates
+obtained after repeating selection within the retained model set for each
+bootstrap sample. They therefore describe a different source of uncertainty
+from an interval that conditions on the original selected model throughout.
+
+For substantive analyses, the reported endpoints should be checked for
+numerical stability. The argument `iseed` makes the random sampling
+reproducible for a given implementation and set of settings, but
+reproducibility with a fixed seed does not establish numerical stability.
+
+### Choosing the retained model set
+
+The notation `ntop` above corresponds to the public argument `ntopmodels`.
+It controls the models retained for bootstrap and jackknife calculations,
+not the initial original-data search or its point estimate.
+
+* `ntopmodels = 1` retains only the best original-data model, and therefore
+  does not allow for model selection uncertainty.
+* A larger finite value allows selection among that many of the
+  best-ranked original-data models, or all available models if fewer exist.
+* `ntopmodels = Inf` retains all eligible models in the chosen model space.
+* The default, `ntopmodels = NULL`, retains all available models for two or
+  three lists, up to 20 for four lists, and up to 100 for five or more lists.
+
+For example, the following displays the call for retaining all models and
+requesting a 95% interval with 1000 replications. It is not evaluated during
+the vignette build:
+
+```{r full-bootstrap-call, eval=FALSE}
+bic_full <- estimate_population_bic(
+  Korea,
+  maxorder = 2,
+  ntopmodels = Inf,
+  nboot = 1000,
+  alpha = c(0.025, 0.975),
+  iseed = 1234,
+  return_details = TRUE
+)
+
+bic_full$uncertainty
+```
+
+For a small model space, retaining all models avoids the approximation
+introduced by a finite restriction. For larger spaces, a finite value can
+make the bootstrap practical. Comparing confidence limits over increasing
+values of `ntopmodels` can help assess sensitivity to the restriction.
+Confidence limits need not change monotonically as models are added, and
+agreement between two choices alone does not guarantee agreement with
+unrestricted selection. Increasing `nboot` addresses Monte Carlo variability;
+increasing `ntopmodels` addresses the restriction of the candidate set.
+
+When `return_details = TRUE`, the result also includes the bootstrap
+population estimates in `details$bootstrap_estimates` and the BCa
+acceleration in `details$bca_acceleration`. These are available for further
+inspection without rerunning the fit. The intervals account for selection
+within the specified model space and retained set; they do not remove the
+need to assess the underlying capture-history data and modelling assumptions.
+
+## Summary
+
+The package applies standard BIC selection within an on-the-fly generated
+hierarchical model space, and exploits sparsity by excluding models
+containing masked sparse interactions while retaining minimal sparse
+interactions. For inference that reflects model selection uncertainty,
+it implements the restricted-model bootstrap and BCa methodology of
+Silverman, Chan and Vincent (2024). The [reproduction vignette](reproduce-2024-bic-bootstrap.html)
+provides code for the numerical investigations underlying the paper.
+
+## References
+
+Silverman, B. W., Chan, L. and Vincent, K. (2024). Bootstrapping Multiple Systems Estimates to Account for Model Selection. *Statistics and Computing*, **34**, 44. [doi:10.1007/s11222-023-10346-9.](https://doi.org/10.1007/s11222-023-10346-9).

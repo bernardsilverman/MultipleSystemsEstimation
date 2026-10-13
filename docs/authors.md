@@ -11,13 +11,13 @@
 ## Citation
 
 Silverman BW (2026). *MultipleSystemsEstimation: Methods for Multiple
-Systems Estimation*. R package version 1.2.6,
+Systems Estimation*. R package version 1.3.2,
 <https://bernardsilverman.github.io/MultipleSystemsEstimation/>.
 
     @Manual{,
       title = {MultipleSystemsEstimation: Methods for Multiple Systems Estimation},
       author = {Bernard W. Silverman},
       year = {2026},
-      note = {R package version 1.2.6},
+      note = {R package version 1.3.2},
       url = {https://bernardsilverman.github.io/MultipleSystemsEstimation/},
     }

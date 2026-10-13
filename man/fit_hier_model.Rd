@@ -9,7 +9,7 @@ fit_hier_model(xdatin, hiermod, bicRcap = TRUE, checkid = FALSE)
 \arguments{
 \item{xdatin}{Data prepared by \code{ingest_data()}.}
 
-\item{hiermod}{Character string specifying the hierarchical model.}
+\item{hiermod}{Full encoded effect vector or hierarchy string.}
 
 \item{bicRcap}{If \code{TRUE}, use the number of observed cases as the BIC
 sample size. Otherwise use the number of fitted cells in the Poisson
@@ -24,8 +24,10 @@ An object returned by \code{stats::glm.fit()}, augmented by:
   \item{\code{abundance}}{Estimated total population size, or \code{NA} if
   the model has no valid fit.}
   \item{\code{bic}, \code{aic}}{BIC and AIC values, where available.}
-  \item{\code{neginfpars}}{Encoded parameters whose extended-MLE values
-  are minus infinity.}
+  \item{\code{neginfpars}}{Encoded parameters represented
+  at minus infinity on the extended-model boundary.}
+  \item{\code{maskedpars}}{Encoded masked parameters assigned the
+  conventional coefficient zero; their values are not identifiable.}
 }
 }
 \description{

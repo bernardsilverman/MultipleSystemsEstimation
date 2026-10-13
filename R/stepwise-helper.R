@@ -83,6 +83,7 @@
   if (pthresh == 1) {
 
     fullpars <- c(1L, mainpars, termpars)
+    fullpars <- setdiff(fullpars, .mse_masked_effects(fullpars, ing$nstar))
     fullmodel <- convert_to_hierarchy(fullpars)
 
     ierr <- .check_extended_MLE(
@@ -128,6 +129,13 @@
       boundary_captures(currentpars, nlists),
       termpars
     )
+    candidates <- candidates[!vapply(
+      candidates,
+      function(k) {
+        k %in% .mse_masked_effects(c(currentpars, k), ing$nstar)
+      },
+      logical(1)
+    )]
 
     if (!length(candidates))
       break

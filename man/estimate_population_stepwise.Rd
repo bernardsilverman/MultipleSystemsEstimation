@@ -8,7 +8,7 @@ estimate_population_stepwise(
   zdat,
   nboot = 0,
   pthresh = 0.02,
-  maxorder = 2,
+  maxorder = Inf,
   iseed = 1234,
   alpha = c(0.025, 0.1, 0.9, 0.975),
   return_details = FALSE
@@ -33,7 +33,7 @@ procedure. The default is 0.02.}
 
 \item{maxorder}{Maximum order of interactions considered for selection.
 An integer of at least 2, or \code{Inf} to allow interactions of any order.
-The default is 2.}
+The default is \code{Inf}.}
 
 \item{iseed}{Integer seed used to initialise the random-number generator
 when \code{nboot > 0}. The default is 1234.}
@@ -45,7 +45,7 @@ argument is used only when
 \code{c(0.025, 0.1, 0.9, 0.975)}.}
 
 \item{return_details}{Logical. If \code{TRUE}, include the bootstrap
-estimates, BCa acceleration, and effects estimated at minus infinity. The
+estimates, BCa acceleration, and effects represented at minus infinity. The
 default is \code{FALSE}.}
 }
 \value{
@@ -74,12 +74,14 @@ BCa confidence intervals while repeating the stepwise selection procedure for
 each resampled data set.
 }
 \details{
-By default, the procedure considers two-list interactions only, reproducing
-the method of Chan, Silverman and Vincent (2021). Higher-order interactions
-may be considered by increasing \code{maxorder}, or by setting
-\code{maxorder = Inf}. An interaction is considered only when all its
-lower-order terms are already present, so every candidate model is
-hierarchical.
+By default, interactions of any order may be considered.
+Setting \code{maxorder = 2} restricts the procedure to the
+pairwise method of Chan, Silverman and Vincent (2021).
+An interaction is considered only when all its
+lower-order terms are already present, so every candidate
+model is hierarchical.
+A masked sparse interaction 
+is not eligible for selection, including when \code{pthresh = 1}.
 
 The procedure starts with a main-effects model. At each stage it considers
 eligible interactions not already included and adds the interaction having

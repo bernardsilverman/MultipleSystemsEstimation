@@ -13,21 +13,18 @@
 - [`estimate_population_bayesthresh()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/estimate_population_bayesthresh.md)
   : Bayesian-thresholding multiple systems estimation
 
-## Data preparation and model checking
+## Capture histories, models and diagnostics
 
 - [`tidy_lists()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/tidy_lists.md)
   : Consolidate capture history data
+- [`get_hierarchical_models()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/get_hierarchical_models.md)
+  : Generate hierarchical models
+- [`find_neighbour_hierarchies()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/find_neighbour_hierarchies.md)
+  : Find the neighbours of a hierarchical model
 - [`check_extended_MLE()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/check_extended_MLE.md)
   : Check existence and identifiability of the extended MLE
 
-## Hierarchical models
-
-- [`get_hierarchical_models()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/get_hierarchical_models.md)
-  : Extract hierarchical models from a catalogue
-- [`find_neighbour_hierarchies()`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/find_neighbour_hierarchies.md)
-  : Find the neighbours of a hierarchical model
-
-## Data
+## Datasets
 
 - [`Artificial_3`](https://bernardsilverman.github.io/MultipleSystemsEstimation/reference/Artificial_3.md)
   : Artificial three-list data
